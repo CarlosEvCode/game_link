@@ -8,4 +8,4 @@ Icon=io.github.CarlosEvCode.GameLink
 Terminal=false
 Categories=Game;Utility;
 X-Flatpak=io.github.CarlosEvCode.GameLink
-StartupWMClass=game-link
+StartupWMClass=io.github.CarlosEvCode.GameLink
