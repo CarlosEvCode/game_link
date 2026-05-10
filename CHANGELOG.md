@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.5](https://github.com/CarlosEvCode/game_link/compare/v2.9.4...v2.9.5) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** install appstream package for flatpak metadata validation ([c140c5f](https://github.com/CarlosEvCode/game_link/commit/c140c5fa275b3abea288ef6564ad959cb6b26863))
+
 ## [2.9.4](https://github.com/CarlosEvCode/game_link/compare/v2.9.3...v2.9.4) (2026-05-10)
 
 
