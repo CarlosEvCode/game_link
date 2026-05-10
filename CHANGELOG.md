@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.4](https://github.com/CarlosEvCode/game_link/compare/v2.9.3...v2.9.4) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** use --user flag in flatpak-builder to match remote scope ([31e5bc5](https://github.com/CarlosEvCode/game_link/commit/31e5bc546d058c896231e6d8442e16da7f2adcd0))
+
 ## [2.9.3](https://github.com/CarlosEvCode/game_link/compare/v2.9.2...v2.9.3) (2026-05-10)
 
 
