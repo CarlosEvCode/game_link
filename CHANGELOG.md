@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.0](https://github.com/CarlosEvCode/game_link/compare/v2.12.1...v2.13.0) (2026-05-10)
+
+
+### Features
+
+* add native Debian packaging and PPA support ([9878b51](https://github.com/CarlosEvCode/game_link/commit/9878b517a2cfc0c5b3e9686cc89bfeb9f4e8b1e6))
+
 ## [2.12.1](https://github.com/CarlosEvCode/game_link/compare/v2.12.0...v2.12.1) (2026-05-10)
 
 
