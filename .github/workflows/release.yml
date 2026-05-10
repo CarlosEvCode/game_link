@@ -95,7 +95,7 @@ jobs:
       - name: Instalar herramientas de empaquetado
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf imagemagick libgdk-pixbuf2.0-dev flatpak flatpak-builder
+          sudo apt-get install -y patchelf imagemagick libgdk-pixbuf2.0-dev flatpak flatpak-builder appstream
 
       - name: Configurar Flathub (para dependencias)
         run: |
