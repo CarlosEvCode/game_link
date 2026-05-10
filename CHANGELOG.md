@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.12.0](https://github.com/CarlosEvCode/game_link/compare/v2.11.0...v2.12.0) (2026-05-10)
+
+
+### Features
+
+* automated asset checksum generation for releases ([e738205](https://github.com/CarlosEvCode/game_link/commit/e73820597b7c3cd637564072cd96202209537b23))
+
 ## [2.11.0](https://github.com/CarlosEvCode/game_link/compare/v2.10.0...v2.11.0) (2026-05-10)
 
 
