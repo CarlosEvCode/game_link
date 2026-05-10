@@ -99,7 +99,7 @@ jobs:
 
       - name: Configurar Flathub (para dependencias)
         run: |
-          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Extraer versión del Tag
         run: |
