@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.3](https://github.com/CarlosEvCode/game_link/compare/v2.13.2...v2.13.3) (2026-05-10)
+
+
+### Bug Fixes
+
+* **release:** fix dch existing file error and sync version 2.13.2 ([539f5b1](https://github.com/CarlosEvCode/game_link/commit/539f5b17abf26b7e1b4839b56cdc1e6bbddbf918))
+
 ## [2.13.2](https://github.com/CarlosEvCode/game_link/compare/v2.13.1...v2.13.2) (2026-05-10)
 
 
