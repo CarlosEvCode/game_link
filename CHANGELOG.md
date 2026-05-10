@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.6](https://github.com/CarlosEvCode/game_link/compare/v2.9.5...v2.9.6) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** add libappstream-compose-dev and debug tools for flatpak build ([4da8f0e](https://github.com/CarlosEvCode/game_link/commit/4da8f0eec9063cb1ae9e37d910de39932c6cb288))
+
 ## [2.9.5](https://github.com/CarlosEvCode/game_link/compare/v2.9.4...v2.9.5) (2026-05-10)
 
 
