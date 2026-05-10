@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.2](https://github.com/CarlosEvCode/game_link/compare/v2.13.1...v2.13.2) (2026-05-10)
+
+
+### Bug Fixes
+
+* **release:** make debian build non-interactive and add build-essential ([d6966fd](https://github.com/CarlosEvCode/game_link/commit/d6966fde3554ee798be673fda17b822852e7dec2))
+
 ## [2.13.1](https://github.com/CarlosEvCode/game_link/compare/v2.13.0...v2.13.1) (2026-05-10)
 
 
