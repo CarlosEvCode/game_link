@@ -95,7 +95,11 @@ jobs:
       - name: Instalar herramientas de empaquetado
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf imagemagick libgdk-pixbuf2.0-dev
+          sudo apt-get install -y patchelf library-pkg-config-perl imagemagick libgdk-pixbuf2.0-dev flatpak flatpak-builder
+
+      - name: Configurar Flathub (para dependencias)
+        run: |
+          flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Extraer versión del Tag
         run: |
@@ -108,12 +112,35 @@ jobs:
       - name: Generar Tarball
         run: ./scripts/package_tarball.sh ${{ env.APP_VERSION }}
 
+      - name: Generar Bundle Flatpak
+        run: |
+          cd flatpak/
+          # Ajustar el manifiesto temporalmente para usar la versión actual y fuentes locales
+          # Reemplazamos la fuente 'archive' por 'dir' apuntando al bundle ya compilado
+          sed -i 's/type: archive/type: dir/' io.github.CarlosEvCode.GameLink.yml
+          sed -i 's|url: .*||' io.github.CarlosEvCode.GameLink.yml
+          sed -i 's|sha256: .*|path: ../build/linux/x64/release/bundle/|' io.github.CarlosEvCode.GameLink.yml
+          
+          # Actualizar versión en metainfo
+          sed -i "s/release version=\".*\"/release version=\"${{ env.APP_VERSION }}\"/" io.github.CarlosEvCode.GameLink.metainfo.xml
+          
+          # Construir
+          flatpak-builder --force-clean --install-deps-from=flathub builddir io.github.CarlosEvCode.GameLink.yml
+          
+          # Crear repositorio y bundle
+          flatpak-builder --repo=repo --force-clean builddir io.github.CarlosEvCode.GameLink.yml
+          flatpak build-bundle repo \
+            ../game_link-${{ env.APP_VERSION }}-x86_64.flatpak \
+            io.github.CarlosEvCode.GameLink \
+            --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
+
       - name: Publicar Release en GitHub
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ needs.release-please.outputs.tag_name }}
           files: |
             game_link-*.AppImage
+            game_link-*.flatpak
             *.zsync
             *.tar.xz
         env:
