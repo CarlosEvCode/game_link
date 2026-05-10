@@ -28,7 +28,7 @@ class ScreenScraperDiskCache {
         Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         Directory.systemTemp.path;
-    return p.join(home, '.cache', 'lutris_game_station', 'screenscraper');
+    return p.join(home, '.cache', 'game_link', 'screenscraper');
   }
 
   void _load() {

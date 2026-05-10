@@ -113,7 +113,7 @@ jobs:
         with:
           tag_name: ${{ needs.release-please.outputs.tag_name }}
           files: |
-            lutris_game_station-*.AppImage
+            game_link-*.AppImage
             *.zsync
             *.tar.xz
         env:

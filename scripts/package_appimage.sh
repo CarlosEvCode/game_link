@@ -10,9 +10,9 @@ RED='\033[0;31m'
 NC='\033[0m'
 
 # Configuración básica (SINCRONIZADA CON EL CÓDIGO C++)
-APP_NAME="lutris_game_station"
-# Este ID DEBE coincidir con el del main.cc
-APP_ID="com.lutris_game_station.app"
+APP_NAME="game_link"
+# Este ID DEBE coincidir con el de CMakeLists.txt
+APP_ID="io.github.carlosevcode.game_link"
 VERSION=${1:-"unknown"}
 BUNDLE_DIR="build/linux/x64/release/bundle"
 
@@ -115,14 +115,14 @@ export GTK_CSD=0
 export GTK_OVERLAY_SCROLLING=1
 export GDK_BACKEND=x11
 
-exec "$HERE/usr/bin/lutris_game_station" "$@"
+exec "$HERE/usr/bin/game_link" "$@"
 APP_RUN
 chmod +x AppDir/AppRun
 
 # 11. Generar AppImage final
 export ARCH=x86_64
 # Configuración para actualizaciones automáticas (ZSync)
-export UPDATE_INFORMATION="gh-releases-zsync|CarlosEvCode|lutris_game_station|latest|lutris_game_station-*x86_64.AppImage.zsync"
+export UPDATE_INFORMATION="gh-releases-zsync|CarlosEvCode|game_link|latest|game_link-*x86_64.AppImage.zsync"
 
 # Usamos el flag -u explícitamente con la información de actualización. 
 # Esto fuerza a appimagetool a embeber la info y generar el archivo .zsync
@@ -131,7 +131,7 @@ export UPDATE_INFORMATION="gh-releases-zsync|CarlosEvCode|lutris_game_station|la
     AppDir "${APP_NAME}-${VERSION}-x86_64.AppImage"
 
 echo -e "${BLUE}✅ Contenido del directorio actual:${NC}"
-ls -lh lutris_game_station-*
+ls -lh game_link-*
 
 if [ -f "${APP_NAME}-${VERSION}-x86_64.AppImage.zsync" ]; then
     echo -e "${BLUE}📦 Archivo ZSync confirmado: ${APP_NAME}-${VERSION}-x86_64.AppImage.zsync${NC}"
@@ -140,4 +140,3 @@ else
     # Intentamos buscar cualquier .zsync generado por si el nombre varió
     ls *.zsync 2>/dev/null || echo "No hay archivos .zsync en absoluto."
 fi
-

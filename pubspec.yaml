@@ -1,5 +1,5 @@
-name: lutris_game_station
-description: "A unified station for managing ROMs and visual media in Lutris."
+name: game_link
+description: "A universal game companion for linking ROMs, managing media, and integrating with multiple launchers."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

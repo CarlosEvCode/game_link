@@ -7,16 +7,16 @@ import 'platforms/platform_registry.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   PlatformRegistry.initialize();
-  runApp(const LutrisGameStationApp());
+  runApp(const GameLinkApp());
 }
 
-class LutrisGameStationApp extends StatelessWidget {
-  const LutrisGameStationApp({Key? key}) : super(key: key);
+class GameLinkApp extends StatelessWidget {
+  const GameLinkApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Lutris Game Station',
+      title: 'Game Link',
       debugShowCheckedModeBanner: false,
       theme: FlexThemeData.light(
         scheme: FlexScheme.materialBaseline,

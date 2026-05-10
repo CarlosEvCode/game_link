@@ -107,7 +107,7 @@ class RomCacheRepository {
         Platform.environment['HOME'] ??
         Platform.environment['USERPROFILE'] ??
         Directory.systemTemp.path;
-    final cacheDir = Directory(p.join(home, '.cache', 'lutris_game_station'));
+    final cacheDir = Directory(p.join(home, '.cache', 'game_link'));
     if (!cacheDir.existsSync()) {
       cacheDir.createSync(recursive: true);
     }

@@ -1,8 +1,8 @@
-# Lutris Game Station
+# Game Link
 
-Desktop utility for Linux users who manage retro and console libraries in Lutris.
+Desktop companion for Linux users who manage game libraries across multiple launchers (Lutris, Steam, etc.).
 
-Lutris Game Station combines two workflows in one application:
+Game Link combines several workflows in one application:
 
 - **ROM injection**: import local ROM collections and generate Lutris entries.
 - **Visual metadata management**: apply cover art, banners, and icons from SteamGridDB, with optional high-precision identification using ScreenScraper.
@@ -26,7 +26,7 @@ Lutris Game Station combines two workflows in one application:
 
 ## Overview
 
-Lutris Game Station is a Flutter desktop app focused on improving the day-to-day management of large Lutris libraries.
+Game Link is a Flutter desktop app focused on improving the day-to-day management of large Lutris libraries.
 
 It reads and updates Lutris data directly (including `pga.db`, YAML game configs, and media folders), while keeping operations practical for real-world setups:
 
@@ -92,7 +92,7 @@ Platform definitions live in `lib/platforms/platform_registry.dart`.
 
 ## How Metadata Works
 
-Lutris Game Station separates responsibilities between providers:
+Game Link separates responsibilities between providers:
 
 - **SteamGridDB**: primary source for downloadable visual assets used in Lutris UI.
 - **ScreenScraper**: high-precision game identification and supplemental metadata.
@@ -149,7 +149,7 @@ SteamGridDB is the primary source for covers, banners, and icons.
 1.  Go to [steamgriddb.com](https://www.steamgriddb.com/) and log in (typically via Steam).
 2.  Navigate to your **Profile Settings** or go directly to [steamgriddb.com/profile/api](https://www.steamgriddb.com/profile/api).
 3.  Click on **"Generate API Key"**.
-4.  Copy the key and paste it into the **Settings** dialog within Lutris Game Station.
+4.  Copy the key and paste it into the **Settings** dialog within Game Link.
 
 #### 2. ScreenScraper (Optional for High-Precision)
 ScreenScraper is used for hash-based identification (ensuring the "Right Game" is matched).
@@ -167,7 +167,7 @@ Use `.env.example` as reference, then build with:
 flutter build linux \
   --dart-define=SS_DEV_ID=your_dev_id \
   --dart-define=SS_DEV_PASSWORD=your_dev_password \
-  --dart-define=SS_SOFT_NAME=LutrisGameStation
+  --dart-define=SS_SOFT_NAME=GameLink
 ```
 
 Notes:
@@ -178,7 +178,7 @@ Notes:
 
 ## Steam Export Requirements
 
-Lutris Game Station can export your games to Steam as non-Steam shortcuts, including artwork sync and platform-based collections.
+Game Link can export your games to Steam as non-Steam shortcuts, including artwork sync and platform-based collections.
 
 > **Note:** Currently, only the **Native** installation of Steam is automatically detected and supported for export operations. Support for Steam via Flatpak is planned for future updates.
 
@@ -275,3 +275,4 @@ If you want to add support for another platform, improve metadata matching, or r
 2. Submit a pull request with clear scope and test steps.
 
 Please keep changes aligned with existing architecture and path-detection behavior for both native and Flatpak Lutris installations.
+ak Lutris installations.

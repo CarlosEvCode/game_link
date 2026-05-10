@@ -22,7 +22,7 @@ class SteamGridDBCache {
     final baseDir = home != null
         ? Directory(home)
         : Directory(Directory.systemTemp.path);
-    final cacheDir = Directory('${baseDir.path}/.cache/lutris_game_station');
+    final cacheDir = Directory('${baseDir.path}/.cache/game_link');
     cacheDir.createSync(recursive: true);
     return '${cacheDir.path}/steamgriddb_cache.json';
   }

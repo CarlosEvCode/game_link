@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Game Link
+Comment=A universal game companion for linking ROMs, managing media, and integrating with multiple launchers.
+Exec=game_link
+Icon=game_link
+Terminal=false
+Categories=Game;Utility;

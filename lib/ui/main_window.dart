@@ -536,7 +536,7 @@ class _MainWindowState extends State<MainWindow> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Lutris Game Station', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+        title: const Text('Game Link', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
         toolbarHeight: 48,
         actions: [
           _buildLutrisSelector(),

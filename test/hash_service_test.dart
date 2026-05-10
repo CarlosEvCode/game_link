@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lutris_game_station/core/metadata/hash_service.dart';
+import 'package:game_link/core/metadata/hash_service.dart';
 
 void main() {
   group('HashService Tests', () {

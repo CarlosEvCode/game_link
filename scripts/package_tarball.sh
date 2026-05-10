@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-APP_NAME="lutris_game_station"
+APP_NAME="game_link"
 VERSION=${1:-"unknown"}
 BUNDLE_DIR="build/linux/x64/release/bundle"
 OUTPUT_NAME="${APP_NAME}-${VERSION}-linux-x64.tar.xz"

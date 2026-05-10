@@ -419,7 +419,7 @@ class ScreenScraperService {
   // Credenciales de desarrollador embebidas en compilación via --dart-define
   static const String _softName = String.fromEnvironment(
     'SS_SOFT_NAME',
-    defaultValue: 'LutrisGameStation',
+    defaultValue: 'GameLink',
   );
   static const String _devId = String.fromEnvironment(
     'SS_DEV_ID',

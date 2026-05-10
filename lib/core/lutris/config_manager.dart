@@ -4,7 +4,7 @@ import 'package:path/path.dart' as p;
 
 class ConfigManager {
   static final String _homeDir = Platform.environment['HOME'] ?? '';
-  static final String _configDirPath = p.join(_homeDir, '.config', 'lutris_game_station');
+  static final String _configDirPath = p.join(_homeDir, '.config', 'game_link');
   static final String _configFilePath = p.join(_configDirPath, 'config.json');
 
   static String get configFilePath => _configFilePath;
