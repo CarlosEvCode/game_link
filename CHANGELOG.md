@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.10.0](https://github.com/CarlosEvCode/game_link/compare/v2.9.10...v2.10.0) (2026-05-10)
+
+
+### Features
+
+* enhance UX with options menu, About dialog, and tabbed configuration ([a23ca1c](https://github.com/CarlosEvCode/game_link/commit/a23ca1c58b8ff53b28f8a6f95e8d7c776910cf9b))
+
 ## [2.9.10](https://github.com/CarlosEvCode/game_link/compare/v2.9.9...v2.9.10) (2026-05-10)
 
 
