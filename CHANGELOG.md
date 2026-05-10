@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.1](https://github.com/CarlosEvCode/game_link/compare/v2.9.0...v2.9.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** correct package name typo in release workflow ([79ec0e5](https://github.com/CarlosEvCode/game_link/commit/79ec0e511949985ab71bf30f8028e93ebddf5dcb))
+
 ## [2.9.0](https://github.com/CarlosEvCode/game_link/compare/v2.8.1...v2.9.0) (2026-05-10)
 
 
