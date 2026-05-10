@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.3](https://github.com/CarlosEvCode/game_link/compare/v2.9.2...v2.9.3) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** use --user flag for flatpak remote-add to avoid permission errors ([30a8d05](https://github.com/CarlosEvCode/game_link/commit/30a8d05010f5784f45e8ebc77265265d9d67f8e1))
+
 ## [2.9.2](https://github.com/CarlosEvCode/game_link/compare/v2.9.1...v2.9.2) (2026-05-10)
 
 
