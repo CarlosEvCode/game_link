@@ -2,9 +2,10 @@
 Version=1.0
 Type=Application
 Name=Game Link
-Comment=Universal game companion for linking ROMs, managing media, and integrating with multiple launchers.
+Comment=Universal game companion for linking ROMs and managing media
 Exec=game-link
 Icon=io.github.CarlosEvCode.GameLink
 Terminal=false
 Categories=Game;Utility;
 X-Flatpak=io.github.CarlosEvCode.GameLink
+StartupWMClass=game-link
