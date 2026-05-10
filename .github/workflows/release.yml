@@ -134,16 +134,18 @@ jobs:
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Generar Paquete Debian (.deb)
+        env:
+          DEBFULLNAME: "Carlos EvCode"
+          DEBEMAIL: "programer.cm12@gmail.com"
         run: |
           sudo apt-get update
-          sudo apt-get install -y debhelper devscripts \
+          sudo apt-get install -y debhelper devscripts build-essential \
             libgtk-3-dev libglib2.0-dev libgdk-pixbuf2.0-dev \
             libpango1.0-dev libatk1.0-dev libcairo2-dev \
             libharfbuzz-dev libepoxy-dev libblkid-dev liblzma-dev
           
-          # Forzar la versión del changelog para que coincida con el release actual
-          # Usamos -v para establecer la versión y -b para forzarla aunque sea menor (por si acaso)
-          dch -v "${{ env.APP_VERSION }}-1" -b "Release ${{ env.APP_VERSION }}"
+          # Forzar la versión del changelog de forma no interactiva
+          dch --create --package game-link -v "${{ env.APP_VERSION }}-1" "Release ${{ env.APP_VERSION }}"
           
           dh_clean
           dpkg-buildpackage -b -us -uc
