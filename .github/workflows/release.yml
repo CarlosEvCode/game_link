@@ -125,10 +125,10 @@ jobs:
           sed -i "s/release version=\".*\"/release version=\"${{ env.APP_VERSION }}\"/" io.github.CarlosEvCode.GameLink.metainfo.xml
           
           # Construir
-          flatpak-builder --force-clean --install-deps-from=flathub builddir io.github.CarlosEvCode.GameLink.yml
+          flatpak-builder --user --force-clean --install-deps-from=flathub builddir io.github.CarlosEvCode.GameLink.yml
           
           # Crear repositorio y bundle
-          flatpak-builder --repo=repo --force-clean builddir io.github.CarlosEvCode.GameLink.yml
+          flatpak-builder --user --repo=repo --force-clean builddir io.github.CarlosEvCode.GameLink.yml
           flatpak build-bundle repo \
             ../game_link-${{ env.APP_VERSION }}-x86_64.flatpak \
             io.github.CarlosEvCode.GameLink \
