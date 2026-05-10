@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.8.1](https://github.com/CarlosEvCode/game_link/compare/v2.8.0...v2.8.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* standardize tarball directory structure for AUR compatibility ([566a2c4](https://github.com/CarlosEvCode/game_link/commit/566a2c431f7d423d3c1bf56f51f7d6ec6b909ac3))
+
 ## [2.8.0](https://github.com/CarlosEvCode/lutris_game_station/compare/v2.7.2...v2.8.0) (2026-04-20)
 
 
