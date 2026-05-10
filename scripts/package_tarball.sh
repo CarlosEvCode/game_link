@@ -9,7 +9,7 @@ OUTPUT_NAME="${APP_NAME}-${VERSION}-linux-x64.tar.xz"
 echo "📦 Generando Tarball para $APP_NAME version $VERSION..."
 
 # Crear carpeta temporal para empaquetar
-TEMP_DIR="${APP_NAME}_portable"
+TEMP_DIR="${APP_NAME}"
 rm -rf "$TEMP_DIR" && mkdir -p "$TEMP_DIR"
 
 # Copiar el bundle
