@@ -133,6 +133,10 @@ jobs:
             io.github.CarlosEvCode.GameLink \
             --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo
 
+      - name: Generar Checksums (SHA256)
+        run: |
+          sha256sum game_link-*.AppImage *.zsync *.tar.xz game_link-*.flatpak > SHA256SUMS
+
       - name: Publicar Release en GitHub
         uses: softprops/action-gh-release@v2
         with:
@@ -142,5 +146,6 @@ jobs:
             game_link-*.flatpak
             *.zsync
             *.tar.xz
+            SHA256SUMS
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
