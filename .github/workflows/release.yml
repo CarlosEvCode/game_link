@@ -144,8 +144,9 @@ jobs:
             libpango1.0-dev libatk1.0-dev libcairo2-dev \
             libharfbuzz-dev libepoxy-dev libblkid-dev liblzma-dev
           
-          # Forzar la versión del changelog de forma no interactiva
-          dch --create --package game-link -v "${{ env.APP_VERSION }}-1" "Release ${{ env.APP_VERSION }}"
+          # Actualizar el changelog de forma no interactiva
+          # Usamos -b para permitir que la versión sea lo que diga el tag, y --distribution para Launchpad
+          dch -b -v "${{ env.APP_VERSION }}-1" --distribution noble "Release ${{ env.APP_VERSION }}"
           
           dh_clean
           dpkg-buildpackage -b -us -uc
