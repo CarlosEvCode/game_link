@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.9.0](https://github.com/CarlosEvCode/game_link/compare/v2.8.1...v2.9.0) (2026-05-10)
+
+
+### Features
+
+* add automated Flatpak bundle generation to release workflow ([9d47a27](https://github.com/CarlosEvCode/game_link/commit/9d47a27b6a92bf3273a2719a19601e9db7c9b629))
+* implement standardized Flatpak packaging and manifest ([27b68f9](https://github.com/CarlosEvCode/game_link/commit/27b68f907c3ca855b38c9008c2244c6728636787))
+
 ## [2.8.1](https://github.com/CarlosEvCode/game_link/compare/v2.8.0...v2.8.1) (2026-05-10)
 
 
