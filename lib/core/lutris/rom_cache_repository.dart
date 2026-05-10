@@ -231,7 +231,7 @@ class RomCacheRepository {
 
       return cached; // Cache válido
     } catch (e) {
-      print('⚠️ Error verificando cache ROM: $e');
+      print('[  WARN ] Error verificando cache ROM: $e');
       return null;
     }
   }
@@ -306,7 +306,7 @@ class RomCacheRepository {
         ],
       );
     } catch (e) {
-      print('⚠️ Error guardando cache ROM: $e');
+      print('[  WARN ] Error guardando cache ROM: $e');
     }
   }
 
@@ -362,7 +362,7 @@ class RomCacheRepository {
 
       return null;
     } catch (e) {
-      print('⚠️ Error buscando por nombre: $e');
+      print('[  WARN ] Error buscando por nombre: $e');
       return null;
     }
   }
@@ -372,7 +372,7 @@ class RomCacheRepository {
     try {
       _db.execute('DELETE FROM rom_cache');
     } catch (e) {
-      print('⚠️ Error limpiando cache ROM: $e');
+      print('[  WARN ] Error limpiando cache ROM: $e');
     }
   }
 

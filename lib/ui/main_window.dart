@@ -789,25 +789,22 @@ class _MainWindowState extends State<MainWindow> {
 
   Widget _buildConfigSection() {
     final platforms = PlatformRegistry.getInjectorPlatforms();
+    final stepTitleStyle = const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5);
     final labelStyle = TextStyle(color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.w500, fontSize: 11, letterSpacing: 0.5);
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // STEP 01
+        _buildStepHeader('01', 'SISTEMA'),
+        const SizedBox(height: 16),
         Text('PLATAFORMA', style: labelStyle),
         const SizedBox(height: 10),
         DropdownButtonFormField<PlatformInfo>(
           value: _selectedPlatform,
           items: platforms.map((p) => DropdownMenuItem(value: p, child: Text(p.platformName, style: const TextStyle(fontSize: 13)))).toList(),
           onChanged: _isProcessing ? null : _onPlatformChanged,
-          decoration: InputDecoration(
-            isDense: true, 
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-            filled: true,
-            fillColor: const Color(0xFF0A0A0A),
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-          ),
+          decoration: _inputDecoration(),
         ),
         if (_selectedPlatform != null && _selectedPlatform!.emulators.length > 1) ...[
           const SizedBox(height: 20),
@@ -817,17 +814,17 @@ class _MainWindowState extends State<MainWindow> {
             value: _selectedEmulator,
             items: _selectedPlatform!.emulators.map((e) => DropdownMenuItem(value: e, child: Text(e.name, style: const TextStyle(fontSize: 13)))).toList(),
             onChanged: _isProcessing ? null : _onEmulatorChanged,
-            decoration: InputDecoration(
-              isDense: true, 
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-              filled: true,
-              fillColor: const Color(0xFF0A0A0A),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-            ),
+            decoration: _inputDecoration(),
           ),
         ],
-        const SizedBox(height: 20),
+
+        const SizedBox(height: 32),
+        const Divider(color: Colors.white10),
+        const SizedBox(height: 32),
+
+        // STEP 02
+        _buildStepHeader('02', 'ORIGEN'),
+        const SizedBox(height: 16),
         Text('CARPETA DE ROMS', style: labelStyle),
         const SizedBox(height: 10),
         InkWell(
@@ -849,7 +846,7 @@ class _MainWindowState extends State<MainWindow> {
         ),
         if (_selectedEmulator != null) ...[
           const SizedBox(height: 20),
-          Text('EXTENSIONES ADMITIDAS', style: labelStyle),
+          Text('EXTENSIONES', style: labelStyle),
           const SizedBox(height: 12),
           Wrap(
             spacing: 6,
@@ -888,16 +885,145 @@ class _MainWindowState extends State<MainWindow> {
             }).toList(),
           ),
         ],
-        const SizedBox(height: 20),
-        Text('OPCIONES', style: labelStyle),
-        const SizedBox(height: 8),
-        _buildCompactCheckbox('Limpiar juegos', _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
-        _buildCompactCheckbox('Alta Precisión', _useHighPrecision, (val) => setState(() => _useHighPrecision = val ?? false)),
+
+        const SizedBox(height: 32),
+        const Divider(color: Colors.white10),
+        const SizedBox(height: 32),
+
+        // STEP 03
+        _buildStepHeader('03', 'PREFERENCIAS'),
+        const SizedBox(height: 16),
+        _buildCompactCheckbox('Limpiar juegos previos', _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
+        _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) => setState(() => _useHighPrecision = val ?? false)),
         _buildCompactCheckbox('Escaneo recursivo', _isRecursive, (val) {
           setState(() => _isRecursive = val ?? false);
           _scanFolder();
         }),
       ],
+    );
+  }
+
+  Widget _buildStepHeader(String number, String title) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            border: Border.all(color: Colors.white24),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: Text(number, style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.bold)),
+        ),
+        const SizedBox(width: 12),
+        Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 10, letterSpacing: 1.5)),
+      ],
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      isDense: true, 
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+      filled: true,
+      fillColor: const Color(0xFF0A0A0A),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+    );
+  }
+
+  Widget _buildActionBar() {
+    final selectedCount = _previewItems.where((i) => i.isSelected).length;
+    final canProcess = selectedCount > 0 && !_isProcessing;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: const BoxDecoration(
+        color: Colors.black,
+        border: Border(top: BorderSide(color: Color(0xFF1A1A1A))),
+      ),
+      child: Row(
+        children: [
+          if (!_isProcessing) ...[
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  canProcess ? '$selectedCount JUEGOS LISTOS' : 'ESPERANDO SELECCIÓN',
+                  style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Inyectar en Lutris + Descargar Metadatos',
+                  style: TextStyle(color: Colors.white24, fontSize: 10),
+                ),
+              ],
+            ),
+          ],
+          const Spacer(),
+          // Botón de opciones avanzadas
+          if (canProcess)
+            PopupMenuButton<String>(
+              tooltip: 'Opciones avanzadas',
+              icon: const Icon(Icons.tune, color: Colors.white38, size: 20),
+              offset: const Offset(0, -100),
+              color: const Color(0xFF0A0A0A),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+                side: const BorderSide(color: Color(0xFF1A1A1A)),
+              ),
+              onSelected: _startProcess,
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'inject',
+                  child: Row(
+                    children: [
+                      Icon(Icons.add, size: 16, color: Colors.white70),
+                      SizedBox(width: 12),
+                      Text('Solo Inyectar ROMs', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'metadata',
+                  child: Row(
+                    children: [
+                      Icon(Icons.download_outlined, size: 16, color: Colors.white70),
+                      SizedBox(width: 12),
+                      Text('Solo Descargar Metadatos', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          const SizedBox(width: 16),
+          // Botón Principal
+          _buildActionButton(
+            _isProcessing ? 'PROCESANDO...' : 'EJECUTAR PROCESO', 
+            Icons.play_arrow_rounded, 
+            () => _startProcess('full'), 
+            isPrimary: canProcess,
+            isEnabled: canProcess,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, IconData icon, VoidCallback onPressed, {required bool isPrimary, bool isEnabled = true}) {
+    return TextButton.icon(
+      onPressed: isEnabled ? onPressed : null,
+      style: TextButton.styleFrom(
+        backgroundColor: isPrimary ? Colors.white : Colors.transparent,
+        foregroundColor: isPrimary ? Colors.black : Colors.white10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: isPrimary ? BorderSide.none : const BorderSide(color: Color(0xFF1A1A1A)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, letterSpacing: 1)),
     );
   }
 
@@ -971,39 +1097,6 @@ class _MainWindowState extends State<MainWindow> {
           ])),
         ],
       ),
-    );
-  }
-
-  Widget _buildActionBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: Colors.black,
-      child: Row(
-        children: [
-          _buildActionButton('Inyectar', Icons.add, () => _startProcess('inject'), isPrimary: false),
-          const SizedBox(width: 12),
-          _buildActionButton('Metadatos', Icons.download_outlined, () => _startProcess('metadata'), isPrimary: false),
-          const Spacer(),
-          _buildActionButton(_isProcessing ? 'Procesando...' : 'Ejecutar Todo', Icons.play_arrow_rounded, () => _startProcess('full'), isPrimary: true),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButton(String label, IconData icon, VoidCallback onPressed, {required bool isPrimary}) {
-    return TextButton.icon(
-      onPressed: _isProcessing ? null : onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: isPrimary ? Colors.white : Colors.transparent,
-        foregroundColor: isPrimary ? Colors.black : Colors.white70,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-          side: isPrimary ? BorderSide.none : const BorderSide(color: Color(0xFF1A1A1A)),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      ),
-      icon: Icon(icon, size: 16),
-      label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 }

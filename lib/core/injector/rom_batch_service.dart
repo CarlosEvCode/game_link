@@ -102,13 +102,13 @@ class RomBatchService {
 
       final platformInfo = PlatformRegistry.getPlatform(platformKey);
       if (platformInfo == null) {
-        _log("⚠️ Plataforma no soportada: $platformKey");
+        _log("[  WARN ] Plataforma no soportada: $platformKey");
         continue;
       }
 
       final folder = Directory(folderPath);
       if (!folder.existsSync()) {
-        _log("⚠️ Carpeta no existe: $folderPath");
+        _log("[  WARN ] Carpeta no existe: $folderPath");
         continue;
       }
 
@@ -134,7 +134,7 @@ class RomBatchService {
     }
 
     _log(
-      "📦 Encontrados ${items.length} ROMs en ${foldersByPlatform.length} plataformas",
+      "[  INFO ] Encontrados ${items.length} ROMs en ${foldersByPlatform.length} plataformas",
     );
     return items;
   }
@@ -179,7 +179,7 @@ class RomBatchService {
 
           filtered.add(nameGroup.first);
           _log(
-            "📁 ${p.basenameWithoutExtension(nameGroup.first.filePath)}: "
+            "[  FILE ] ${p.basenameWithoutExtension(nameGroup.first.filePath)}: "
             "usando ${nameGroup.first.extension} "
             "(ignorando: ${nameGroup.skip(1).map((i) => i.extension).join(', ')})",
           );
@@ -220,7 +220,7 @@ class RomBatchService {
     final totalItems = selectedItems.length;
 
     if (totalItems == 0) {
-      _log("⚠️ No hay items seleccionados para procesar");
+      _log("[  WARN ] No hay items seleccionados para procesar");
       return BatchProcessStats(
         totalItems: 0,
         processed: 0,
@@ -231,7 +231,7 @@ class RomBatchService {
       );
     }
 
-    _log("🚀 Procesando $totalItems ROMs en batch...");
+    _log("[ START ] Procesando $totalItems ROMs en batch...");
 
     int processed = 0;
     int identified = 0;
@@ -247,7 +247,7 @@ class RomBatchService {
         // Verificar si el archivo existe
         final file = File(item.filePath);
         if (!file.existsSync()) {
-          _log("⏩ Archivo no existe: ${item.fileName}");
+          _log("[  SKIP ] Archivo no existe: ${item.fileName}");
           skipped++;
           processed++;
           _log("Progreso: ${(progress * 100).toInt()}%", progress);
@@ -257,7 +257,7 @@ class RomBatchService {
         final platformInfo = PlatformRegistry.getPlatform(item.platformKey);
         final screenScraperId = platformInfo?.screenScraperId;
         if (screenScraperId == null) {
-          _log("⏩ Plataforma sin soporte ScreenScraper: ${item.platformKey}");
+          _log("[  SKIP ] Plataforma sin soporte ScreenScraper: ${item.platformKey}");
           skipped++;
           processed++;
           _log("Progreso: ${(progress * 100).toInt()}%", progress);
@@ -271,7 +271,7 @@ class RomBatchService {
 
         if (cachedEntry != null && cachedEntry.isIdentified) {
           _log(
-            "📦 Cache hit: ${cachedEntry.identifiedName ?? item.displayName}",
+            "[  INFO ] Cache hit: ${cachedEntry.identifiedName ?? item.displayName}",
           );
           cached++;
           processed++;
@@ -281,7 +281,7 @@ class RomBatchService {
 
         // Identificar con ScreenScraper si se requiere alta precisión
         if (useHighPrecision) {
-          _log("🔍 Identificando: ${item.displayName}...");
+          _log("[ SEARCH ] Identificando: ${item.displayName}...");
 
           final stat = file.statSync();
           final identifiedGame = await ScreenScraperService.identifyFile(
@@ -296,9 +296,9 @@ class RomBatchService {
             finalName = identifiedGame!.name!;
             wasIdentified = true;
             identified++;
-            _log("✨ Identificado: $finalName");
+            _log("[  INFO ] Identificado: $finalName");
           } else {
-            _log("⚠️ No identificado: ${item.displayName}");
+            _log("[  WARN ] No identificado: ${item.displayName}");
           }
 
           // Guardar en cache
@@ -329,7 +329,7 @@ class RomBatchService {
 
         processed++;
       } catch (e) {
-        _log("❌ Error procesando ${item.displayName}: $e");
+        _log("[  FAIL ] Error procesando ${item.displayName}: $e");
         failed++;
         processed++;
       }
@@ -346,7 +346,7 @@ class RomBatchService {
       skipped: skipped,
     );
 
-    _log("🎉 Procesamiento batch completado: $stats", 1.0);
+    _log("[  DONE ] Procesamiento batch completado: $stats", 1.0);
     return stats;
   }
 
@@ -358,4 +358,8 @@ class RomBatchService {
 
   /// Cierra recursos
   void dispose() => _cache.dispose();
+}
+;
+}
+}
 }

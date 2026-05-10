@@ -907,7 +907,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       widget.onGameUpdated();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ Nombre corregido a "$pendingNameFromMatch".'),
+          content: Text('[  DONE ] Nombre corregido a "$pendingNameFromMatch".'),
         ),
       );
     }

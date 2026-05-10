@@ -50,7 +50,7 @@ class MetadataDownloader {
         try {
           dir.createSync(recursive: true);
         } catch (e) {
-          _log("⚠️ Error creando directorio $d: $e");
+          _log("[  WARN ] Error creando directorio $d: $e");
         }
       }
     }
@@ -82,28 +82,28 @@ class MetadataDownloader {
         return true;
       }
     } catch (e) {
-      _log("⚠️ Error descargando $url: $e");
+      _log("[  WARN ] Error descargando $url: $e");
     }
     return false;
   }
 
   Future<void> downloadMetadata({bool skipExisting = true}) async {
     if (apiKey.isEmpty) {
-      _log("❌ No hay API Key configurada");
+      _log("[  FAIL ] No hay API Key configurada");
       return;
     }
 
     _ensureDirectories();
     final db = sqlite3.open(dbPath);
 
-    _log("🎨 Descargando metadatos para: $runner");
+    _log("[ SEARCH ] Descargando metadatos para: $runner");
 
     final results = db.select(
       "SELECT id, slug, name FROM games WHERE runner = ? AND installed = 1",
       [runner],
     );
     if (results.isEmpty) {
-      _log("⚠️ No se encontraron juegos instalados para $runner");
+      _log("[  WARN ] No se encontraron juegos instalados para $runner");
       db.dispose();
       return;
     }
@@ -126,12 +126,12 @@ class MetadataDownloader {
           File(pCover).existsSync() &&
           File(pBanner).existsSync() &&
           File(pIconSystem).existsSync()) {
-        _log("⏩ Saltando $slug (Ya existe)", (i + 1) / totalGames);
+        _log("[  SKIP ] Saltando $slug (Ya existe)", (i + 1) / totalGames);
         continue;
       }
 
       final displayName = hasIdentifiedName ? rawName : slug;
-      _log("🔍 Procesando: $displayName", (i + 1) / totalGames);
+      _log("[ SEARCH ] Procesando: $displayName", (i + 1) / totalGames);
 
       final cleanName = _cleanName(rawName);
       final candidates = <String>[];
@@ -162,7 +162,7 @@ class MetadataDownloader {
         final results = await _api.searchGames(candidate);
         if (results.isNotEmpty) {
           foundGame = results.first;
-          _log("   ✅ Encontrado: ${foundGame['name']}");
+          _log("   [  DONE ] Encontrado: ${foundGame['name']}");
           break;
         }
       }
@@ -210,11 +210,11 @@ class MetadataDownloader {
           );
         }
       } else {
-        _log("   ❌ No se encontró en SteamGridDB");
+        _log("   [  FAIL ] No se encontró en SteamGridDB");
       }
     }
 
     db.dispose();
-    _log("🎉 ¡Completado!", 1.0);
+    _log("[  DONE ] ¡Completado!", 1.0);
   }
 }

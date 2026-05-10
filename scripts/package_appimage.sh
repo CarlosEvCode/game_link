@@ -16,13 +16,13 @@ APP_ID="io.github.carlosevcode.game_link"
 VERSION=${1:-"unknown"}
 BUNDLE_DIR="build/linux/x64/release/bundle"
 
-echo -e "${BLUE}📦 Generando AppImage para $APP_NAME version $VERSION...${NC}"
+echo -e "${BLUE}[  INFO ] Generando AppImage para $APP_NAME version $VERSION...${NC}"
 
 # 1. Validar herramientas locales
 if [ ! -f /.dockerenv ]; then
     for tool in patchelf convert; do
         if ! command -v $tool &> /dev/null; then
-            echo -e "${RED}❌ Error: '$tool' no está instalado.${NC}"
+            echo -e "${RED}[  FAIL ] Error: '$tool' no está instalado.${NC}"
             exit 1
         fi
     done
@@ -69,7 +69,7 @@ if ! grep -q "StartupWMClass" "$DESKTOP_FILE"; then
 fi
 
 if [ -f "linux/$APP_NAME.png" ]; then
-    echo -e "${BLUE}🎨 Procesando icono con ID: $APP_ID...${NC}"
+    echo -e "${BLUE}[ BUILD ] Procesando icono con ID: $APP_ID...${NC}"
     convert "linux/$APP_NAME.png" -resize 512x512! "AppDir/usr/share/icons/hicolor/512x512/apps/$APP_ID.png"
     mkdir -p AppDir/usr/share/pixmaps
     cp "AppDir/usr/share/icons/hicolor/512x512/apps/$APP_ID.png" "AppDir/usr/share/pixmaps/$APP_ID.png"
@@ -130,13 +130,13 @@ export UPDATE_INFORMATION="gh-releases-zsync|CarlosEvCode|game_link|latest|game_
     -u "$UPDATE_INFORMATION" \
     AppDir "${APP_NAME}-${VERSION}-x86_64.AppImage"
 
-echo -e "${BLUE}✅ Contenido del directorio actual:${NC}"
+echo -e "${BLUE}[  DONE ] Contenido del directorio actual:${NC}"
 ls -lh game_link-*
 
 if [ -f "${APP_NAME}-${VERSION}-x86_64.AppImage.zsync" ]; then
-    echo -e "${BLUE}📦 Archivo ZSync confirmado: ${APP_NAME}-${VERSION}-x86_64.AppImage.zsync${NC}"
+    echo -e "${BLUE}[  INFO ] Archivo ZSync confirmado: ${APP_NAME}-${VERSION}-x86_64.AppImage.zsync${NC}"
 else
-    echo -e "${RED}⚠️ Advertencia: No se encontró el archivo .zsync esperado.${NC}"
+    echo -e "${RED}[  WARN ] Advertencia: No se encontró el archivo .zsync esperado.${NC}"
     # Intentamos buscar cualquier .zsync generado por si el nombre varió
     ls *.zsync 2>/dev/null || echo "No hay archivos .zsync en absoluto."
 fi

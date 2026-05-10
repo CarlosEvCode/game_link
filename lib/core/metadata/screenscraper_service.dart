@@ -495,7 +495,7 @@ class ScreenScraperService {
   static Future<ScreenScraperQuota?> getQuota() async {
     if (!hasDevCredentials) {
       print(
-        '⚠️ ScreenScraper: Credenciales de desarrollador no configuradas en .env',
+        '[  WARN ] ScreenScraper: Credenciales de desarrollador no configuradas en .env',
       );
       return null;
     }
@@ -532,7 +532,7 @@ class ScreenScraperService {
       return null;
     } catch (e) {
       if (e is ScreenScraperException) rethrow;
-      print('❌ Error obteniendo quota: $e');
+      print('[  FAIL ] Error obteniendo quota: $e');
       return null;
     }
   }
@@ -668,7 +668,7 @@ class ScreenScraperService {
             response.statusCode == 423 ||
             response.statusCode >= 500) {
           print(
-            '⚠️ Error ${response.statusCode}, reintentando en ${delay.inSeconds}s (intento $attempt/$_maxRetries)',
+            '[  WARN ] Error ${response.statusCode}, reintentando en ${delay.inSeconds}s (intento $attempt/$_maxRetries)',
           );
           await Future.delayed(delay);
           delay *= 2; // Backoff exponencial
@@ -680,7 +680,7 @@ class ScreenScraperService {
         if (e is SocketException || e is TimeoutException) {
           if (attempt >= _maxRetries) rethrow;
           print(
-            '⚠️ Error de conexión, reintentando en ${delay.inSeconds}s (intento $attempt/$_maxRetries)',
+            '[  WARN ] Error de conexión, reintentando en ${delay.inSeconds}s (intento $attempt/$_maxRetries)',
           );
           await Future.delayed(delay);
           delay *= 2;
@@ -712,7 +712,7 @@ class ScreenScraperService {
     final cachedFailure = _failedGameCache[failureKey];
     if (cachedFailure != null) {
       if (DateTime.now().difference(cachedFailure) < _failedCacheTtl) {
-        print('⏩ Saltando request a ScreenScraper (falló recientemente)');
+        print('[  SKIP ] Saltando request a ScreenScraper (falló recientemente)');
         return null;
       } else {
         _failedGameCache.remove(failureKey);
@@ -723,7 +723,7 @@ class ScreenScraperService {
     final cachedMemory = _memoryCache.get(crc, md5, sha1, systemId);
     if (cachedMemory != null) {
       _inMemoryCacheHits++;
-      print('📦 Cache en memoria para ${fileName ?? 'ROM'}');
+      print('[  INFO ] Cache en memoria para ${fileName ?? 'ROM'}');
       return cachedMemory;
     }
 
@@ -731,12 +731,12 @@ class ScreenScraperService {
     if (diskEntry != null) {
       _diskCacheHits++;
       if (diskEntry.isMiss) {
-        print('💾 Cache en disco (miss) para ${fileName ?? 'ROM'}');
+        print('[  DISK ] Cache en disco (miss) para ${fileName ?? 'ROM'}');
         return null;
       }
       final data = diskEntry.data;
       if (data != null) {
-        print('💾 Cache en disco para ${fileName ?? 'ROM'}');
+        print('[  DISK ] Cache en disco para ${fileName ?? 'ROM'}');
         final game = ScreenScraperGame.fromJson(data);
         _memoryCache.set(crc, md5, sha1, systemId, game);
         return game;
@@ -793,7 +793,7 @@ class ScreenScraperService {
     } on ScreenScraperException {
       rethrow;
     } catch (e) {
-      print('❌ Error identificando juego: $e');
+      print('[  FAIL ] Error identificando juego: $e');
       rethrow;
     }
   }
@@ -822,7 +822,7 @@ class ScreenScraperService {
         systemId: systemId ?? '57',
       );
     } catch (e) {
-      print('❌ Error identificando archivo $filePath: $e');
+      print('[  FAIL ] Error identificando archivo $filePath: $e');
       rethrow;
     }
   }
@@ -833,7 +833,7 @@ class ScreenScraperService {
     _diskCache.clear();
     _inMemoryCacheHits = 0;
     _diskCacheHits = 0;
-    print('🗑️ Cache de ScreenScraper limpiado');
+    print('[ CLEAN ] Cache de ScreenScraper limpiado');
   }
 
   /// Resetea el rate limiter (útil si cambia la quota)

@@ -232,7 +232,7 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
 
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('✅ $type actualizado.')));
+        ).showSnackBar(SnackBar(content: Text('[  DONE ] $type actualizado.')));
         widget.onUpdated();
       } else {
         _setStatus(
@@ -245,7 +245,7 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
       _setStatus('Error aplicando $type: $e', Colors.red, Icons.error_outline);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('❌ Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('[  FAIL ] Error: $e')));
     } finally {
       if (mounted) setState(() => _isApplying = false);
     }

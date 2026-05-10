@@ -76,14 +76,14 @@ class RomInjector {
     // Early exit por extensión - verificar que sea válida antes de hacer hash
     final ext = p.extension(filePath).toLowerCase();
     if (!extensions.contains(ext)) {
-      _log("⏩ Extensión no válida para $platformName: $ext");
+      _log("[  SKIP ] Extensión no válida para $platformName: $ext");
       return false;
     }
 
     final cached = _romCache.shouldProcessRom(filePath);
     if (cached != null && cached.isIdentified) {
       _log(
-        "📦 Usando identificación previa: ${cached.identifiedName ?? p.basenameWithoutExtension(filePath)}",
+        "[  INFO ] Usando identificación previa: ${cached.identifiedName ?? p.basenameWithoutExtension(filePath)}",
       );
       return false;
     }
@@ -129,7 +129,7 @@ class RomInjector {
 
     // Calcular hash e identificar con ScreenScraper
     try {
-      _log("🔍 Identificando con alta precisión: $fallbackName...");
+      _log("[ SEARCH ] Identificando con alta precisión: $fallbackName...");
 
       final file = File(filePath);
       final stat = file.statSync();
@@ -150,10 +150,10 @@ class RomInjector {
       if (identified != null && identified.name != null) {
         finalName = identified.name!;
         wasIdentified = true;
-        _log("✨ Identificado: $finalName");
+        _log("[  INFO ] Identificado: $finalName");
       } else {
         finalName = fallbackName;
-        _log("⚠️ No identificado, usando nombre de archivo");
+        _log("[  WARN ] No identificado, usando nombre de archivo");
       }
 
       // Guardar en cache
@@ -181,7 +181,7 @@ class RomInjector {
 
       return finalName;
     } catch (e) {
-      _log("⚠️ Error de identificación: $e");
+      _log("[  WARN ] Error de identificación: $e");
 
       // Guardar error en cache para evitar reintentar
       if (reuseIdentification) {
@@ -246,7 +246,7 @@ class RomInjector {
             .map((f) => p.extension(f.path))
             .join(', ');
         logCallback?.call(
-          "📁 ${entry.key}: usando ${p.extension(selected.path)} (ignorando: $skipped)",
+          "[  FILE ] ${entry.key}: usando ${p.extension(selected.path)} (ignorando: $skipped)",
         );
         result.add(selected);
       }
@@ -322,7 +322,7 @@ system:
   }
 
   void _cleanOldGames() {
-    _log("🧹 Limpiando juegos antiguos de $runner...");
+    _log("[ CLEAN ] Limpiando juegos antiguos de $runner...");
 
     final db = sqlite3.open(dbPath);
     try {
@@ -339,7 +339,7 @@ system:
             try {
               file.deleteSync();
             } catch (e) {
-              _log("⚠️ No se pudo borrar $yamlPath: $e");
+              _log("[  WARN ] No se pudo borrar $yamlPath: $e");
             }
           }
         }
@@ -360,7 +360,7 @@ system:
   }) async {
     final folder = Directory(romFolder);
     if (!folder.existsSync()) {
-      _log("❌ No existe la carpeta: $romFolder");
+      _log("[  FAIL ] No existe la carpeta: $romFolder");
       return;
     }
 
@@ -389,7 +389,7 @@ system:
 
     final totalFiles = romFiles.length;
     if (totalFiles == 0) {
-      _log("⚠️ No se encontraron archivos con las extensiones seleccionadas.");
+      _log("[  WARN ] No se encontraron archivos con las extensiones seleccionadas.");
       db.dispose();
       return;
     }
@@ -408,7 +408,7 @@ system:
       }
     }
 
-    _log("🚀 Inyectando juegos desde: $romFolder (Runner: $runner)");
+    _log("[ START ] Inyectando juegos desde: $romFolder (Runner: $runner)");
 
     for (int i = 0; i < romFiles.length; i++) {
       final f = romFiles[i];
@@ -419,7 +419,7 @@ system:
       // Early exit si la extensión no es válida para la plataforma
       final ext = p.extension(f.path).toLowerCase();
       if (!extensions.contains(ext)) {
-        _log("⏩ Extensión no válida para $platformName ($runner): $ext");
+        _log("[  SKIP ] Extensión no válida para $platformName ($runner): $ext");
         continue;
       }
 
@@ -445,14 +445,14 @@ system:
 
       if (processedSlugs.contains(gameSlug)) {
         _log(
-          "⏩ Saltando formato duplicado: $gameSlug (${p.extension(f.path)})",
+          "[  SKIP ] Saltando formato duplicado: $gameSlug (${p.extension(f.path)})",
         );
         continue;
       }
       processedSlugs.add(gameSlug);
 
       if (!cleanOld && existingSlugs.contains(gameSlug)) {
-        _log("⏩ Juego ya existe en Lutris: $gameSlug");
+        _log("[  SKIP ] Juego ya existe en Lutris: $gameSlug");
         continue;
       }
 
@@ -479,9 +479,9 @@ system:
 
         count++;
         final progress = (i + 1) / totalFiles;
-        _log("✅ Agregado: $gameName", progress);
+        _log("[  DONE ] Agregado: $gameName", progress);
       } catch (e) {
-        final errorMsg = "⚠️ Error con $gameName: $e";
+        final errorMsg = "[  WARN ] Error con $gameName: $e";
         errors.add(errorMsg);
         _log(errorMsg);
       }
@@ -490,7 +490,7 @@ system:
     db.dispose();
     _romCache.dispose();
 
-    _log("🎉 ¡Inyección completa! $count juegos nuevos agregados.", 1.0);
+    _log("[  DONE ] Inyección completa! $count juegos nuevos agregados.", 1.0);
 
     if (errors.isNotEmpty) {
       _log("Se encontraron ${errors.length} errores.");

@@ -6,7 +6,7 @@ VERSION=${1:-"unknown"}
 BUNDLE_DIR="build/linux/x64/release/bundle"
 OUTPUT_NAME="${APP_NAME}-${VERSION}-linux-x64.tar.xz"
 
-echo "📦 Generando Tarball para $APP_NAME version $VERSION..."
+echo "[  INFO ] Generando Tarball para $APP_NAME version $VERSION..."
 
 # Crear carpeta temporal para empaquetar
 TEMP_DIR="${APP_NAME}"
@@ -39,4 +39,4 @@ tar -cJf "$OUTPUT_NAME" "$TEMP_DIR"
 # Limpieza
 rm -rf "$TEMP_DIR"
 
-echo "✅ Tarball generado: $OUTPUT_NAME"
+echo "[  DONE ] Tarball generado: $OUTPUT_NAME"
