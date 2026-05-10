@@ -1,0 +1,44 @@
+app-id: io.github.CarlosEvCode.GameLink
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+command: game-link
+
+finish-args:
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --device=dri
+  - --filesystem=home
+  - --share=network
+  - --talk-name=org.freedesktop.Notifications
+
+modules:
+  - name: game-link
+    buildsystem: simple
+    build-commands:
+      # Copia el binario principal (están en el root del archivo extraído)
+      - install -Dm755 game_link /app/bin/game-link
+      # Copia las libs
+      - cp -r lib /app/bin/lib
+      # Copia los datos Flutter
+      - cp -r data /app/bin/data
+      # Metadatos
+      - install -Dm644 io.github.CarlosEvCode.GameLink.desktop /app/share/applications/io.github.CarlosEvCode.GameLink.desktop
+      - install -Dm644 io.github.CarlosEvCode.GameLink.metainfo.xml /app/share/metainfo/io.github.CarlosEvCode.GameLink.metainfo.xml
+      - install -Dm644 io.github.CarlosEvCode.GameLink.png /app/share/icons/hicolor/512x512/apps/io.github.CarlosEvCode.GameLink.png
+
+    build-options:
+      env:
+        LD_LIBRARY_PATH: /app/bin/lib
+
+    sources:
+      - type: archive
+        url: https://github.com/CarlosEvCode/game_link/releases/download/v2.8.1/game_link-2.8.1-linux-x64.tar.xz
+        sha256: c052418253fba71869392ad4b906d1ba096cba30f8540bdff9c1602e07a6e74d
+      - type: file
+        path: io.github.CarlosEvCode.GameLink.desktop
+      - type: file
+        path: io.github.CarlosEvCode.GameLink.metainfo.xml
+      - type: file
+        path: io.github.CarlosEvCode.GameLink.png
