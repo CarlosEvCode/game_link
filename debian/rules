@@ -1,0 +1,43 @@
+#!/usr/bin/make -f
+
+# Evitar que debhelper intente compilar algo, ya que ya tenemos los binarios
+# El bundle de Flutter se encuentra en build/linux/x64/release/bundle/
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	# No hacer nada, el binario ya está compilado por Flutter
+
+override_dh_dwz:
+	# No intentar optimizar debug info, los binarios de Flutter no lo soportan bien
+
+override_dh_strip:
+	# No hacer strip, Flutter ya lo hace o tiene su propio formato
+
+override_dh_shlibdeps:
+	dh_shlibdeps -l$(CURDIR)/debian/game-link/usr/lib/game-link/lib
+
+
+override_dh_auto_install:
+	# Crear directorios necesarios
+	mkdir -p debian/game-link/usr/bin
+	mkdir -p debian/game-link/usr/lib/game-link
+	mkdir -p debian/game-link/usr/share/applications
+	mkdir -p debian/game-link/usr/share/pixmaps
+
+	# Instalar el binario y sus recursos
+	# Nota: Usamos una subcarpeta en /usr/lib para las librerías de Flutter
+	cp -r build/linux/x64/release/bundle/* debian/game-link/usr/lib/game-link/
+	
+	# Crear un symlink en /usr/bin que apunte al binario con el LD_LIBRARY_PATH correcto
+	# O simplemente mover el ejecutable principal y dejar las libs en su sitio
+	# Flutter busca las libs en el mismo directorio que el ejecutable por defecto.
+	
+	# Opción recomendada: Todo en /usr/lib/game-link y un wrapper en /usr/bin
+	printf '#!/bin/sh\nexec /usr/lib/game-link/game_link "$$@"\n' > debian/game-link/usr/bin/game-link
+	chmod +x debian/game-link/usr/bin/game-link
+
+	# Instalar el desktop e icono
+	install -Dm644 linux/game_link.desktop debian/game-link/usr/share/applications/game-link.desktop
+	install -Dm644 linux/game_link.png debian/game-link/usr/share/pixmaps/game_link.png

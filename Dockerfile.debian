@@ -1,0 +1,18 @@
+FROM ubuntu:noble
+
+RUN apt-get update && apt-get install -y \
+    devscripts \
+    debhelper \
+    dh-make \
+    build-essential \
+    dput-ng \
+    gpg \
+    git \
+    libgtk-3-dev \
+    libblkid-dev \
+    liblzma-dev \
+    libgcrypt20-dev \
+    libunwind-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /build

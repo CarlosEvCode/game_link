@@ -1,0 +1,13 @@
+game-link (2.12.1-2) noble; urgency=medium
+
+  * Fix build dependencies for Launchpad.
+  * Correct dh_shlibdeps path.
+
+ -- Carlos EvCode <programer.cm12@gmail.com>  Sun, 10 May 2026 12:15:00 +0000
+
+game-link (2.12.1-1) noble; urgency=medium
+
+  * New release 2.12.1.
+  * Native Debian packaging support.
+
+ -- Carlos EvCode <programer.cm12@gmail.com>  Sun, 10 May 2026 12:00:00 +0000
