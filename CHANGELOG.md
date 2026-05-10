@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.1](https://github.com/CarlosEvCode/game_link/compare/v2.13.0...v2.13.1) (2026-05-10)
+
+
+### Bug Fixes
+
+* **release:** fix debian build dependencies and sync version 2.13.0 ([ea7a79c](https://github.com/CarlosEvCode/game_link/commit/ea7a79ceb93b810a058de3240b2b15ccb5521a16))
+
 ## [2.13.0](https://github.com/CarlosEvCode/game_link/compare/v2.12.1...v2.13.0) (2026-05-10)
 
 
