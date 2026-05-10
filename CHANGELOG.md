@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.9](https://github.com/CarlosEvCode/game_link/compare/v2.9.8...v2.9.9) (2026-05-10)
+
+
+### Bug Fixes
+
+* resize application icon to 512x512 for Flatpak compliance ([ff358e4](https://github.com/CarlosEvCode/game_link/commit/ff358e4d3321416bb60efbae5631f3cfe4207aca))
+
 ## [2.9.8](https://github.com/CarlosEvCode/game_link/compare/v2.9.7...v2.9.8) (2026-05-10)
 
 
