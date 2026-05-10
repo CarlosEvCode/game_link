@@ -95,7 +95,12 @@ jobs:
       - name: Instalar herramientas de empaquetado
         run: |
           sudo apt-get update
-          sudo apt-get install -y patchelf imagemagick libgdk-pixbuf2.0-dev flatpak flatpak-builder appstream
+          sudo apt-get install -y patchelf imagemagick libgdk-pixbuf2.0-dev flatpak flatpak-builder appstream libappstream-compose-dev
+
+      - name: Verificar herramientas
+        run: |
+          which appstream-compose || echo "appstream-compose no encontrado en PATH"
+          ls -l /usr/bin/appstream* || true
 
       - name: Configurar Flathub (para dependencias)
         run: |
