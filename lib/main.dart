@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flex_color_scheme/flex_color_scheme.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'ui/main_window.dart';
+import 'ui/onboarding_screen.dart';
+import 'core/lutris/config_manager.dart';
 import 'platforms/platform_registry.dart';
 
 void main() async {
@@ -95,7 +97,21 @@ class GameLinkApp extends StatelessWidget {
         fontFamily: GoogleFonts.inter().fontFamily,
       ),
       themeMode: ThemeMode.dark,
-      home: const MainWindow(),
+      home: FutureBuilder<bool>(
+        future: ConfigManager.isFirstRun(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              backgroundColor: Colors.black,
+              body: Center(child: CircularProgressIndicator(color: Colors.white24)),
+            );
+          }
+          if (snapshot.data == true) {
+            return const OnboardingScreen();
+          }
+          return const MainWindow();
+        },
+      ),
     );
   }
 }

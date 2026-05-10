@@ -98,5 +98,17 @@ class ConfigManager {
     await _writeConfig(config);
   }
 
+  // Onboarding Status
+  static Future<bool> isFirstRun() async {
+    final config = await _readConfig();
+    return config['first_run_completed'] != true;
+  }
+
+  static Future<void> setFirstRunCompleted() async {
+    final config = await _readConfig();
+    config['first_run_completed'] = true;
+    await _writeConfig(config);
+  }
+
   // Puedes añadir más configuraciones aquí en el futuro
 }
