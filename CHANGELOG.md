@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.11.0](https://github.com/CarlosEvCode/game_link/compare/v2.10.0...v2.11.0) (2026-05-10)
+
+
+### Features
+
+* implement guided onboarding experience with interactive setup ([840b01c](https://github.com/CarlosEvCode/game_link/commit/840b01cfee0f1f7b4a2f5a94b303a9b11a4c930f))
+
 ## [2.10.0](https://github.com/CarlosEvCode/game_link/compare/v2.9.10...v2.10.0) (2026-05-10)
 
 
