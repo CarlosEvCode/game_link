@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.7](https://github.com/CarlosEvCode/game_link/compare/v2.9.6...v2.9.7) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** bypass missing appstream-compose tool with --no-compose flag ([7725111](https://github.com/CarlosEvCode/game_link/commit/7725111a192e552353eb00d9edc0e1b150af31f1))
+
 ## [2.9.6](https://github.com/CarlosEvCode/game_link/compare/v2.9.5...v2.9.6) (2026-05-10)
 
 
