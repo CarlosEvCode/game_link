@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.10](https://github.com/CarlosEvCode/game_link/compare/v2.9.9...v2.9.10) (2026-05-10)
+
+
+### Bug Fixes
+
+* **flatpak:** correct Exec command and add StartupWMClass for better desktop integration ([f4bfac8](https://github.com/CarlosEvCode/game_link/commit/f4bfac8d18c123df547576ba6e2a9a050c1942c1))
+
 ## [2.9.9](https://github.com/CarlosEvCode/game_link/compare/v2.9.8...v2.9.9) (2026-05-10)
 
 
