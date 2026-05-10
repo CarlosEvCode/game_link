@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.8](https://github.com/CarlosEvCode/game_link/compare/v2.9.7...v2.9.8) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** upgrade packaging job to ubuntu-24.04 for better flatpak compatibility ([e9895bb](https://github.com/CarlosEvCode/game_link/commit/e9895bb1667e9b94b561882d944254e0607d752f))
+
 ## [2.9.7](https://github.com/CarlosEvCode/game_link/compare/v2.9.6...v2.9.7) (2026-05-10)
 
 
