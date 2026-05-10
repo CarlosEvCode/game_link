@@ -127,8 +127,8 @@ Optional (for Steam export workflow):
 ## Installation
 
 ```bash
-git clone https://github.com/CarlosEvCode/lutris_game_station.git
-cd lutris_game_station
+git clone https://github.com/CarlosEvCode/game_link.git
+cd game_link
 flutter pub get
 ```
 
