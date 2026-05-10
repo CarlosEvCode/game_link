@@ -13,12 +13,14 @@ import 'steam_dependencies_dialog.dart';
 class VisualManagerScreen extends StatefulWidget {
   final Map<String, String?> lutrisPaths;
   final String apiKey;
+  final VoidCallback? onShowConfig;
   final String? initialPlatformId;
 
   const VisualManagerScreen({
     super.key,
     required this.lutrisPaths,
     required this.apiKey,
+    this.onShowConfig,
     this.initialPlatformId,
   });
 
@@ -1110,7 +1112,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
   }
 
   void _editMetadata(Game game) {
-    GameDetailScreen.show(context, game, widget.lutrisPaths, widget.apiKey, () {
+    GameDetailScreen.show(context, game, widget.lutrisPaths, widget.apiKey, widget.onShowConfig, () {
       setState(() => _imageVersion++);
       _refreshList();
     });

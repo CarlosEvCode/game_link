@@ -16,6 +16,7 @@ class GameDetailScreen extends StatefulWidget {
   final Game game;
   final Map<String, String?> lutrisPaths;
   final String apiKey;
+  final VoidCallback? onShowConfig;
   final VoidCallback onGameUpdated;
 
   const GameDetailScreen({
@@ -23,6 +24,7 @@ class GameDetailScreen extends StatefulWidget {
     required this.game,
     required this.lutrisPaths,
     required this.apiKey,
+    this.onShowConfig,
     required this.onGameUpdated,
   });
 
@@ -35,6 +37,7 @@ class GameDetailScreen extends StatefulWidget {
     Game game,
     Map<String, String?> lutrisPaths,
     String apiKey,
+    VoidCallback? onShowConfig,
     VoidCallback onGameUpdated,
   ) {
     return showDialog(
@@ -44,6 +47,7 @@ class GameDetailScreen extends StatefulWidget {
           game: game,
           lutrisPaths: lutrisPaths,
           apiKey: apiKey,
+          onShowConfig: onShowConfig,
           onGameUpdated: onGameUpdated,
         ),
       ),
@@ -370,6 +374,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Portada (Izquierda)
               Expanded(
                 flex: 3,
                 child: _buildMediaItem(
@@ -381,8 +386,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 ),
               ),
               const SizedBox(width: 20),
+              // Banner e Icono (Derecha)
               Expanded(
-                flex: 4,
+                flex: 5,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -391,29 +397,48 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       _bannerPath,
                       Icons.panorama_horizontal_outlined,
                       mediaType: 'banner',
-                      aspectRatio: 2.8,
+                      aspectRatio: 3.0,
                     ),
                     const SizedBox(height: 20),
-                    _buildMediaItem(
-                      'ICONO',
-                      _iconPath,
-                      Icons.apps_outlined,
-                      mediaType: 'icon',
-                      aspectRatio: 1.0,
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Icono pequeño y controlado
+                        SizedBox(
+                          width: 100,
+                          child: _buildMediaItem(
+                            'ICONO',
+                            _iconPath,
+                            Icons.apps_outlined,
+                            mediaType: 'icon',
+                            aspectRatio: 1.0,
+                          ),
+                        ),
+                        const SizedBox(width: 20),
+                        // Estados al lado del icono para ahorrar espacio vertical
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('ESTADO EN DISCO', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                              const SizedBox(height: 12),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  _buildStatusChip('COVER', File(_coverPath).existsSync()),
+                                  _buildStatusChip('BANNER', File(_bannerPath).existsSync()),
+                                  _buildStatusChip('ICONO', File(_iconPath).existsSync() || File(_lutrisPaths.systemIconPath(widget.game.slug)).existsSync()),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: 24),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _buildStatusChip('COVER', File(_coverPath).existsSync()),
-              _buildStatusChip('BANNER', File(_bannerPath).existsSync()),
-              _buildStatusChip('ICONO', File(_iconPath).existsSync() || File(_lutrisPaths.systemIconPath(widget.game.slug)).existsSync()),
             ],
           ),
         ],
@@ -601,54 +626,55 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     String path,
     IconData fallbackIcon, {
     required String mediaType,
-    double aspectRatio = 1.0,
+    double? aspectRatio = 1.0,
   }) {
     final systemPath = _lutrisPaths.systemIconPath(widget.game.slug);
     final finalPath = (mediaType == 'icon' && !File(path).existsSync() && File(systemPath).existsSync()) ? systemPath : path;
+
+    final content = Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: const Color(0xFF1A1A1A)),
+        color: const Color(0xFF050505),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            File(finalPath).existsSync()
+                ? Image.file(
+                    File(finalPath),
+                    key: ValueKey('$finalPath-$_imageVersion'),
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(fallbackIcon),
+                  )
+                : _buildPlaceholderImage(fallbackIcon),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: InkWell(
+                onTap: () => _openVisualSelectorForType(mediaType),
+                child: Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                  child: const Icon(Icons.edit_outlined, color: Colors.white, size: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
         const SizedBox(height: 8),
-        AspectRatio(
-          aspectRatio: aspectRatio,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: const Color(0xFF1A1A1A)),
-              color: const Color(0xFF050505),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  File(finalPath).existsSync()
-                      ? Image.file(
-                          File(finalPath),
-                          key: ValueKey('$finalPath-$_imageVersion'),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(fallbackIcon),
-                        )
-                      : _buildPlaceholderImage(fallbackIcon),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: InkWell(
-                      onTap: () => _openVisualSelectorForType(mediaType),
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
-                        child: const Icon(Icons.edit_outlined, color: Colors.white, size: 14),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
+        aspectRatio != null
+            ? AspectRatio(aspectRatio: aspectRatio, child: content)
+            : Expanded(child: content),
       ],
     );
   }
@@ -776,6 +802,16 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> _openVisualSelectorInternal({String? initialMediaType}) async {
+    if (widget.apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Se requiere API Key de SteamGridDB para esta accion.')),
+      );
+      if (widget.onShowConfig != null) {
+        widget.onShowConfig!();
+      }
+      return;
+    }
+
     final changed = await SteamGridDBVisualSelector.show(
       context,
       widget.game,
@@ -799,6 +835,16 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Future<void> _correctGame() async {
+    if (widget.apiKey.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Se requiere API Key de SteamGridDB para esta accion.')),
+      );
+      if (widget.onShowConfig != null) {
+        widget.onShowConfig!();
+      }
+      return;
+    }
+
     final controller = TextEditingController(text: _currentGameName);
 
     final query = await showDialog<String>(

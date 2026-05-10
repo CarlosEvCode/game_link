@@ -353,85 +353,146 @@ class _MainWindowState extends State<MainWindow> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Row(
-            children: [
-              Icon(Icons.settings, color: Colors.blue, size: 20),
-              SizedBox(width: 8),
-              Text('Configuración', style: TextStyle(fontSize: 16)),
-            ],
-          ),
-          content: SizedBox(
-            width: 400,
-            child: SingleChildScrollView(
+        return DefaultTabController(
+          length: 2,
+          child: AlertDialog(
+            backgroundColor: const Color(0xFF0A0A0A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+              side: const BorderSide(color: Color(0xFF1A1A1A)),
+            ),
+            titlePadding: EdgeInsets.zero,
+            title: Container(
+              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('SteamGridDB API Key:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: _apiKeyController,
-                    obscureText: true,
-                    style: const TextStyle(fontSize: 13),
-                    decoration: InputDecoration(
-                      hintText: 'API Key...',
-                      isDense: true,
-                      prefixIcon: const Icon(Icons.vpn_key, size: 18),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                  ),
+                  const Text('CONFIGURACIÓN', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
                   const SizedBox(height: 16),
-                  const Text('ScreenScraper:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
-                  const SizedBox(height: 6),
-                  TextField(
-                    controller: _ssUserController,
-                    style: const TextStyle(fontSize: 13),
-                    decoration: InputDecoration(
-                      hintText: 'Usuario',
-                      isDense: true,
-                      prefixIcon: const Icon(Icons.person, size: 18),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  const TabBar(
+                    labelColor: Colors.white,
+                    unselectedLabelColor: Colors.white24,
+                    indicatorColor: Colors.white,
+                    indicatorWeight: 2,
+                    dividerColor: Colors.transparent,
+                    labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    tabs: [
+                      Tab(text: 'STEAMGRIDDB'),
+                      Tab(text: 'SCREEN SCRAPER'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            content: SizedBox(
+              width: 400,
+              height: 220,
+              child: TabBarView(
+                children: [
+                  // Tab SteamGridDB
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('API KEY', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _apiKeyController,
+                          obscureText: true,
+                          style: const TextStyle(fontSize: 13, color: Colors.white70),
+                          decoration: InputDecoration(
+                            hintText: 'Tu API Key...',
+                            isDense: true,
+                            filled: true,
+                            fillColor: Colors.black,
+                            prefixIcon: const Icon(Icons.vpn_key_outlined, size: 16, color: Colors.white24),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Requerido para descargar carátulas, banners e iconos automáticamente.',
+                          style: TextStyle(color: Colors.white24, fontSize: 11),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: _ssPasswordController,
-                    obscureText: true,
-                    style: const TextStyle(fontSize: 13),
-                    decoration: InputDecoration(
-                      hintText: 'Contraseña',
-                      isDense: true,
-                      prefixIcon: const Icon(Icons.lock, size: 18),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                  // Tab ScreenScraper
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('USUARIO', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _ssUserController,
+                          style: const TextStyle(fontSize: 13, color: Colors.white70),
+                          decoration: InputDecoration(
+                            hintText: 'Usuario...',
+                            isDense: true,
+                            filled: true,
+                            fillColor: Colors.black,
+                            prefixIcon: const Icon(Icons.person_outline, size: 16, color: Colors.white24),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('CONTRASEÑA', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _ssPasswordController,
+                          obscureText: true,
+                          style: const TextStyle(fontSize: 13, color: Colors.white70),
+                          decoration: InputDecoration(
+                            hintText: 'Contraseña...',
+                            isDense: true,
+                            filled: true,
+                            fillColor: Colors.black,
+                            prefixIcon: const Icon(Icons.lock_outline, size: 16, color: Colors.white24),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('CANCELAR', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+              const SizedBox(width: 8),
+              TextButton(
+                onPressed: () async {
+                  final newKey = _apiKeyController.text.trim();
+                  final newUser = _ssUserController.text.trim();
+                  final newPass = _ssPasswordController.text;
+                  setState(() {
+                    _apiKey = newKey;
+                    _ssUser = newUser;
+                    _ssPassword = newPass;
+                  });
+                  await ConfigManager.saveApiKey(newKey);
+                  await ConfigManager.saveSSCredentials(newUser, newPass);
+                  if (context.mounted) Navigator.of(context).pop();
+                },
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                ),
+                child: const Text('GUARDAR', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () async {
-                final newKey = _apiKeyController.text.trim();
-                final newUser = _ssUserController.text.trim();
-                final newPass = _ssPasswordController.text;
-                setState(() {
-                  _apiKey = newKey;
-                  _ssUser = newUser;
-                  _ssPassword = newPass;
-                });
-                await ConfigManager.saveApiKey(newKey);
-                await ConfigManager.saveSSCredentials(newUser, newPass);
-                if (context.mounted) Navigator.of(context).pop();
-              },
-              child: const Text('Guardar'),
-            ),
-          ],
         );
       },
     );
@@ -532,6 +593,76 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
+  void _showAboutDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0A0A0A),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: const BorderSide(color: Color(0xFF1A1A1A)),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 16),
+            Container(
+              width: 80,
+              height: 80,
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/icon.png'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Game Link',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'v2.9.10',
+              style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Universal game companion for linking ROMs and managing media.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Software libre desarrollado como complemento para otros lanzadores y gestión de librerías.',
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.white24, fontSize: 10, height: 1.4),
+            ),
+            const SizedBox(height: 24),
+            const Divider(color: Colors.white10),
+            const SizedBox(height: 16),
+            const Text(
+              '© 2026 CarlosEvCode',
+              style: TextStyle(color: Colors.white38, fontSize: 11),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CERRAR', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -540,10 +671,40 @@ class _MainWindowState extends State<MainWindow> {
         toolbarHeight: 48,
         actions: [
           _buildLutrisSelector(),
-          IconButton(
-            icon: const Icon(Icons.settings, size: 20),
-            onPressed: _showConfigDialog,
-            tooltip: 'Configuración',
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert, size: 20, color: Colors.white70),
+            offset: const Offset(0, 40),
+            color: const Color(0xFF0A0A0A),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+              side: const BorderSide(color: Color(0xFF1A1A1A)),
+            ),
+            onSelected: (value) {
+              if (value == 'settings') _showConfigDialog();
+              if (value == 'about') _showAboutDialog();
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'settings',
+                child: Row(
+                  children: [
+                    Icon(Icons.settings_outlined, size: 16, color: Colors.white70),
+                    SizedBox(width: 12),
+                    Text('Configuración', style: TextStyle(fontSize: 13, color: Colors.white70)),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'about',
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, size: 16, color: Colors.white70),
+                    SizedBox(width: 12),
+                    Text('Acerca de', style: TextStyle(fontSize: 13, color: Colors.white70)),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(width: 8),
         ],
@@ -592,6 +753,7 @@ class _MainWindowState extends State<MainWindow> {
     return _lutrisPaths == null ? const Center(child: Text("Lutris no detectado.")) : VisualManagerScreen(
       lutrisPaths: _lutrisPaths!,
       apiKey: _apiKey,
+      onShowConfig: _showConfigDialog,
       initialPlatformId: _selectedPlatform?.platformId,
     );
   }
@@ -685,6 +847,47 @@ class _MainWindowState extends State<MainWindow> {
             ),
           ),
         ),
+        if (_selectedEmulator != null) ...[
+          const SizedBox(height: 20),
+          Text('EXTENSIONES ADMITIDAS', style: labelStyle),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 6,
+            runSpacing: 6,
+            children: _selectedEmulator!.extensions.map((ext) {
+              final isSelected = _selectedExtensions.contains(ext);
+              return InkWell(
+                onTap: _isProcessing ? null : () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedExtensions.remove(ext);
+                    } else {
+                      _selectedExtensions.add(ext);
+                    }
+                  });
+                  _scanFolder();
+                },
+                borderRadius: BorderRadius.circular(4),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white : Colors.transparent,
+                    border: Border.all(color: isSelected ? Colors.white : const Color(0xFF1A1A1A)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    ext,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.black : Colors.white38,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
         const SizedBox(height: 20),
         Text('OPCIONES', style: labelStyle),
         const SizedBox(height: 8),
