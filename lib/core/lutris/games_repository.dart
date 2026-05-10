@@ -164,6 +164,7 @@ class GamesRepository {
     required String coversDir,
     required String bannersDir,
     required String iconsDir,
+    String? lutrisIconsDir,
   }) {
     if (runners.isEmpty) return;
 
@@ -180,11 +181,18 @@ class GamesRepository {
 
         final hasCoverFile = File("$coversDir$slug.jpg").existsSync();
         final hasBannerFile = File("$bannersDir$slug.jpg").existsSync();
-        final hasIconFile = File("${iconsDir}lutris_$slug.png").existsSync();
+        
+        // Comprobar ambos patrones de iconos (sistema y lutris interno)
+        final hasSystemIcon = File("${iconsDir}lutris_$slug.png").existsSync();
+        final hasLutrisIcon = lutrisIconsDir != null && File("$lutrisIconsDir$slug.png").existsSync();
+        final hasIconFile = hasSystemIcon || hasLutrisIcon;
 
         if ((hasCoverFile && row['has_custom_coverart_big'] == 0) ||
             (hasBannerFile && row['has_custom_banner'] == 0) ||
-            (hasIconFile && row['has_custom_icon'] == 0)) {
+            (hasIconFile && row['has_custom_icon'] == 0) ||
+            (!hasCoverFile && row['has_custom_coverart_big'] == 1) ||
+            (!hasBannerFile && row['has_custom_banner'] == 1) ||
+            (!hasIconFile && row['has_custom_icon'] == 1)) {
           db.execute(
             '''
             UPDATE games 
@@ -217,8 +225,8 @@ class GamesRepository {
     return getMediaStatsByRunners([runner], searchQuery: searchQuery);
   }
 
-  void syncMetadataWithDisk({required String runner, required String coversDir, required String bannersDir, required String iconsDir}) {
-    syncMetadataWithDiskByRunners(runners: [runner], coversDir: coversDir, bannersDir: bannersDir, iconsDir: iconsDir);
+  void syncMetadataWithDisk({required String runner, required String coversDir, required String bannersDir, required String iconsDir, String? lutrisIconsDir}) {
+    syncMetadataWithDiskByRunners(runners: [runner], coversDir: coversDir, bannersDir: bannersDir, iconsDir: iconsDir, lutrisIconsDir: lutrisIconsDir);
   }
 
   int getGamesCount(String runner) {

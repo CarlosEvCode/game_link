@@ -184,19 +184,24 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
           minHeight: 480,
         ),
         child: Material(
-          color: const Color(0xFF11151A),
-          borderRadius: BorderRadius.circular(16),
+          color: Colors.black,
+          borderRadius: BorderRadius.circular(4),
           clipBehavior: Clip.antiAlias,
-          child: Column(
-            children: [
-              _buildHeader(),
-              Expanded(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : _buildBody(),
-              ),
-              _buildFooterActions(),
-            ],
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.white10),
+            ),
+            child: Column(
+              children: [
+                _buildHeader(),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)))
+                      : _buildBody(),
+                ),
+                _buildFooterActions(),
+              ],
+            ),
           ),
         ),
       ),
@@ -207,15 +212,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     final identified = _screenScraperInfo?.isIdentified == true;
 
     return Container(
-      padding: const EdgeInsets.fromLTRB(18, 14, 12, 14),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [const Color(0xFF1B222B), const Color(0xFF141A21)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
+      padding: const EdgeInsets.fromLTRB(24, 20, 16, 20),
+      decoration: const BoxDecoration(
+        color: Color(0xFF020202),
         border: Border(
-          bottom: BorderSide(color: Colors.white.withOpacity(0.08)),
+          bottom: BorderSide(color: Color(0xFF1A1A1A)),
         ),
       ),
       child: Row(
@@ -225,38 +226,38 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Detalle del Juego',
+                  'DETALLE DEL JUEGO',
                   style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    letterSpacing: 0.4,
+                    color: Colors.white38,
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   _currentGameName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     color: Colors.white,
-                    fontSize: 23,
-                    fontWeight: FontWeight.w700,
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: -0.5,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 12),
                 Wrap(
                   spacing: 8,
                   runSpacing: 8,
                   children: [
-                    _buildChip(
+                    _buildMinimalChip(
                       widget.game.platform.toUpperCase(),
-                      const Color(0xFF2C7BE5),
+                      Colors.white,
                     ),
-                    _buildChip(
-                      identified
-                          ? 'Identificado por ScreenScraper'
-                          : 'Sin identificacion ScreenScraper',
-                      identified ? const Color(0xFF2DA56A) : Colors.orange,
+                    _buildMinimalChip(
+                      identified ? 'SCREEN SCRAPER OK' : 'SIN IDENTIFICAR',
+                      identified ? Colors.white70 : Colors.white24,
                     ),
                   ],
                 ),
@@ -264,8 +265,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.close, color: Colors.white70),
-            tooltip: 'Cerrar (Esc)',
+            icon: const Icon(Icons.close_rounded, color: Colors.white38, size: 24),
             onPressed: () => Navigator.of(context).pop(),
           ),
         ],
@@ -273,20 +273,20 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     );
   }
 
-  Widget _buildChip(String label, Color color) {
+  Widget _buildMinimalChip(String label, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.16),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withOpacity(0.42)),
+        border: Border.all(color: const Color(0xFF1A1A1A)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: color,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -296,23 +296,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isDesktop = constraints.maxWidth >= 980;
-        final isTablet = constraints.maxWidth >= 720;
-
-        if (!isTablet) {
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildMediaPanel(compact: true),
-                const SizedBox(height: 12),
-                _buildInfoPanel(),
-              ],
-            ),
-          );
-        }
 
         return Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(24),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -320,7 +306,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 flex: isDesktop ? 7 : 5,
                 child: _buildMediaPanel(compact: !isDesktop),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 24),
               Expanded(flex: 3, child: _buildInfoPanel()),
             ],
           ),
@@ -338,249 +324,200 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             _screenScraperInfo!.logoUrl != null);
     final tabCount = hasScraperMedia ? 2 : 1;
 
-    return _buildPanel(
-      title: 'Media',
-      child: DefaultTabController(
-        length: tabCount,
-        child: Column(
-          children: [
-            TabBar(
-              labelColor: Colors.white,
-              unselectedLabelColor: Colors.white60,
-              indicatorColor: const Color(0xFF4BA7FF),
-              tabs: [
-                const Tab(text: 'Actual en Lutris'),
-                if (hasScraperMedia) const Tab(text: 'ScreenScraper'),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: TabBarView(
-                children: [
-                  SingleChildScrollView(
-                    child: _buildCurrentMediaContent(compact),
-                  ),
-                  if (hasScraperMedia)
-                    SingleChildScrollView(child: _buildScreenScraperInfo()),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCurrentMediaContent(bool compact) {
-    final coverExists = File(_coverPath).existsSync();
-    final bannerExists = File(_bannerPath).existsSync();
-    final iconExists = File(_iconPath).existsSync();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        compact
-            ? Column(
-                children: [
-                  _buildMediaItem(
-                    'Cover',
-                    _coverPath,
-                    Icons.image,
-                    mediaType: 'cover',
-                    aspectRatio: 0.75,
+        const Text('MEDIA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
+        const SizedBox(height: 16),
+        Expanded(
+          child: DefaultTabController(
+            length: tabCount,
+            child: Column(
+              children: [
+                TabBar(
+                  labelColor: Colors.white,
+                  unselectedLabelColor: Colors.white24,
+                  indicatorColor: Colors.white,
+                  indicatorWeight: 2,
+                  labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  tabs: [
+                    const Tab(text: 'ACTUAL'),
+                    if (hasScraperMedia) const Tab(text: 'SCREEN SCRAPER'),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: TabBarView(
+                    children: [
+                      _buildCurrentMediaContent(compact),
+                      if (hasScraperMedia) _buildScreenScraperInfo(),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  _buildMediaItem(
-                    'Banner',
-                    _bannerPath,
-                    Icons.panorama,
-                    mediaType: 'banner',
-                    aspectRatio: 3.0,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildMediaItem(
-                    'Icono',
-                    _iconPath,
-                    Icons.apps,
-                    mediaType: 'icon',
-                    aspectRatio: 1.0,
-                  ),
-                ],
-              )
-            : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: _buildMediaItem(
-                      'Cover',
-                      _coverPath,
-                      Icons.image,
-                      mediaType: 'cover',
-                      aspectRatio: 0.75,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 4,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final iconWidth = constraints.maxWidth > 260
-                            ? 220.0
-                            : constraints.maxWidth * 0.72;
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildMediaItem(
-                              'Banner',
-                              _bannerPath,
-                              Icons.panorama,
-                              mediaType: 'banner',
-                              aspectRatio: 3.0,
-                            ),
-                            const SizedBox(height: 12),
-                            SizedBox(
-                              width: iconWidth,
-                              child: _buildMediaItem(
-                                'Icono',
-                                _iconPath,
-                                Icons.apps,
-                                mediaType: 'icon',
-                                aspectRatio: 1.0,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            _buildStatusChip('Cover', coverExists),
-            _buildStatusChip('Banner', bannerExists),
-            _buildStatusChip('Icono', iconExists),
-          ],
+                ),
+              ],
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildStatusChip(String label, bool ok) {
-    final color = ok ? const Color(0xFF2DA56A) : Colors.orange;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: color.withOpacity(0.16),
-        border: Border.all(color: color.withOpacity(0.42)),
+  Widget _buildCurrentMediaContent(bool compact) {
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 3,
+                child: _buildMediaItem(
+                  'COVER',
+                  _coverPath,
+                  Icons.photo_library_outlined,
+                  mediaType: 'cover',
+                  aspectRatio: 0.7,
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                flex: 4,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildMediaItem(
+                      'BANNER',
+                      _bannerPath,
+                      Icons.panorama_horizontal_outlined,
+                      mediaType: 'banner',
+                      aspectRatio: 2.8,
+                    ),
+                    const SizedBox(height: 20),
+                    _buildMediaItem(
+                      'ICONO',
+                      _iconPath,
+                      Icons.apps_outlined,
+                      mediaType: 'icon',
+                      aspectRatio: 1.0,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildStatusChip('COVER', File(_coverPath).existsSync()),
+              _buildStatusChip('BANNER', File(_bannerPath).existsSync()),
+              _buildStatusChip('ICONO', File(_iconPath).existsSync() || File(_lutrisPaths.systemIconPath(widget.game.slug)).existsSync()),
+            ],
+          ),
+        ],
       ),
-      child: Text(
-        ok ? '$label disponible' : '$label faltante',
-        style: TextStyle(color: color, fontSize: 11),
+    );
+  }
+
+  Widget _buildStatusChip(String label, bool ok) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: ok ? Colors.white.withOpacity(0.05) : Colors.transparent,
+        border: Border.all(color: ok ? Colors.white10 : const Color(0xFF1A1A1A)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.circle, size: 6, color: ok ? Colors.white38 : Colors.white10),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(color: ok ? Colors.white70 : Colors.white24, fontSize: 10, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
 
   Widget _buildInfoPanel() {
-    return _buildPanel(
-      title: 'Informacion',
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoCard(
-              title: 'Correccion de juego',
-              children: [_buildEditActions()],
-            ),
-            const SizedBox(height: 10),
-            _buildInfoCard(
-              title: 'Archivo y origen',
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('INFORMACIÓN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
+        const SizedBox(height: 16),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (_romFileName != null)
-                  _buildInfoRow('Archivo ROM', _romFileName!),
-                if (_romExtension != null)
-                  _buildInfoRow('Extension', _romExtension!),
-                if (_romDirectory != null)
-                  _buildInfoRow('Ubicacion', _romDirectory!),
-                _buildInfoRow('Slug', widget.game.slug),
-                _buildInfoRow('ID', widget.game.id.toString()),
-                if (_romPath != null) ...[
-                  const SizedBox(height: 6),
-                  _buildRomPathBlock(_romPath!),
-                ],
-              ],
-            ),
-            const SizedBox(height: 10),
-            _buildInfoCard(
-              title: 'ScreenScraper',
-              children: [
-                _buildInfoRow(
-                  'Estado',
-                  _screenScraperInfo?.isIdentified == true
-                      ? 'Identificado'
-                      : 'Sin datos disponibles',
+                _buildInfoSection(
+                  title: 'GESTIÓN',
+                  children: [_buildEditActions()],
                 ),
-                if (_screenScraperInfo?.developer != null)
-                  _buildInfoRow(
-                    'Desarrollador',
-                    _screenScraperInfo!.developer!,
-                  ),
-                if (_screenScraperInfo?.releaseDate != null)
-                  _buildInfoRow(
-                    'Lanzamiento',
-                    _screenScraperInfo!.releaseDate!,
-                  ),
-              ],
-            ),
-            if (_screenScraperInfo?.synopsis != null &&
-                _screenScraperInfo!.synopsis!.isNotEmpty) ...[
-              const SizedBox(height: 10),
-              _buildInfoCard(
-                title: 'Sinopsis',
-                children: [
-                  Text(
-                    _screenScraperInfo!.synopsis!,
-                    style: const TextStyle(color: Colors.white70, height: 1.4),
+                const SizedBox(height: 24),
+                _buildInfoSection(
+                  title: 'SISTEMA',
+                  children: [
+                    if (_romFileName != null) _buildMinimalInfoRow('ARCHIVO', _romFileName!),
+                    _buildMinimalInfoRow('SLUG', widget.game.slug),
+                    _buildMinimalInfoRow('ID', widget.game.id.toString()),
+                    if (_romPath != null) ...[
+                      const SizedBox(height: 12),
+                      _buildRomPathBlock(_romPath!),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildInfoSection(
+                  title: 'DATOS',
+                  children: [
+                    if (_screenScraperInfo?.developer != null) _buildMinimalInfoRow('DEV', _screenScraperInfo!.developer!),
+                    if (_screenScraperInfo?.releaseDate != null) _buildMinimalInfoRow('FECHA', _screenScraperInfo!.releaseDate!),
+                  ],
+                ),
+                if (_screenScraperInfo?.synopsis != null && _screenScraperInfo!.synopsis!.isNotEmpty) ...[
+                  const SizedBox(height: 24),
+                  _buildInfoSection(
+                    title: 'SINOPSIS',
+                    children: [
+                      Text(
+                        _screenScraperInfo!.synopsis!,
+                        style: const TextStyle(color: Colors.white70, fontSize: 12, height: 1.6),
+                      ),
+                    ],
                   ),
                 ],
-              ),
-            ],
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
+      ],
     );
   }
 
-  Widget _buildInfoCard({
-    required String title,
-    required List<Widget> children,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.white.withOpacity(0.09)),
-      ),
-      child: Column(
+  Widget _buildInfoSection({required String title, required List<Widget> children}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1)),
+        const SizedBox(height: 12),
+        ...children,
+      ],
+    );
+  }
+
+  Widget _buildMinimalInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 10),
-          ...children,
+          SizedBox(width: 80, child: Text(label, style: const TextStyle(color: Colors.white24, fontSize: 11, fontWeight: FontWeight.w500))),
+          Expanded(child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 11))),
         ],
       ),
     );
@@ -590,98 +527,38 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            OutlinedButton.icon(
-              onPressed: _correctGame,
-              icon: const Icon(Icons.manage_search, size: 16),
-              label: const Text('Corregir juego'),
-            ),
-            OutlinedButton.icon(
-              onPressed: _isSteamAvailable
-                  ? _exportToSteam
-                  : () => SteamDependenciesDialog.show(context),
-              icon: Icon(
-                Icons.sports_esports,
-                size: 16,
-                color: _isSteamAvailable ? null : Colors.white38,
-              ),
-              label: Text(
-                'Exportar a Steam',
-                style: TextStyle(
-                  color: _isSteamAvailable ? null : Colors.white38,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          _isSteamAvailable
-              ? 'Abre SteamGridDB en modo busqueda para corregir coincidencia y actualizar automaticamente el nombre en Lutris al seleccionar un juego.'
-              : 'Abre SteamGridDB en modo busqueda para corregir coincidencia. Nota: Steam o sus dependencias no detectadas (haz clic en Exportar para ver requerimientos).',
-          style: const TextStyle(color: Colors.white54, fontSize: 12),
+        _buildActionHighlightButton(Icons.manage_search, 'CORREGIR METADATOS', _correctGame),
+        const SizedBox(height: 12),
+        _buildActionHighlightButton(
+          Icons.sports_esports_outlined, 
+          'EXPORTAR A STEAM', 
+          _isSteamAvailable ? _exportToSteam : () => SteamDependenciesDialog.show(context), 
+          isDisabled: !_isSteamAvailable
         ),
       ],
     );
   }
 
-  Widget _buildPanel({required String title, required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF151B22),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.08)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 12, 14, 8),
-            child: Text(
-              title,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
+  Widget _buildActionHighlightButton(IconData icon, String label, VoidCallback onTap, {bool isDisabled = false}) {
+    return SizedBox(
+      width: double.infinity,
+      child: TextButton.icon(
+        onPressed: isDisabled ? null : onTap,
+        style: TextButton.styleFrom(
+          backgroundColor: isDisabled ? Colors.transparent : Colors.white,
+          foregroundColor: isDisabled ? Colors.white10 : Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+            side: isDisabled ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
           ),
-          const Divider(height: 1, color: Colors.white12),
-          Expanded(
-            child: Padding(padding: const EdgeInsets.all(12), child: child),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 108,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                color: Colors.white54,
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(color: Colors.white, fontSize: 13),
-            ),
-          ),
-        ],
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          alignment: Alignment.centerLeft,
+        ),
+        icon: Padding(
+          padding: const EdgeInsets.only(left: 8),
+          child: Icon(icon, size: 16),
+        ),
+        label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
       ),
     );
   }
@@ -689,54 +566,31 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   Widget _buildRomPathBlock(String fullPath) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.22),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.14)),
+        color: const Color(0xFF080808),
+        border: Border.all(color: const Color(0xFF1A1A1A)),
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.folder_open, size: 14, color: Colors.white60),
-              const SizedBox(width: 6),
-              const Expanded(
-                child: Text(
-                  'Ruta exacta del ROM',
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              IconButton(
-                tooltip: 'Copiar ruta',
-                visualDensity: VisualDensity.compact,
-                icon: const Icon(Icons.copy, size: 14, color: Colors.white70),
-                onPressed: () async {
+              const Text('RUTA ROM', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold)),
+              const Spacer(),
+              InkWell(
+                onTap: () async {
                   await Clipboard.setData(ClipboardData(text: fullPath));
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Ruta copiada al portapapeles.'),
-                    ),
-                  );
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copiado.')));
                 },
+                child: const Text('COPIAR', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
               ),
             ],
           ),
-          const SizedBox(height: 6),
-          SelectableText(
-            fullPath,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 12,
-              height: 1.3,
-            ),
-          ),
+          const SizedBox(height: 8),
+          Text(fullPath, style: const TextStyle(color: Colors.white38, fontSize: 11, height: 1.4)),
         ],
       ),
     );
@@ -749,57 +603,44 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     required String mediaType,
     double aspectRatio = 1.0,
   }) {
+    final systemPath = _lutrisPaths.systemIconPath(widget.game.slug);
+    final finalPath = (mediaType == 'icon' && !File(path).existsSync() && File(systemPath).existsSync()) ? systemPath : path;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+        const SizedBox(height: 8),
         AspectRatio(
           aspectRatio: aspectRatio,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.white.withOpacity(0.15)),
-              color: Colors.black.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: const Color(0xFF1A1A1A)),
+              color: const Color(0xFF050505),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(4),
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  File(path).existsSync()
+                  File(finalPath).existsSync()
                       ? Image.file(
-                          File(path),
-                          key: ValueKey('$path-$_imageVersion'),
+                          File(finalPath),
+                          key: ValueKey('$finalPath-$_imageVersion'),
                           fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              _buildPlaceholderImage(label, fallbackIcon),
+                          errorBuilder: (context, error, stackTrace) => _buildPlaceholderImage(fallbackIcon),
                         )
-                      : _buildPlaceholderImage(label, fallbackIcon),
+                      : _buildPlaceholderImage(fallbackIcon),
                   Positioned(
                     top: 8,
                     right: 8,
-                    child: Material(
-                      color: Colors.black.withOpacity(0.58),
-                      borderRadius: BorderRadius.circular(18),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(18),
-                        onTap: () => _openVisualSelectorForType(mediaType),
-                        child: const Padding(
-                          padding: EdgeInsets.all(6),
-                          child: Icon(
-                            Icons.edit,
-                            color: Colors.white,
-                            size: 16,
-                          ),
-                        ),
+                    child: InkWell(
+                      onTap: () => _openVisualSelectorForType(mediaType),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                        child: const Icon(Icons.edit_outlined, color: Colors.white, size: 14),
                       ),
                     ),
                   ),
@@ -812,69 +653,34 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     );
   }
 
-  Widget _buildPlaceholderImage(String label, IconData icon) {
-    return Container(
-      color: Colors.white.withOpacity(0.04),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: Colors.white30, size: 32),
-          const SizedBox(height: 4),
-          Text(
-            'Sin $label',
-            style: const TextStyle(color: Colors.white30, fontSize: 10),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
+  Widget _buildPlaceholderImage(IconData icon) {
+    return Center(child: Icon(icon, color: Colors.white.withOpacity(0.02), size: 32));
   }
 
   Widget _buildScreenScraperInfo() {
     if (_screenScraperInfo == null) return const SizedBox.shrink();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Media disponible en ScreenScraper',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
-        ),
-        const SizedBox(height: 12),
-
-        Row(
-          children: [
-            if (_screenScraperInfo!.coverUrl != null)
-              Expanded(
-                child: _buildScreenScraperImagePreview(
-                  'Cover ScreenScraper',
-                  _screenScraperInfo!.coverUrl!,
-                ),
-              ),
-            if (_screenScraperInfo!.coverUrl != null &&
-                _screenScraperInfo!.bannerUrl != null)
-              const SizedBox(width: 12),
-            if (_screenScraperInfo!.bannerUrl != null)
-              Expanded(
-                child: _buildScreenScraperImagePreview(
-                  'Banner ScreenScraper',
-                  _screenScraperInfo!.bannerUrl!,
-                ),
-              ),
-          ],
-        ),
-
-        const SizedBox(height: 12),
-
-        if (_screenScraperInfo!.coverUrl != null)
-          _buildMediaUrlRow('Cover (2D)', _screenScraperInfo!.coverUrl!),
-        if (_screenScraperInfo!.cover3dUrl != null)
-          _buildMediaUrlRow('Cover (3D)', _screenScraperInfo!.cover3dUrl!),
-        if (_screenScraperInfo!.bannerUrl != null)
-          _buildMediaUrlRow('Banner/Fanart', _screenScraperInfo!.bannerUrl!),
-        if (_screenScraperInfo!.logoUrl != null)
-          _buildMediaUrlRow('Logo/Wheel', _screenScraperInfo!.logoUrl!),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              if (_screenScraperInfo!.coverUrl != null)
+                Expanded(child: _buildScreenScraperImagePreview('COVER', _screenScraperInfo!.coverUrl!)),
+              if (_screenScraperInfo!.coverUrl != null && _screenScraperInfo!.bannerUrl != null) const SizedBox(width: 16),
+              if (_screenScraperInfo!.bannerUrl != null)
+                Expanded(child: _buildScreenScraperImagePreview('BANNER', _screenScraperInfo!.bannerUrl!)),
+            ],
+          ),
+          const SizedBox(height: 24),
+          const Text('ENLACES EXTERNOS', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 12),
+          if (_screenScraperInfo!.coverUrl != null) _buildMediaUrlRow('Cover (2D)', _screenScraperInfo!.coverUrl!),
+          if (_screenScraperInfo!.cover3dUrl != null) _buildMediaUrlRow('Cover (3D)', _screenScraperInfo!.cover3dUrl!),
+          if (_screenScraperInfo!.bannerUrl != null) _buildMediaUrlRow('Banner', _screenScraperInfo!.bannerUrl!),
+          if (_screenScraperInfo!.logoUrl != null) _buildMediaUrlRow('Logo', _screenScraperInfo!.logoUrl!),
+        ],
+      ),
     );
   }
 
@@ -882,60 +688,19 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.green,
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 6),
+        Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
         InkWell(
           onTap: () => _showImagePreview(imageUrl, label),
-          borderRadius: BorderRadius.circular(8),
           child: Container(
             height: 120,
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colors.green.withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(4),
+              border: Border.all(color: const Color(0xFF1A1A1A)),
             ),
             child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    color: Colors.white.withOpacity(0.05),
-                    child: const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    color: Colors.white.withOpacity(0.05),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.broken_image,
-                          color: Colors.white30,
-                          size: 24,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          'Error al cargar',
-                          style: TextStyle(color: Colors.white30, fontSize: 10),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+              borderRadius: BorderRadius.circular(4),
+              child: Image.network(imageUrl, fit: BoxFit.cover),
             ),
           ),
         ),
@@ -944,25 +709,17 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Widget _buildMediaUrlRow(String type, String url) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          const Icon(Icons.link, size: 16, color: Colors.blue),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              type,
-              style: const TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.open_in_new, size: 16),
-            onPressed: () => _showImagePreview(url, type),
-            tooltip: 'Ver imagen',
-            visualDensity: VisualDensity.compact,
-          ),
-        ],
+    return InkWell(
+      onTap: () => _showImagePreview(url, type),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          children: [
+            const Icon(Icons.link, size: 14, color: Colors.white24),
+            const SizedBox(width: 10),
+            Expanded(child: Text(type, style: const TextStyle(color: Colors.white70, fontSize: 12, decoration: TextDecoration.underline))),
+          ],
+        ),
       ),
     );
   }
@@ -971,71 +728,23 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: Colors.black87,
+        backgroundColor: Colors.black,
+        insetPadding: const EdgeInsets.all(40),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Expanded(
-                    child: Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.close, color: Colors.white),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
+                  Text(title, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                  const Spacer(),
+                  IconButton(icon: const Icon(Icons.close, color: Colors.white38), onPressed: () => Navigator.of(context).pop()),
                 ],
               ),
             ),
-            // Image
-            Container(
-              constraints: BoxConstraints(
-                maxHeight: MediaQuery.of(context).size.height * 0.6,
-                maxWidth: MediaQuery.of(context).size.width * 0.8,
-              ),
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.contain,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Container(
-                    height: 200,
-                    child: const Center(child: CircularProgressIndicator()),
-                  );
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    height: 200,
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.broken_image,
-                          color: Colors.white54,
-                          size: 48,
-                        ),
-                        SizedBox(height: 8),
-                        Text(
-                          'Error al cargar la imagen',
-                          style: TextStyle(color: Colors.white54),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(height: 16),
+            Flexible(child: Image.network(imageUrl, fit: BoxFit.contain)),
+            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -1044,29 +753,18 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
   Widget _buildFooterActions() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F141A),
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.08))),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: const BoxDecoration(
+        color: Color(0xFF020202),
+        border: Border(top: BorderSide(color: Color(0xFF1A1A1A))),
       ),
       child: Row(
         children: [
-          const Expanded(
-            child: Text(
-              'Tip: usa el icono de editar en Cover/Banner/Icono para cambiar cada media.',
-              style: TextStyle(color: Colors.white54, fontSize: 12),
-            ),
-          ),
-          const SizedBox(width: 10),
-          OutlinedButton.icon(
-            onPressed: null,
-            icon: const Icon(Icons.drive_file_rename_outline, size: 16),
-            label: const Text('Selector desde media'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.white38,
-              side: const BorderSide(color: Colors.white24),
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            ),
+          const Expanded(child: Text('USAR ICONOS DE EDICIÓN PARA CAMBIAR CADA ELEMENTO.', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+          const SizedBox(width: 20),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('CERRAR', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -1198,8 +896,14 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(result.message),
-        backgroundColor: result.success ? Colors.green : Colors.red,
+        content: Row(
+          children: [
+            Icon(result.success ? Icons.check_circle_outline : Icons.error_outline, 
+                 size: 18, color: Colors.white70),
+            const SizedBox(width: 12),
+            Expanded(child: Text(result.message)),
+          ],
+        ),
       ),
     );
   }

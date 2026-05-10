@@ -172,6 +172,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
         coversDir: _lutrisPaths.coversDir,
         bannersDir: _lutrisPaths.bannersDir,
         iconsDir: _lutrisPaths.systemIconsDir,
+        lutrisIconsDir: _lutrisPaths.lutrisIconsDir,
       );
     });
   }
@@ -334,12 +335,20 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                 if (!mounted) return;
                 ScaffoldMessenger.of(this.context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      selectedOnly
-                          ? 'Exportacion completada. OK: $ok | Fallidos: $failed | Total: ${games.length}'
-                          : 'Sincronizacion completada. OK: $ok | Fallidos: $failed | Eliminados: $removedShortcuts shortcuts, $removedArtwork medias',
+                    content: Row(
+                      children: [
+                        Icon(failed == 0 ? Icons.check_circle_outline : Icons.warning_amber_outlined, 
+                             size: 18, color: failed == 0 ? Colors.white70 : Colors.white38),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            selectedOnly
+                                ? 'Exportacion completada. OK: $ok | Fallidos: $failed'
+                                : 'Sincronizacion completada. OK: $ok | Fallidos: $failed',
+                          ),
+                        ),
+                      ],
                     ),
-                    backgroundColor: failed == 0 ? Colors.green : Colors.orange,
                   ),
                 );
               });
@@ -405,16 +414,16 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                   );
                   _refreshList();
                 },
-          borderRadius: BorderRadius.circular(999),
+          borderRadius: BorderRadius.circular(4),
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(999),
+              color: const Color(0xFF0A0A0A),
+              borderRadius: BorderRadius.circular(4),
               border: Border.all(
                 color: missing > 0
-                    ? color.withOpacity(0.6)
-                    : Colors.transparent,
+                    ? const Color(0xFF333333)
+                    : const Color(0xFF1A1A1A),
               ),
             ),
             child: Row(
@@ -422,16 +431,16 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               children: [
                 Icon(
                   icon,
-                  size: 16,
-                  color: missing > 0 ? color : Colors.white30,
+                  size: 14,
+                  color: missing > 0 ? Colors.white70 : Colors.white24,
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Text(
                   '$missing',
                   style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                    color: missing > 0 ? color : Colors.white70,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: missing > 0 ? Colors.white : Colors.white38,
                   ),
                 ),
               ],
@@ -447,50 +456,51 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
         Row(
           children: [
             const Text(
-              'Biblioteca',
+              'BIBLIOTECA',
               style: TextStyle(
-                fontSize: 12,
-                letterSpacing: 1.2,
-                color: Colors.white70,
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+                color: Colors.white38,
               ),
             ),
             const Spacer(),
             Text(
-              '$total juegos',
-              style: TextStyle(
-                fontSize: 12,
-                color: theme.colorScheme.primary,
+              '$total JUEGOS',
+              style: const TextStyle(
+                fontSize: 10,
+                color: Colors.white70,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Wrap(
-          spacing: 12,
+          spacing: 8,
           runSpacing: 8,
           children: [
             buildChip(
               'Sin portada',
               _stats.missingCover,
-              Icons.photo_library,
-              Colors.pinkAccent,
+              Icons.photo_library_outlined,
+              Colors.white,
             ),
             buildChip(
               'Sin banner',
               _stats.missingBanner,
-              Icons.panorama_horizontal,
-              Colors.amberAccent,
+              Icons.panorama_horizontal_outlined,
+              Colors.white,
             ),
             buildChip(
               'Sin icono',
               _stats.missingIcon,
-              Icons.apps,
-              Colors.lightBlueAccent,
+              Icons.apps_outlined,
+              Colors.white,
             ),
           ],
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
         _buildFiltersSection(),
       ],
     );
@@ -501,67 +511,45 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Filtros rápidos',
+          'FILTROS',
           style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 1.2,
-            color: Colors.white70,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+            color: Colors.white38,
           ),
         ),
         const SizedBox(height: 12),
         Wrap(
-          spacing: 8,
-          runSpacing: 8,
+          spacing: 6,
+          runSpacing: 6,
           children: [
-            ChoiceChip(
-              label: const Text('Todos', style: TextStyle(fontSize: 11)),
-              selected: _filterMode == 'all',
-              onSelected: (val) {
-                if (val) {
-                  setState(() => _filterMode = 'all');
-                  _refreshList();
-                }
-              },
-            ),
-            ChoiceChip(
-              label: const Text('Sin portada', style: TextStyle(fontSize: 11)),
-              selected: _filterMode == 'missingCover',
-              onSelected: (val) {
-                if (val) {
-                  setState(() => _filterMode = 'missingCover');
-                  _refreshList();
-                }
-              },
-            ),
-            ChoiceChip(
-              label: const Text('Sin banner', style: TextStyle(fontSize: 11)),
-              selected: _filterMode == 'missingBanner',
-              onSelected: (val) {
-                if (val) {
-                  setState(() => _filterMode = 'missingBanner');
-                  _refreshList();
-                }
-              },
-            ),
-            ChoiceChip(
-              label: const Text('Sin icono', style: TextStyle(fontSize: 11)),
-              selected: _filterMode == 'missingIcon',
-              onSelected: (val) {
-                if (val) {
-                  setState(() => _filterMode = 'missingIcon');
-                  _refreshList();
-                }
-              },
-            ),
+            _buildMinimalChoiceChip('Todos', _filterMode == 'all', () {
+              setState(() => _filterMode = 'all');
+              _refreshList();
+            }),
+            _buildMinimalChoiceChip('Sin portada', _filterMode == 'missingCover', () {
+              setState(() => _filterMode = 'missingCover');
+              _refreshList();
+            }),
+            _buildMinimalChoiceChip('Sin banner', _filterMode == 'missingBanner', () {
+              setState(() => _filterMode = 'missingBanner');
+              _refreshList();
+            }),
+            _buildMinimalChoiceChip('Sin icono', _filterMode == 'missingIcon', () {
+              setState(() => _filterMode = 'missingIcon');
+              _refreshList();
+            }),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 32),
         const Text(
-          'Herramientas',
+          'HERRAMIENTAS',
           style: TextStyle(
-            fontSize: 12,
-            letterSpacing: 1.2,
-            color: Colors.white70,
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1,
+            color: Colors.white38,
           ),
         ),
         const SizedBox(height: 12),
@@ -570,20 +558,43 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
             _buildSideActionButton(
               icon: Icons.select_all,
               label: _selectionMode
-                  ? 'Cancelar selección multiple'
-                  : 'Selección multiple',
+                  ? 'Cancelar Selección'
+                  : 'Selección Múltiple',
               onPressed: _toggleSelectionMode,
               isActive: _selectionMode,
             ),
             const SizedBox(height: 8),
             _buildSideActionButton(
               icon: Icons.refresh,
-              label: 'Forzar sincronización',
+              label: 'Sincronizar Disco',
               onPressed: _refreshList,
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildMinimalChoiceChip(String label, bool isSelected, VoidCallback onSelected) {
+    return InkWell(
+      onTap: onSelected,
+      borderRadius: BorderRadius.circular(4),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: isSelected ? Colors.white : const Color(0xFF1A1A1A)),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: isSelected ? Colors.black : Colors.white70,
+          ),
+        ),
+      ),
     );
   }
 
@@ -593,32 +604,33 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     required VoidCallback onPressed,
     bool isActive = false,
   }) {
-    final theme = Theme.of(context);
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(4),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: isActive
-              ? theme.colorScheme.primary.withOpacity(0.15)
-              : theme.colorScheme.surfaceVariant.withOpacity(0.2),
-          borderRadius: BorderRadius.circular(12),
+              ? Colors.white.withOpacity(0.05)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: isActive ? Colors.white24 : const Color(0xFF1A1A1A)),
         ),
         child: Row(
           children: [
             Icon(
               icon,
               size: 16,
-              color: isActive ? theme.colorScheme.primary : Colors.white70,
+              color: isActive ? Colors.white : Colors.white38,
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 10),
             Expanded(
               child: Text(
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: isActive ? theme.colorScheme.primary : Colors.white70,
+                  fontWeight: FontWeight.w500,
+                  color: isActive ? Colors.white : Colors.white70,
                 ),
               ),
             ),
@@ -629,13 +641,12 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
   }
 
   Widget _buildHeader() {
-    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.8),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      decoration: const BoxDecoration(
+        color: Colors.black,
         border: Border(
-          bottom: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
+          bottom: BorderSide(color: Color(0xFF1A1A1A)),
         ),
       ),
       child: Row(
@@ -644,12 +655,14 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             decoration: BoxDecoration(
-              color: theme.colorScheme.primaryContainer.withOpacity(0.25),
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFF0A0A0A),
+              border: Border.all(color: const Color(0xFF1A1A1A)),
+              borderRadius: BorderRadius.circular(4),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<PlatformInfo>(
                 value: _selectedPlatform,
+                dropdownColor: const Color(0xFF0A0A0A),
                 items: _platforms.map((p) {
                   return DropdownMenuItem(
                     value: p,
@@ -658,6 +671,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                       style: const TextStyle(
                         fontWeight: FontWeight.w600,
                         fontSize: 13,
+                        color: Colors.white,
                       ),
                     ),
                   );
@@ -680,12 +694,13 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                 setState(() => _searchQuery = value.trim());
                 _refreshList();
               },
+              style: const TextStyle(fontSize: 13),
               decoration: InputDecoration(
-                hintText: 'Buscar juego o slug...',
-                prefixIcon: const Icon(Icons.search, size: 18),
+                hintText: 'Buscar juego...',
+                prefixIcon: const Icon(Icons.search, size: 18, color: Colors.white24),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear, size: 18),
+                        icon: const Icon(Icons.clear, size: 16, color: Colors.white38),
                         onPressed: () {
                           _searchController.clear();
                           setState(() => _searchQuery = '');
@@ -694,14 +709,16 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                       )
                     : null,
                 filled: true,
+                fillColor: const Color(0xFF0A0A0A),
                 isDense: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 14,
-                  vertical: 12,
-                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
                 ),
               ),
             ),
@@ -710,64 +727,67 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
           // View toggle
           Container(
             decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFF0A0A0A),
+              border: Border.all(color: const Color(0xFF1A1A1A)),
+              borderRadius: BorderRadius.circular(4),
             ),
-            child: ToggleButtons(
-              borderRadius: BorderRadius.circular(12),
-              isSelected: [_isGridView, !_isGridView],
-              onPressed: (index) {
-                setState(() => _isGridView = index == 0);
-              },
-              children: const [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(Icons.grid_view, size: 18),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: Icon(Icons.view_list, size: 18),
-                ),
+            child: Row(
+              children: [
+                _buildViewToggleButton(Icons.grid_view, _isGridView, () => setState(() => _isGridView = true)),
+                Container(width: 1, height: 20, color: const Color(0xFF1A1A1A)),
+                _buildViewToggleButton(Icons.view_list, !_isGridView, () => setState(() => _isGridView = false)),
               ],
             ),
           ),
           const SizedBox(width: 16),
-          FilledButton.tonalIcon(
-            onPressed: _refreshList,
-            icon: const Icon(Icons.refresh, size: 18),
-            label: const Text('Refrescar'),
-          ),
-          const SizedBox(width: 10),
-          FilledButton.icon(
+          _buildMinimalHeaderButton(
+            icon: Icons.cloud_upload_outlined,
+            label: 'Exportar a Steam',
             onPressed: _isSteamAvailable
                 ? () => _confirmAndExportToSteam(selectedOnly: false)
                 : () => SteamDependenciesDialog.show(context),
-            icon: Icon(
-              Icons.cloud_upload,
-              size: 18,
-              color: _isSteamAvailable ? null : Colors.white38,
-            ),
-            label: Text(
-              'Exportar plataforma a Steam',
-              style: TextStyle(
-                color: _isSteamAvailable ? null : Colors.white38,
-              ),
-            ),
+            isDisabled: !_isSteamAvailable,
           ),
         ],
       ),
     );
   }
 
+  Widget _buildViewToggleButton(IconData icon, bool isActive, VoidCallback onTap) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Icon(icon, size: 18, color: isActive ? Colors.white : Colors.white24),
+      ),
+    );
+  }
+
+  Widget _buildMinimalHeaderButton({required IconData icon, required String label, required VoidCallback onPressed, bool isDisabled = false}) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: isDisabled ? Colors.transparent : Colors.white,
+        foregroundColor: isDisabled ? Colors.white24 : Colors.black,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: isDisabled ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+      ),
+      icon: Icon(icon, size: 18),
+      label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+    );
+  }
+
   Widget _buildSidePanel() {
-    final theme = Theme.of(context);
     return Container(
       width: 280,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.7),
+      padding: const EdgeInsets.all(24),
+      decoration: const BoxDecoration(
+        color: Color(0xFF020202),
         border: Border(
-          right: BorderSide(color: theme.dividerColor.withValues(alpha: 0.15)),
+          right: BorderSide(color: Color(0xFF1A1A1A)),
         ),
       ),
       child: SingleChildScrollView(
@@ -784,17 +804,17 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       controller: _scrollController,
       padding: const EdgeInsets.all(24),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-        maxCrossAxisExtent: 260,
-        childAspectRatio: 0.68,
-        crossAxisSpacing: 24,
-        mainAxisSpacing: 24,
+        maxCrossAxisExtent: 240,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 20,
+        mainAxisSpacing: 20,
       ),
       itemCount: _games.length + (_hasMore ? 1 : 0),
       itemBuilder: (context, index) {
         if (index < _games.length) {
           return _buildGameCard(_games[index]);
         } else {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)));
         }
       },
     );
@@ -805,19 +825,18 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       controller: _scrollController,
       padding: const EdgeInsets.all(24),
       itemCount: _games.length + (_hasMore ? 1 : 0),
-      separatorBuilder: (context, index) => const SizedBox(height: 12),
+      separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
         if (index < _games.length) {
           return _buildGameListTile(_games[index]);
         } else {
-          return const Center(child: CircularProgressIndicator());
+          return const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)));
         }
       },
     );
   }
 
   Widget _buildGameListTile(Game game) {
-    final theme = Theme.of(context);
     final isSelected = _isGameSelected(game);
     return InkWell(
       onTap: () =>
@@ -828,20 +847,18 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
           _toggleGameSelection(game);
         }
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.all(10),
+      child: Container(
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(4),
           border: Border.all(
             color: isSelected
-                ? theme.colorScheme.primary.withOpacity(0.6)
-                : theme.dividerColor.withValues(alpha: 0.1),
+                ? Colors.white24
+                : const Color(0xFF1A1A1A),
           ),
           color: isSelected
-              ? theme.colorScheme.primary.withOpacity(0.08)
-              : theme.colorScheme.surfaceVariant.withOpacity(0.2),
+              ? Colors.white.withOpacity(0.05)
+              : const Color(0xFF0A0A0A),
         ),
         child: Row(
           children: [
@@ -849,17 +866,16 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               Padding(
                 padding: const EdgeInsets.only(right: 12),
                 child: Icon(
-                  isSelected ? Icons.check_circle : Icons.circle_outlined,
-                  color: isSelected
-                      ? theme.colorScheme.primary
-                      : Colors.white38,
+                  isSelected ? Icons.check_box : Icons.check_box_outline_blank,
+                  size: 20,
+                  color: isSelected ? Colors.white : Colors.white24,
                 ),
               ),
             ClipRRect(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(2),
               child: SizedBox(
-                width: 56,
-                height: 56,
+                width: 48,
+                height: 48,
                 child: _buildImagePreview(game, 'cover', fit: BoxFit.cover),
               ),
             ),
@@ -871,16 +887,17 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                   Text(
                     game.name,
                     style: const TextStyle(
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w600,
                       fontSize: 14,
+                      color: Colors.white,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    game.platform,
-                    style: TextStyle(fontSize: 12, color: theme.hintColor),
+                    game.platform.toUpperCase(),
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white24, letterSpacing: 0.5),
                   ),
                 ],
               ),
@@ -889,8 +906,8 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
             _buildMediaStatus(game),
             const SizedBox(width: 16),
             IconButton(
-              icon: const Icon(Icons.edit),
-              color: Colors.white60,
+              icon: const Icon(Icons.edit_outlined, size: 18),
+              color: Colors.white38,
               onPressed: () => _editMetadata(game),
             ),
           ],
@@ -903,30 +920,29 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     Widget buildDot(bool hasAsset, IconData icon) {
       return Icon(
         icon,
-        size: 16,
-        color: hasAsset ? Colors.greenAccent : Colors.orangeAccent,
+        size: 14,
+        color: hasAsset ? Colors.white : Colors.white10,
       );
     }
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        buildDot(game.hasCover, Icons.photo_library),
-        const SizedBox(width: 6),
-        buildDot(game.hasBanner, Icons.panorama_horizontal),
-        const SizedBox(width: 6),
-        buildDot(game.hasIcon, Icons.apps),
+        buildDot(game.hasCover, Icons.photo_library_outlined),
+        const SizedBox(width: 8),
+        buildDot(game.hasBanner, Icons.panorama_horizontal_outlined),
+        const SizedBox(width: 8),
+        buildDot(game.hasIcon, Icons.apps_outlined),
       ],
     );
   }
 
   Widget _buildGameCard(Game game) {
-    final theme = Theme.of(context);
-    final missingCover = !game.hasCover;
+    final isSelected = _isGameSelected(game);
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(4),
         onTap: () =>
             _selectionMode ? _toggleGameSelection(game) : _editMetadata(game),
         onLongPress: () {
@@ -935,130 +951,91 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
             _toggleGameSelection(game);
           }
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          curve: Curves.easeOut,
+        child: Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(4),
             border: Border.all(
-              color: _isGameSelected(game)
-                  ? theme.colorScheme.primary.withOpacity(0.7)
-                  : theme.dividerColor.withValues(alpha: 0.05),
+              color: isSelected
+                  ? Colors.white70
+                  : const Color(0xFF1A1A1A),
             ),
-            color: missingCover
-                ? theme.colorScheme.errorContainer.withOpacity(0.1)
-                : theme.colorScheme.surfaceContainerHighest.withOpacity(0.4),
-            boxShadow: _isGameSelected(game)
-                ? [
-                    BoxShadow(
-                      color: theme.colorScheme.primary.withOpacity(0.3),
-                      blurRadius: 16,
-                      spreadRadius: 2,
-                    ),
-                  ]
-                : null,
+            color: const Color(0xFF0A0A0A),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(18),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      _buildImagePreview(game, 'cover', fit: BoxFit.cover),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    _buildImagePreview(game, 'cover', fit: BoxFit.cover),
+                    if (_selectionMode)
+                      Positioned(
+                        top: 8,
+                        left: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(2),
+                          decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                          child: Icon(
+                            isSelected ? Icons.check_circle : Icons.circle_outlined,
+                            size: 20,
+                            color: isSelected ? Colors.white : Colors.white38,
+                          ),
+                        ),
+                      ),
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 40,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                            colors: [Colors.black87, Colors.transparent],
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (!game.hasCover || !game.hasBanner || !game.hasIcon)
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: Column(
-                          children: [
-                            if (!game.hasCover)
-                              _buildBadge('Cover')
-                            else if (!game.hasBanner)
-                              _buildBadge('Banner')
-                            else if (!game.hasIcon)
-                              _buildBadge('Icon'),
-                          ],
-                        ),
+                        child: _buildBadge('INCOMPLETO'),
                       ),
-                      if (_selectionMode)
-                        Positioned(
-                          top: 8,
-                          left: 8,
-                          child: CircleAvatar(
-                            radius: 14,
-                            backgroundColor: Colors.black54,
-                            child: Icon(
-                              _isGameSelected(game)
-                                  ? Icons.check
-                                  : Icons.radio_button_unchecked,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      Positioned(
-                        bottom: 8,
-                        right: 8,
-                        child: IconButton.filled(
-                          icon: const Icon(Icons.edit, size: 16),
-                          onPressed: () => _editMetadata(game),
-                          style: IconButton.styleFrom(
-                            minimumSize: const Size(34, 34),
-                            backgroundColor: Colors.black54,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(14),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       game.name,
                       style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12,
+                        color: Colors.white,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
-                        Expanded(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: SizedBox(
-                              height: 28,
-                              child: _buildImagePreview(
-                                game,
-                                'banner',
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
+                        const Icon(Icons.photo_library_outlined, size: 10, color: Colors.white24),
+                        const SizedBox(width: 4),
+                        Icon(Icons.circle, size: 6, color: game.hasCover ? Colors.white38 : Colors.white10),
                         const SizedBox(width: 8),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: SizedBox(
-                            width: 32,
-                            height: 32,
-                            child: _buildImagePreview(
-                              game,
-                              'icon',
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
+                        const Icon(Icons.panorama_horizontal_outlined, size: 10, color: Colors.white24),
+                        const SizedBox(width: 4),
+                        Icon(Icons.circle, size: 6, color: game.hasBanner ? Colors.white38 : Colors.white10),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.apps_outlined, size: 10, color: Colors.white24),
+                        const SizedBox(width: 4),
+                        Icon(Icons.circle, size: 6, color: game.hasIcon ? Colors.white38 : Colors.white10),
                       ],
                     ),
                   ],
@@ -1073,14 +1050,15 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
   Widget _buildBadge(String text) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: Colors.deepOrange.withOpacity(0.85),
-        borderRadius: BorderRadius.circular(999),
+        color: Colors.black,
+        border: Border.all(color: Colors.white24),
+        borderRadius: BorderRadius.circular(2),
       ),
       child: Text(
         text,
-        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+        style: const TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white70, letterSpacing: 0.5),
       ),
     );
   }
@@ -1114,21 +1092,18 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
   Widget _buildPlaceholder(String type) {
     final icon = type == 'cover'
-        ? Icons.photo_library
+        ? Icons.photo_library_outlined
         : type == 'banner'
-        ? Icons.panorama_horizontal
-        : Icons.apps;
+        ? Icons.panorama_horizontal_outlined
+        : Icons.apps_outlined;
 
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(8),
-      ),
+      color: const Color(0xFF080808),
       child: Center(
         child: Icon(
           icon,
-          color: Colors.white12,
-          size: type == 'icon' ? 18 : 36,
+          color: Colors.white.withOpacity(0.03),
+          size: type == 'icon' ? 16 : 32,
         ),
       ),
     );
@@ -1146,17 +1121,11 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.search_off, size: 64, color: Colors.white30),
-          const SizedBox(height: 12),
-          Text(
-            'No se encontraron juegos',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
+          const Icon(Icons.search_off_outlined, size: 48, color: Colors.white10),
+          const SizedBox(height: 16),
           const Text(
-            'Ajusta tus filtros o verifica que tengas juegos instalados en esta plataforma.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white54, fontSize: 13),
+            'Sin resultados',
+            style: TextStyle(color: Colors.white38, fontWeight: FontWeight.w600, fontSize: 14),
           ),
         ],
       ),
@@ -1165,7 +1134,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
   Widget _buildContentArea() {
     if (_isLoading && _games.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)));
     }
 
     if (_games.isEmpty) {
@@ -1177,61 +1146,51 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
   Widget _buildSelectionBar() {
     if (!_selectionMode) return const SizedBox.shrink();
-    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.9),
+      decoration: const BoxDecoration(
+        color: Colors.black,
         border: Border(
-          top: BorderSide(color: theme.dividerColor.withValues(alpha: 0.2)),
+          top: BorderSide(color: Color(0xFF1A1A1A)),
         ),
       ),
       child: Row(
         children: [
           Text(
-            '${_selectedGameIds.length} seleccionados',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            '${_selectedGameIds.length} SELECCIONADOS',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5, color: Colors.white70),
           ),
-          const SizedBox(width: 16),
-          TextButton.icon(
-            onPressed: _selectedGameIds.length == _games.length
-                ? null
-                : () {
-                    setState(() {
-                      _selectedGameIds
-                        ..clear()
-                        ..addAll(_games.map((g) => g.id));
-                    });
-                  },
-            icon: const Icon(Icons.select_all, size: 18),
-            label: const Text('Seleccionar visibles'),
-          ),
-          const SizedBox(width: 8),
-          OutlinedButton.icon(
-            onPressed: () => _selectedGameIds.clear(),
-            icon: const Icon(Icons.clear),
-            label: const Text('Limpiar'),
-          ),
+          const SizedBox(width: 24),
+          _buildMinimalSelectionButton('SELECCIONAR TODO', () {
+            setState(() {
+              _selectedGameIds
+                ..clear()
+                ..addAll(_games.map((g) => g.id));
+            });
+          }),
+          const SizedBox(width: 12),
+          _buildMinimalSelectionButton('LIMPIAR', () => _selectedGameIds.clear()),
           const Spacer(),
-          FilledButton.icon(
+          _buildMinimalHeaderButton(
+            icon: Icons.cloud_upload_outlined,
+            label: 'Exportar Seleccionados',
             onPressed: _selectedGameIds.isEmpty
-                ? null
+                ? () {}
                 : (_isSteamAvailable
                     ? () => _confirmAndExportToSteam(selectedOnly: true)
                     : () => SteamDependenciesDialog.show(context)),
-            icon: Icon(
-              Icons.cloud_upload,
-              color: _isSteamAvailable ? null : Colors.white38,
-            ),
-            label: Text(
-              'Exportar seleccionados a Steam',
-              style: TextStyle(
-                color: _isSteamAvailable ? null : Colors.white38,
-              ),
-            ),
+            isDisabled: _selectedGameIds.isEmpty || !_isSteamAvailable,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMinimalSelectionButton(String label, VoidCallback onTap) {
+    return TextButton(
+      onPressed: onTap,
+      style: TextButton.styleFrom(foregroundColor: Colors.white38),
+      child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
     );
   }
 

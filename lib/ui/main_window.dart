@@ -567,22 +567,23 @@ class _MainWindowState extends State<MainWindow> {
 
   Widget _buildLutrisSelector() {
     final currentMode = _lutrisPaths != null ? _lutrisPaths!['mode']! : "No detectado";
-    if (_availableLutrisModes.length <= 1) {
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        margin: const EdgeInsets.only(right: 4),
-        decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(16)),
-        child: Text(currentMode, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-      );
-    }
     return PopupMenuButton<String>(
       onSelected: _switchLutrisMode,
-      itemBuilder: (context) => _availableLutrisModes.map((mode) => PopupMenuItem(value: mode, child: Text(mode))).toList(),
+      itemBuilder: (context) => _availableLutrisModes.map((mode) => PopupMenuItem(value: mode, child: Text(mode, style: const TextStyle(fontSize: 13)))).toList(),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-        margin: const EdgeInsets.only(right: 4),
-        decoration: BoxDecoration(color: Colors.blue.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(16)),
-        child: Text(currentMode, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.blue)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFF1A1A1A)),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(currentMode, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: Colors.white70)),
+            const SizedBox(width: 6),
+            const Icon(Icons.keyboard_arrow_down, size: 14, color: Colors.white38),
+          ],
+        ),
       ),
     );
   }
@@ -598,109 +599,98 @@ class _MainWindowState extends State<MainWindow> {
   Widget _buildInjectorView() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        if (constraints.maxWidth < 800) return _buildInjectorViewMobile();
-        return _buildInjectorViewDesktop();
+        return Row(
+          children: [
+            Container(
+              width: 300,
+              decoration: const BoxDecoration(
+                border: Border(right: BorderSide(color: Color(0xFF1A1A1A))),
+              ),
+              child: SingleChildScrollView(padding: const EdgeInsets.all(20), child: _buildConfigSection()),
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Expanded(flex: 3, child: _buildPreviewPanel()),
+                  const Divider(),
+                  Expanded(flex: 2, child: _buildLogPanel()),
+                  const Divider(),
+                  _buildActionBar(),
+                ],
+              ),
+            ),
+          ],
+        );
       },
-    );
-  }
-
-  Widget _buildInjectorViewDesktop() {
-    return Row(
-      children: [
-        SizedBox(width: 320, child: SingleChildScrollView(padding: const EdgeInsets.all(16), child: _buildConfigSection())),
-        Expanded(
-          child: Column(
-            children: [
-              Expanded(flex: 3, child: _buildPreviewPanel()),
-              Expanded(flex: 2, child: _buildLogPanel()),
-              _buildActionBar(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInjectorViewMobile() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          _buildConfigSection(),
-          const SizedBox(height: 16),
-          SizedBox(height: 300, child: _buildPreviewPanel()),
-          const SizedBox(height: 16),
-          SizedBox(height: 200, child: _buildLogPanel()),
-          const SizedBox(height: 16),
-          _buildActionBar(),
-        ],
-      ),
     );
   }
 
   Widget _buildConfigSection() {
     final platforms = PlatformRegistry.getInjectorPlatforms();
+    final labelStyle = TextStyle(color: Colors.white.withOpacity(0.5), fontWeight: FontWeight.w500, fontSize: 11, letterSpacing: 0.5);
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Plataforma', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-        const SizedBox(height: 6),
+        Text('PLATAFORMA', style: labelStyle),
+        const SizedBox(height: 10),
         DropdownButtonFormField<PlatformInfo>(
           value: _selectedPlatform,
           items: platforms.map((p) => DropdownMenuItem(value: p, child: Text(p.platformName, style: const TextStyle(fontSize: 13)))).toList(),
           onChanged: _isProcessing ? null : _onPlatformChanged,
-          decoration: InputDecoration(isDense: true, contentPadding: const EdgeInsets.all(10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+          decoration: InputDecoration(
+            isDense: true, 
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            filled: true,
+            fillColor: const Color(0xFF0A0A0A),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+          ),
         ),
         if (_selectedPlatform != null && _selectedPlatform!.emulators.length > 1) ...[
-          const SizedBox(height: 16),
-          const Text('Emulador', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-          const SizedBox(height: 6),
+          const SizedBox(height: 20),
+          Text('EMULADOR', style: labelStyle),
+          const SizedBox(height: 10),
           DropdownButtonFormField<EmulatorInfo>(
             value: _selectedEmulator,
             items: _selectedPlatform!.emulators.map((e) => DropdownMenuItem(value: e, child: Text(e.name, style: const TextStyle(fontSize: 13)))).toList(),
             onChanged: _isProcessing ? null : _onEmulatorChanged,
-            decoration: InputDecoration(isDense: true, contentPadding: const EdgeInsets.all(10), border: OutlineInputBorder(borderRadius: BorderRadius.circular(8))),
+            decoration: InputDecoration(
+              isDense: true, 
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+              filled: true,
+              fillColor: const Color(0xFF0A0A0A),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+            ),
           ),
         ],
-        const SizedBox(height: 16),
-        const Text('Carpeta de ROMs', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-        const SizedBox(height: 6),
-        Row(
-          children: [
-            Expanded(child: Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest, borderRadius: BorderRadius.circular(8)), child: Text(_romFolder.isEmpty ? 'Sin seleccionar...' : _romFolder, style: const TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis))),
-            const SizedBox(width: 8),
-            IconButton.filled(onPressed: _isProcessing ? null : _browseFolder, icon: const Icon(Icons.folder_open, size: 18)),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Text('Extensiones', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-        const SizedBox(height: 6),
-        if (_selectedEmulator != null)
-          Wrap(
-            spacing: 4,
-            runSpacing: 4,
-            children: _selectedEmulator!.extensions.map((ext) {
-              final isSelected = _selectedExtensions.contains(ext);
-              return FilterChip(
-                label: Text(ext, style: const TextStyle(fontSize: 10)),
-                selected: isSelected,
-                onSelected: _isProcessing ? null : (selected) {
-                  setState(() {
-                    if (selected) {
-                      _selectedExtensions.add(ext);
-                    } else {
-                      _selectedExtensions.remove(ext);
-                    }
-                  });
-                  _scanFolder();
-                },
-              );
-            }).toList(),
+        const SizedBox(height: 20),
+        Text('CARPETA DE ROMS', style: labelStyle),
+        const SizedBox(height: 10),
+        InkWell(
+          onTap: _isProcessing ? null : _browseFolder,
+          child: Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A0A0A),
+              border: Border.all(color: const Color(0xFF1A1A1A)),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Row(
+              children: [
+                Expanded(child: Text(_romFolder.isEmpty ? 'Seleccionar...' : _romFolder, style: const TextStyle(fontSize: 12, color: Colors.white70), overflow: TextOverflow.ellipsis)),
+                const Icon(Icons.folder_open, size: 16, color: Colors.white38),
+              ],
+            ),
           ),
-        const SizedBox(height: 16),
-        _buildCompactCheckbox('Limpiar juegos', 'Borra entradas previas', _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
-        _buildCompactCheckbox('Alta Precisión', 'Hash (ScreenScraper)', _useHighPrecision, (val) => setState(() => _useHighPrecision = val ?? false)),
-        _buildCompactCheckbox('Escaneo recursivo', 'Subcarpetas', _isRecursive, (val) {
+        ),
+        const SizedBox(height: 20),
+        Text('OPCIONES', style: labelStyle),
+        const SizedBox(height: 8),
+        _buildCompactCheckbox('Limpiar juegos', _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
+        _buildCompactCheckbox('Alta Precisión', _useHighPrecision, (val) => setState(() => _useHighPrecision = val ?? false)),
+        _buildCompactCheckbox('Escaneo recursivo', _isRecursive, (val) {
           setState(() => _isRecursive = val ?? false);
           _scanFolder();
         }),
@@ -708,19 +698,25 @@ class _MainWindowState extends State<MainWindow> {
     );
   }
 
-  Widget _buildCompactCheckbox(String title, String subtitle, bool value, ValueChanged<bool?> onChanged) {
+  Widget _buildCompactCheckbox(String title, bool value, ValueChanged<bool?> onChanged) {
     return InkWell(
       onTap: _isProcessing ? null : () => onChanged(!value),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         child: Row(
           children: [
-            Checkbox(value: value, onChanged: _isProcessing ? null : onChanged, visualDensity: VisualDensity.compact),
+            SizedBox(
+              height: 24, width: 24,
+              child: Checkbox(
+                value: value, 
+                onChanged: _isProcessing ? null : onChanged,
+                side: const BorderSide(color: Color(0xFF333333)),
+                activeColor: Colors.white,
+                checkColor: Colors.black,
+              ),
+            ),
             const SizedBox(width: 8),
-            Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
-              Text(subtitle, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-            ])),
+            Text(title, style: const TextStyle(fontSize: 12, color: Colors.white70)),
           ],
         ),
       ),
@@ -728,49 +724,47 @@ class _MainWindowState extends State<MainWindow> {
   }
 
   Widget _buildPreviewPanel() {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5), borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: theme.colorScheme.surfaceContainerHighest, borderRadius: const BorderRadius.vertical(top: Radius.circular(12))),
-            child: Row(children: [
-              const Icon(Icons.list, size: 16),
-              const SizedBox(width: 8),
-              const Text('ROMs detectadas', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-              const Spacer(),
-              Text('${_previewItems.where((i) => i.isSelected).length}/${_previewItems.length}', style: TextStyle(fontSize: 11, color: theme.colorScheme.primary)),
-            ]),
-          ),
-          Expanded(child: _isScanning ? const Center(child: CircularProgressIndicator()) : ListView.builder(
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(children: [
+            const Text('DETECTADOS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
+            const Spacer(),
+            Text('${_previewItems.where((i) => i.isSelected).length}/${_previewItems.length}', style: const TextStyle(fontSize: 11, color: Colors.white70)),
+          ]),
+        ),
+        Expanded(
+          child: _isScanning ? const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24))) : ListView.builder(
             itemCount: _previewItems.length,
             itemBuilder: (context, index) {
               final item = _previewItems[index];
               return ListTile(
                 dense: true,
-                leading: Checkbox(value: item.isSelected, onChanged: (val) => setState(() => item.isSelected = val ?? false)),
-                title: Text(item.displayName, style: const TextStyle(fontSize: 12)),
-                trailing: IconButton(icon: const Icon(Icons.edit, size: 14), onPressed: () => _editItemName(item)),
+                visualDensity: VisualDensity.compact,
+                leading: Checkbox(
+                  value: item.isSelected, 
+                  onChanged: (val) => setState(() => item.isSelected = val ?? false),
+                  side: const BorderSide(color: Color(0xFF1A1A1A)),
+                ),
+                title: Text(item.displayName, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), onPressed: () => _editItemName(item)),
               );
             },
-          )),
-        ],
-      ),
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildLogPanel() {
     return Container(
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: Colors.black87, borderRadius: BorderRadius.circular(12)),
+      color: const Color(0xFF050505),
       child: Column(
         children: [
-          LinearProgressIndicator(value: _progress, minHeight: 4),
-          Expanded(child: ListView(controller: _logScrollController, padding: const EdgeInsets.all(12), children: [
-            Text(_logText.isEmpty ? 'Listo.' : _logText, style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Colors.greenAccent)),
+          if (_progress > 0 && _progress < 1) LinearProgressIndicator(value: _progress, minHeight: 1, backgroundColor: Colors.transparent, color: Colors.white24),
+          Expanded(child: ListView(controller: _logScrollController, padding: const EdgeInsets.all(16), children: [
+            Text(_logText.isEmpty ? '> Ready.' : _logText, style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Color(0xFF888888), height: 1.5)),
           ])),
         ],
       ),
@@ -779,17 +773,34 @@ class _MainWindowState extends State<MainWindow> {
 
   Widget _buildActionBar() {
     return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(color: Theme.of(context).colorScheme.surfaceContainerHighest),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      color: Colors.black,
       child: Row(
         children: [
-          OutlinedButton.icon(onPressed: _isProcessing ? null : () => _startProcess('inject'), icon: const Icon(Icons.add_to_photos, size: 16), label: const Text('Inyectar')),
-          const SizedBox(width: 8),
-          OutlinedButton.icon(onPressed: _isProcessing ? null : () => _startProcess('metadata'), icon: const Icon(Icons.download, size: 16), label: const Text('Metadatos')),
+          _buildActionButton('Inyectar', Icons.add, () => _startProcess('inject'), isPrimary: false),
+          const SizedBox(width: 12),
+          _buildActionButton('Metadatos', Icons.download_outlined, () => _startProcess('metadata'), isPrimary: false),
           const Spacer(),
-          FilledButton.icon(onPressed: _isProcessing ? null : () => _startProcess('full'), icon: const Icon(Icons.play_arrow, size: 18), label: Text(_isProcessing ? 'Procesando...' : 'Ejecutar')),
+          _buildActionButton(_isProcessing ? 'Procesando...' : 'Ejecutar Todo', Icons.play_arrow_rounded, () => _startProcess('full'), isPrimary: true),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionButton(String label, IconData icon, VoidCallback onPressed, {required bool isPrimary}) {
+    return TextButton.icon(
+      onPressed: _isProcessing ? null : onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: isPrimary ? Colors.white : Colors.transparent,
+        foregroundColor: isPrimary ? Colors.black : Colors.white70,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: isPrimary ? BorderSide.none : const BorderSide(color: Color(0xFF1A1A1A)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      ),
+      icon: Icon(icon, size: 16),
+      label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
     );
   }
 }
