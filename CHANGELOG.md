@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.9.2](https://github.com/CarlosEvCode/game_link/compare/v2.9.1...v2.9.2) (2026-05-10)
+
+
+### Bug Fixes
+
+* **ci:** remove non-existent perl package from dependencies ([60a8b31](https://github.com/CarlosEvCode/game_link/commit/60a8b31c431a50e3e340af0c62188bd3347da723))
+
 ## [2.9.1](https://github.com/CarlosEvCode/game_link/compare/v2.9.0...v2.9.1) (2026-05-10)
 
 
