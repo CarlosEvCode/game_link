@@ -7,8 +7,15 @@ if [ ! -d "build/linux/x64/release/bundle" ]; then
     flutter build linux --release
 fi
 
-VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
-VERSION_CLEAN=$(echo $VERSION | cut -d'+' -f1)
+# Obtener versión: 1. Argumento, 2. pubspec.yaml
+if [ -n "$1" ]; then
+    VERSION_CLEAN="$1"
+else
+    VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //')
+    VERSION_CLEAN=$(echo $VERSION | cut -d'+' -f1)
+fi
+
+echo "[  INFO ] Preparando paquete RPM para version $VERSION_CLEAN..."
 
 # Generar el Tarball primero (necesario como fuente para el RPM)
 ./scripts/package_tarball.sh "$VERSION_CLEAN"
