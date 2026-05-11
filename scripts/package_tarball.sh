@@ -15,6 +15,10 @@ rm -rf "$TEMP_DIR" && mkdir -p "$TEMP_DIR"
 # Copiar el bundle
 cp -r $BUNDLE_DIR/* "$TEMP_DIR/"
 
+# Copiar el desktop e icono (para empaquetado)
+cp linux/game_link.desktop "$TEMP_DIR/"
+cp linux/game_link.png "$TEMP_DIR/"
+
 # Inyectar SQLite por seguridad
 SQLITE_SRC=$(ldconfig -p | grep libsqlite3.so.0 | head -n1 | awk '{print $4}')
 [ -z "$SQLITE_SRC" ] && SQLITE_SRC="/usr/lib/x86_64-linux-gnu/libsqlite3.so.0"

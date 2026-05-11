@@ -40,5 +40,7 @@ flutter build linux --release --build-name=$VERSION_CLEAN
 echo -e "${GREEN}[  INFO ] Generando paquetes...${NC}"
 ./scripts/package_appimage.sh "$VERSION_CLEAN"
 ./scripts/package_tarball.sh "$VERSION_CLEAN"
+./scripts/package_debian.sh "$VERSION_CLEAN"
+./scripts/package_rpm.sh "$VERSION_CLEAN"
 
 echo -e "${GREEN}[  DONE ] ¡Proceso completado con éxito!${NC}"
