@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.5](https://github.com/CarlosEvCode/game_link/compare/v2.13.4...v2.13.5) (2026-05-11)
+
+
+### Bug Fixes
+
+* **appimage:** unify binary name to game_link and repair AppImage build ([4c6fd57](https://github.com/CarlosEvCode/game_link/commit/4c6fd574b6681bbc76519998c34a03e204c453ca))
+
 ## [2.13.4](https://github.com/CarlosEvCode/game_link/compare/v2.13.3...v2.13.4) (2026-05-11)
 
 
