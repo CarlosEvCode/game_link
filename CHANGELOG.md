@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.15.0](https://github.com/CarlosEvCode/game_link/compare/v2.14.0...v2.15.0) (2026-05-11)
+
+
+### Features
+
+* add RPM packaging support with Fedora Copr integration ([fa7020f](https://github.com/CarlosEvCode/game_link/commit/fa7020f74909f11a6050a721bbb6fcf3bbbf69fa))
+
 ## [2.14.0](https://github.com/CarlosEvCode/game_link/compare/v2.13.5...v2.14.0) (2026-05-11)
 
 
