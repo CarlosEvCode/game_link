@@ -40,6 +40,15 @@ plugins/
 fake-bin/
 *.AppImage
 *.tar.xz
+*.rpm
+*.deb
+/rpmbuild/
+/debian/game-link/
+/debian/.debhelper/
+/debian/debhelper-build-stamp
+/debian/files
+/debian/game-link.debhelper.log
+/debian/game-link.substvars
 linuxdeploy-plugin-gtk.sh
 runtime-x86_64
 appimagetool-x86_64.AppImage

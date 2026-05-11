@@ -9,9 +9,15 @@ RUN apt-get update && apt-get install -y \
     gpg \
     git \
     libgtk-3-dev \
+    libglib2.0-dev \
+    libgdk-pixbuf2.0-dev \
+    libpango1.0-dev \
+    libatk1.0-dev \
+    libcairo2-dev \
+    libharfbuzz-dev \
+    libepoxy-dev \
     libblkid-dev \
     liblzma-dev \
-    libgcrypt20-dev \
     libunwind-dev \
     && rm -rf /var/lib/apt/lists/*
 
