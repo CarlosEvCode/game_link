@@ -27,8 +27,11 @@ override_dh_auto_install:
 	mkdir -p debian/game-link/usr/share/pixmaps
 
 	# Instalar el binario y sus recursos
-	# Nota: Usamos una subcarpeta en /usr/lib para las librerías de Flutter
 	cp -r build/linux/x64/release/bundle/* debian/game-link/usr/lib/game-link/
+	
+	# ASEGURAR PERMISOS DE EJECUCIÓN (Crítico para que no de Permission Denied)
+	chmod +x debian/game-link/usr/lib/game-link/game_link
+	find debian/game-link/usr/lib/game-link/lib -type f -name "*.so*" -exec chmod +x {} +
 	
 	# Crear un symlink en /usr/bin que apunte al binario con el LD_LIBRARY_PATH correcto
 	# O simplemente mover el ejecutable principal y dejar las libs en su sitio

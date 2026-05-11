@@ -1,8 +1,9 @@
-game-link (2.13.2-1) noble; urgency=medium
+game-link (2.13.4-1) noble; urgency=medium
 
-  * New release 2.13.2.
+  * Fix execution permissions for the binary and libraries.
+  * Correct Exec name in .desktop file for better menu visibility.
 
- -- Carlos EvCode <programer.cm12@gmail.com>  Sun, 10 May 2026 19:00:00 +0000
+ -- Carlos EvCode <programer.cm12@gmail.com>  Sun, 10 May 2026 20:00:00 +0000
 
 game-link (2.13.0-1) noble; urgency=medium
 
