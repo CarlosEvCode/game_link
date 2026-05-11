@@ -38,8 +38,9 @@ override_dh_auto_install:
 	# Flutter busca las libs en el mismo directorio que el ejecutable por defecto.
 	
 	# Opción recomendada: Todo en /usr/lib/game-link y un wrapper en /usr/bin
-	printf '#!/bin/sh\nexec /usr/lib/game-link/game_link "$$@"\n' > debian/game-link/usr/bin/game-link
-	chmod +x debian/game-link/usr/bin/game-link
+	printf '#!/bin/sh\nexec /usr/lib/game-link/game_link "$$@"\n' > debian/game-link/usr/bin/game_link
+	chmod +x debian/game-link/usr/bin/game_link
+
 
 	# Instalar el desktop e icono
 	install -Dm644 linux/game_link.desktop debian/game-link/usr/share/applications/game-link.desktop

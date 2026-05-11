@@ -1,3 +1,9 @@
+game-link (2.13.5-1) noble; urgency=medium
+
+  * Unified binary name to game_link to fix AppImage build.
+
+ -- Carlos EvCode <programer.cm12@gmail.com>  Sun, 10 May 2026 21:00:00 +0000
+
 game-link (2.13.4-1) noble; urgency=medium
 
   * Fix execution permissions for the binary and libraries.
