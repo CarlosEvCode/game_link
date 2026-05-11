@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.13.4](https://github.com/CarlosEvCode/game_link/compare/v2.13.3...v2.13.4) (2026-05-11)
+
+
+### Bug Fixes
+
+* **debian:** fix binary permissions and .desktop Exec path ([7ea5342](https://github.com/CarlosEvCode/game_link/commit/7ea5342c27ca22c96054145c489b078026749864))
+
 ## [2.13.3](https://github.com/CarlosEvCode/game_link/compare/v2.13.2...v2.13.3) (2026-05-10)
 
 
