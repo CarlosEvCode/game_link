@@ -1,3 +1,10 @@
+game-link (2.15.0-1) noble; urgency=medium
+
+  * New release 2.15.0.
+  * Added RPM packaging support and Fedora Copr integration.
+
+ -- Carlos EvCode <programer.cm12@gmail.com>  Mon, 11 May 2026 10:00:00 +0000
+
 game-link (2.13.5-1) noble; urgency=medium
 
   * Unified binary name to game_link to fix AppImage build.
