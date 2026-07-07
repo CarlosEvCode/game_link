@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:sqlite3/sqlite3.dart' show sqlite3;
 import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
@@ -19,12 +20,14 @@ class InjectionItem {
   String displayName;
   bool isSelected;
   bool wasManuallyEdited;
+  bool isAlreadyInLutris;
 
   InjectionItem({
     required this.filePath,
     required this.displayName,
     this.isSelected = true,
     this.wasManuallyEdited = false,
+    this.isAlreadyInLutris = false,
   });
 }
 
@@ -328,6 +331,31 @@ class _MainWindowState extends State<MainWindow> {
         (msg, [progress]) => _log(msg),
       );
 
+      final Set<String> injectedSlugs = {};
+      if (_lutrisPaths != null && _lutrisPaths!['db'] != null && _selectedEmulator != null) {
+        final dbPath = _lutrisPaths!['db']!;
+        final file = File(dbPath);
+        if (file.existsSync()) {
+          final db = sqlite3.open(dbPath);
+          try {
+            final results = db.select(
+              "SELECT slug FROM games WHERE runner = ?",
+              [_selectedEmulator!.runner],
+            );
+            for (final row in results) {
+              final s = row['slug'] as String?;
+              if (s != null) {
+                injectedSlugs.add(s.toLowerCase());
+              }
+            }
+          } catch (e) {
+            _log("[  WARN ] Error al leer juegos de Lutris: $e");
+          } finally {
+            db.dispose();
+          }
+        }
+      }
+
       final List<InjectionItem> detected = [];
       if (_useOfflineId) {
         final romCache = RomCacheRepository();
@@ -342,10 +370,13 @@ class _MainWindowState extends State<MainWindow> {
               displayName = cached.identifiedName!;
             }
 
+            final isAlreadyInLutris = injectedSlugs.contains(slug.toLowerCase());
             detected.add(
               InjectionItem(
                 filePath: file.path,
                 displayName: displayName,
+                isAlreadyInLutris: isAlreadyInLutris,
+                isSelected: !isAlreadyInLutris,
               ),
             );
           }
@@ -355,10 +386,13 @@ class _MainWindowState extends State<MainWindow> {
       } else {
         for (var file in filteredFiles) {
           final slug = p.basenameWithoutExtension(file.path);
+          final isAlreadyInLutris = injectedSlugs.contains(slug.toLowerCase());
           detected.add(
             InjectionItem(
               filePath: file.path,
               displayName: slug,
+              isAlreadyInLutris: isAlreadyInLutris,
+              isSelected: !isAlreadyInLutris,
             ),
           );
         }
@@ -1120,22 +1154,44 @@ class _MainWindowState extends State<MainWindow> {
         const SizedBox(height: 16),
         Text('CARPETA DE ROMS', style: labelStyle),
         const SizedBox(height: 10),
-        InkWell(
-          onTap: _isProcessing ? null : _browseFolder,
-          child: Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0A0A),
-              border: Border.all(color: const Color(0xFF1A1A1A)),
-              borderRadius: BorderRadius.circular(4),
+        Row(
+          children: [
+            Expanded(
+              child: InkWell(
+                onTap: _isProcessing ? null : _browseFolder,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0A0A0A),
+                    border: Border.all(color: const Color(0xFF1A1A1A)),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(_romFolder.isEmpty ? 'Seleccionar...' : _romFolder, style: const TextStyle(fontSize: 12, color: Colors.white70), overflow: TextOverflow.ellipsis)),
+                      const Icon(Icons.folder_open, size: 16, color: Colors.white38),
+                    ],
+                  ),
+                ),
+              ),
             ),
-            child: Row(
-              children: [
-                Expanded(child: Text(_romFolder.isEmpty ? 'Seleccionar...' : _romFolder, style: const TextStyle(fontSize: 12, color: Colors.white70), overflow: TextOverflow.ellipsis)),
-                const Icon(Icons.folder_open, size: 16, color: Colors.white38),
-              ],
-            ),
-          ),
+            if (_romFolder.isNotEmpty) ...[
+              const SizedBox(width: 8),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white70, size: 20),
+                onPressed: _isProcessing || _isScanning ? null : _scanFolder,
+                tooltip: 'Actualizar carpeta',
+                style: IconButton.styleFrom(
+                  backgroundColor: const Color(0xFF0A0A0A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    side: const BorderSide(color: Color(0xFF1A1A1A)),
+                  ),
+                  padding: const EdgeInsets.all(12),
+                ),
+              ),
+            ],
+          ],
         ),
         if (_selectedEmulator != null) ...[
           const SizedBox(height: 20),
@@ -1373,7 +1429,48 @@ class _MainWindowState extends State<MainWindow> {
                   onChanged: (val) => setState(() => item.isSelected = val ?? false),
                   side: const BorderSide(color: Color(0xFF1A1A1A)),
                 ),
-                title: Text(item.displayName, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                title: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        item.displayName, 
+                        style: TextStyle(
+                          fontSize: 12, 
+                          color: item.isAlreadyInLutris ? Colors.white38 : Colors.white70,
+                          decoration: item.isAlreadyInLutris ? TextDecoration.none : null,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (item.isAlreadyInLutris) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF132E20),
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(color: const Color(0xFF1E4530), width: 0.5),
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.check, size: 10, color: Color(0xFF52C48A)),
+                            SizedBox(width: 3),
+                            Text(
+                              'EN LUTRIS',
+                              style: TextStyle(
+                                fontSize: 8,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF52C48A),
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
                 trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), onPressed: () => _editItemName(item)),
               );
             },
