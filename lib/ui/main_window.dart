@@ -391,20 +391,22 @@ class _MainWindowState extends State<MainWindow> {
               }
 
               final isNoHashPlatform = (platformId == 'mame' || platformId == 'gamecube' || platformId == 'wii');
-              _log(isNoHashPlatform
-                  ? "Buscando en base de datos local $platformId: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}..."
-                  : "Calculando hashes y buscando en base de datos local: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
+              _log("Buscando en base de datos local $platformId: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
               
               final Map<String, String> resolvedChunk = {};
               for (final file in chunkToResolve) {
                 final slug = p.basenameWithoutExtension(file.path);
+                final ext = p.extension(file.path).toLowerCase();
+                final isNoHashFormat = (ext == '.chd' || ext == '.cso' || ext == '.pbp' || ext == '.rvz' || ext == '.gcz' || ext == '.wbfs' || ext == '.iso');
+                final skipHashes = isNoHashPlatform || isNoHashFormat;
+                
                 try {
                   String? resolvedName;
                   String? crc32;
                   String? md5;
                   String? sha1;
 
-                  if (isNoHashPlatform) {
+                  if (skipHashes) {
                     resolvedName = await DatResolver.resolveGameName(
                       platformId: platformId,
                       filePath: file.path,
