@@ -114,12 +114,15 @@ class DatResolver {
     return clean.trim().replaceAll(RegExp(r'\s+'), ' ');
   }
 
-  /// Extrae el serial (DISC_ID/GameCode) de archivos ROM/ISO conocidos (GBA, NDS, PS1/PS2/PSP).
+  /// Extrae el serial (DISC_ID/GameCode) de archivos ROM/ISO/CSO conocidos (GBA, NDS, PS1/PS2/PSP).
   static Future<String?> getRomSerial(String filePath, String platformId) async {
     try {
       final file = File(filePath);
       if (!file.existsSync()) return null;
 
+      final ext = p.extension(filePath).toLowerCase();
+
+      // 1. Soporte para Nintendo DS
       if (platformId == 'ds') {
         final bytes = await file.open();
         await bytes.setPosition(0x0C);
@@ -129,6 +132,7 @@ class DatResolver {
         return serial.isNotEmpty ? serial : null;
       }
 
+      // 2. Soporte para Game Boy Advance
       if (platformId == 'gba') {
         final bytes = await file.open();
         await bytes.setPosition(0xAC);
@@ -138,20 +142,201 @@ class DatResolver {
         return serial.isNotEmpty ? serial : null;
       }
 
-      // Para plataformas de discos o contenedores (PS1, PS2, PSP)
-      if (platformId == 'ps1' || platformId == 'ps2' || platformId == 'psp') {
-        final bytes = await file.open();
-        final buffer = await bytes.read(2048);
-        await bytes.close();
-        final text = ascii.decode(buffer.map((b) => (b >= 32 && b <= 126) ? b : 46).toList());
-        final regex = RegExp(
-          r'\b(SC[U|E|D]S|SL[U|E|P|M|K|T]S|SLED|SCED|SLKA|SIPS|UL[U|E|J|A]S|UC[U|E|J][S|B]|NP[U|E|J|H][G|H])_?(\d{5})\b',
-          caseSensitive: false,
-        );
-        final match = regex.firstMatch(text);
-        if (match != null) {
-          return "${match.group(1)}${match.group(2)}".toUpperCase();
+      // 3. Soporte para archivos CSO (Compressed ISO) de PSP
+      if (ext == '.cso') {
+        final raf = await file.open();
+        try {
+          final headerBytes = await raf.read(24);
+          if (headerBytes.length < 24) return null;
+          final magic = ascii.decode(headerBytes.sublist(0, 4));
+          if (magic != "CISO") return null;
+
+          final headerData = ByteData.sublistView(Uint8List.fromList(headerBytes));
+          final totalSize = headerData.getUint64(8, Endian.little);
+          final blockSize = headerData.getUint32(16, Endian.little);
+          final indexShift = headerBytes[21];
+          final numBlocks = totalSize ~/ blockSize;
+
+          final indexTableBytes = await raf.read((numBlocks + 1) * 4);
+          if (indexTableBytes.length < (numBlocks + 1) * 4) return null;
+          final indexTableData = ByteData.sublistView(Uint8List.fromList(indexTableBytes));
+
+          final List<int> blockOffsets = [];
+          final List<bool> blockCompressed = [];
+          for (int i = 0; i <= numBlocks; i++) {
+            final entry = indexTableData.getUint32(i * 4, Endian.little);
+            final isUncompressed = (entry & 0x80000000) != 0;
+            final offset = (entry & 0x7FFFFFFF) << indexShift;
+            blockOffsets.add(offset);
+            blockCompressed.add(!isUncompressed);
+          }
+
+          Future<Uint8List?> readSector(int sector) async {
+            if (sector >= blockOffsets.length - 1) return null;
+            final offset = blockOffsets[sector];
+            final nextOffset = blockOffsets[sector + 1];
+            final size = nextOffset - offset;
+            if (size <= 0) return null;
+
+            await raf.setPosition(offset);
+            final data = await raf.read(size);
+            if (blockCompressed[sector]) {
+              try {
+                return Uint8List.fromList(ZLibDecoder(raw: true).convert(data));
+              } catch (_) {
+                return null;
+              }
+            } else {
+              return Uint8List.fromList(data);
+            }
+          }
+
+          final pvd = await readSector(16);
+          if (pvd != null && pvd.length >= 2048) {
+            final pvdMagic = ascii.decode(pvd.sublist(1, 6));
+            if (pvdMagic == "CD001") {
+              final rootRecord = pvd.sublist(156, 156 + 34);
+              final rootData = ByteData.sublistView(rootRecord);
+              final rootExtent = rootData.getUint32(2, Endian.little);
+              final rootSize = rootData.getUint32(10, Endian.little);
+
+              final rootSectors = (rootSize + 2047) ~/ 2048;
+              final List<int> rootDirBytes = [];
+              for (int i = 0; i < rootSectors; i++) {
+                final sectorData = await readSector(rootExtent + i);
+                if (sectorData != null) {
+                  rootDirBytes.addAll(sectorData);
+                }
+              }
+
+              int offset = 0;
+              int? umdExtent;
+              while (offset < rootDirBytes.length) {
+                final len = rootDirBytes[offset];
+                if (len == 0) {
+                  offset = ((offset + 2048) ~/ 2048) * 2048;
+                  continue;
+                }
+                final recordData = ByteData.sublistView(Uint8List.fromList(rootDirBytes.sublist(offset, offset + len)));
+                final extent = recordData.getUint32(2, Endian.little);
+                final nameLen = rootDirBytes[offset + 32];
+                final nameBytes = rootDirBytes.sublist(offset + 33, offset + 33 + nameLen);
+                final name = ascii.decode(nameBytes.where((b) => b != 0).toList());
+
+                if (name.startsWith("UMD_DATA.BIN")) {
+                  umdExtent = extent;
+                  break;
+                }
+                offset += len;
+              }
+
+              if (umdExtent != null) {
+                final umdData = await readSector(umdExtent);
+                if (umdData != null) {
+                  final text = ascii.decode(umdData.where((b) => b >= 32 && b <= 126).toList());
+                  final match = RegExp(
+                    r'\b(SC[U|E|D]S|SL[U|E|P|M|K|T]S|SLED|SCED|SLKA|SIPS|UL[U|E|J|A]S|UC[U|E|J][S|B]|NP[U|E|J|H][G|H])[-_\s]?(\d{5})\b',
+                    caseSensitive: false,
+                  ).firstMatch(text);
+                  if (match != null) {
+                    return "${match.group(1)}${match.group(2)}".toUpperCase();
+                  }
+                }
+              }
+            }
+          }
+        } finally {
+          await raf.close();
         }
+      }
+
+      // 4. Soporte para archivos ISO standard (PS1, PS2, PSP)
+      if (ext == '.iso') {
+        final raf = await file.open();
+        try {
+          Future<Uint8List?> readSector(int sector) async {
+            await raf.setPosition(sector * 2048);
+            final data = await raf.read(2048);
+            return Uint8List.fromList(data);
+          }
+
+          final pvd = await readSector(16);
+          if (pvd != null && pvd.length >= 2048) {
+            final pvdMagic = ascii.decode(pvd.sublist(1, 6));
+            if (pvdMagic == "CD001") {
+              final rootRecord = pvd.sublist(156, 156 + 34);
+              final rootData = ByteData.sublistView(rootRecord);
+              final rootExtent = rootData.getUint32(2, Endian.little);
+              final rootSize = rootData.getUint32(10, Endian.little);
+
+              final rootSectors = (rootSize + 2047) ~/ 2048;
+              final List<int> rootDirBytes = [];
+              for (int i = 0; i < rootSectors; i++) {
+                final sectorData = await readSector(rootExtent + i);
+                if (sectorData != null) {
+                  rootDirBytes.addAll(sectorData);
+                }
+              }
+
+              int offset = 0;
+              int? targetExtent;
+              int? targetSize;
+
+              while (offset < rootDirBytes.length) {
+                final len = rootDirBytes[offset];
+                if (len == 0) {
+                  offset = ((offset + 2048) ~/ 2048) * 2048;
+                  continue;
+                }
+                final recordData = ByteData.sublistView(Uint8List.fromList(rootDirBytes.sublist(offset, offset + len)));
+                final extent = recordData.getUint32(2, Endian.little);
+                final size = recordData.getUint32(10, Endian.little);
+                final nameLen = rootDirBytes[offset + 32];
+                final nameBytes = rootDirBytes.sublist(offset + 33, offset + 33 + nameLen);
+                final name = ascii.decode(nameBytes.where((b) => b != 0).toList()).toUpperCase();
+
+                if (name.startsWith("UMD_DATA.BIN")) {
+                  targetExtent = extent;
+                  targetSize = size;
+                  break;
+                } else if (name.startsWith("SYSTEM.CNF")) {
+                  targetExtent = extent;
+                  targetSize = size;
+                }
+                offset += len;
+              }
+
+              if (targetExtent != null && targetSize != null) {
+                await raf.setPosition(targetExtent * 2048);
+                final targetData = await raf.read(targetSize);
+                final text = ascii.decode(targetData.where((b) => b >= 32 && b <= 126).toList());
+                final match = RegExp(
+                  r'\b(SC[U|E|D]S|SL[U|E|P|M|K|T]S|SLED|SCED|SLKA|SIPS|UL[U|E|J|A]S|UC[U|E|J][S|B]|NP[U|E|J|H][G|H])[-_\s]?(\d{5})\b',
+                  caseSensitive: false,
+                ).firstMatch(text);
+                if (match != null) {
+                  return "${match.group(1)}${match.group(2)}".toUpperCase();
+                }
+              }
+            }
+          }
+        } finally {
+          await raf.close();
+        }
+      }
+
+      // 5. Fallback para contenedores/EBOOTs/PBPs (primeros 2KB, regex de patrón de ID de disco)
+      final bytes = await file.open();
+      final buffer = await bytes.read(2048);
+      await bytes.close();
+      final text = ascii.decode(buffer.map((b) => (b >= 32 && b <= 126) ? b : 46).toList());
+      final regex = RegExp(
+        r'\b(SC[U|E|D]S|SL[U|E|P|M|K|T]S|SLED|SCED|SLKA|SIPS|UL[U|E|J|A]S|UC[U|E|J][S|B]|NP[U|E|J|H][G|H])[-_\s]?(\d{5})\b',
+        caseSensitive: false,
+      );
+      final match = regex.firstMatch(text);
+      if (match != null) {
+        return "${match.group(1)}${match.group(2)}".toUpperCase();
       }
     } catch (_) {}
     return null;
