@@ -548,6 +548,17 @@ system:
         specialConfig: specialConfig,
       );
 
+      final coversDir = lutrisPaths['covers_dir'];
+      final bannersDir = lutrisPaths['banners_dir'];
+      final lutrisIconsDir = lutrisPaths['lutris_icons_dir'];
+      final systemIconsDir = lutrisPaths['system_icons_dir'];
+
+      final hasCover = coversDir != null && File(p.join(coversDir, "$gameSlug.jpg")).existsSync();
+      final hasBanner = bannersDir != null && File(p.join(bannersDir, "$gameSlug.jpg")).existsSync();
+      final hasLutrisIcon = lutrisIconsDir != null && File(p.join(lutrisIconsDir, "$gameSlug.png")).existsSync();
+      final hasSystemIcon = systemIconsDir != null && File(p.join(systemIconsDir, "lutris_$gameSlug.png")).existsSync();
+      final hasIcon = hasLutrisIcon || hasSystemIcon;
+
       try {
         db.execute(
           '''
@@ -556,9 +567,19 @@ system:
               installed, installed_at, platform, lastplayed,
               has_custom_banner, has_custom_icon, has_custom_coverart_big, playtime
           )
-          VALUES (?, ?, ?, NULL, NULL, ?, 1, ?, ?, 0, 0, 0, 0, 0)
+          VALUES (?, ?, ?, NULL, NULL, ?, 1, ?, ?, 0, ?, ?, ?, 0)
         ''',
-          [gameName, gameSlug, runner, configId, uniqueTime, platformName],
+          [
+            gameName, 
+            gameSlug, 
+            runner, 
+            configId, 
+            uniqueTime, 
+            platformName,
+            hasBanner ? 1 : 0,
+            hasIcon ? 1 : 0,
+            hasCover ? 1 : 0
+          ],
         );
 
         count++;

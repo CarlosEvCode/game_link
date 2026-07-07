@@ -198,17 +198,26 @@ class MetadataDownloader {
           }
         }
 
-        if (updated) {
-          db.execute(
-            '''
-            UPDATE games
-            SET name=?, sortname=?, 
-                has_custom_banner=1, has_custom_icon=1, has_custom_coverart_big=1
-            WHERE id=?
-          ''',
-            [sgdbName, sgdbName, gameId],
-          );
-        }
+        final hasCover = File(pCover).existsSync();
+        final hasBanner = File(pBanner).existsSync();
+        final hasIcon = File(pIconSystem).existsSync() || File(pIconLutris).existsSync();
+
+        db.execute(
+          '''
+          UPDATE games
+          SET name=?, sortname=?, 
+              has_custom_banner=?, has_custom_icon=?, has_custom_coverart_big=?
+          WHERE id=?
+        ''',
+          [
+            sgdbName,
+            sgdbName,
+            hasBanner ? 1 : 0,
+            hasIcon ? 1 : 0,
+            hasCover ? 1 : 0,
+            gameId
+          ],
+        );
       } else {
         _log("   [  FAIL ] No se encontró en SteamGridDB");
       }
