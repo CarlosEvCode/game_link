@@ -4,6 +4,8 @@ import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
 import '../core/injector/mame_resolver.dart';
+import '../core/injector/dat_resolver.dart';
+import '../core/metadata/hash_service.dart';
 import '../core/metadata/metadata_downloader.dart';
 import '../core/metadata/screenscraper_service.dart';
 import '../core/lutris/config_manager.dart';
@@ -382,6 +384,65 @@ class _MainWindowState extends State<MainWindow> {
         }
       }
 
+      if (_selectedPlatform != null && DatResolver.isPlatformSupported(_selectedPlatform!.platformId) && detected.isNotEmpty) {
+        final platformId = _selectedPlatform!.platformId;
+        _log("Resolviendo nombres de juegos usando base de datos local No-Intro/Redump...");
+        final chunkSize = 50;
+        int processedCount = 0;
+        final List<String> unresolvedSlugs = [];
+
+        // Asegurarnos de que el DAT esté listo (si es de GitHub se descarga y se guarda localmente)
+        final datFile = await DatResolver.getDatFile(platformId);
+        if (datFile == null) {
+          _log("[  WARN ] No se pudo cargar la base de datos local para $platformId");
+        } else {
+          for (var i = 0; i < filteredFiles.length; i += chunkSize) {
+            final chunk = filteredFiles.skip(i).take(chunkSize).toList();
+            _log("Calculando hashes y buscando en base de datos local: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
+            
+            final Map<String, String> resolvedChunk = {};
+            for (final file in chunk) {
+              final slug = p.basenameWithoutExtension(file.path);
+              try {
+                final hashes = await HashService.calculateHashes(file.path);
+                final resolvedName = await DatResolver.resolveGameName(
+                  platformId: platformId,
+                  crc32: hashes.crc32,
+                  md5: hashes.md5,
+                  sha1: hashes.sha1,
+                  filePath: file.path,
+                );
+                if (resolvedName != null) {
+                  resolvedChunk[slug] = resolvedName;
+                } else {
+                  unresolvedSlugs.add(slug);
+                }
+              } catch (_) {
+                unresolvedSlugs.add(slug);
+              }
+            }
+
+            if (mounted) {
+              setState(() {
+                for (var item in _previewItems) {
+                  final slug = p.basenameWithoutExtension(item.filePath);
+                  if (resolvedChunk.containsKey(slug)) {
+                    item.displayName = resolvedChunk[slug]!;
+                  }
+                }
+              });
+            }
+            
+            processedCount += chunk.length;
+            _log("Progreso offline: $processedCount / ${filteredFiles.length} juegos procesados.");
+          }
+
+          if (unresolvedSlugs.isNotEmpty) {
+            _log("[  WARN ] Base de datos local no pudo identificar ${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
+          }
+        }
+      }
+
       _log("${detected.length} juegos encontrados.");
     } catch (e) {
       _log("Error: $e");
@@ -636,7 +697,7 @@ class _MainWindowState extends State<MainWindow> {
       if (action == 'inject' || action == 'full') {
         final selectedFiles = _previewItems.where((item) => item.isSelected).map((item) => File(item.filePath)).toList();
         final Map<String, String> customNames = {
-          for (var item in _previewItems.where((i) => i.isSelected && (i.wasManuallyEdited || _selectedPlatform?.platformId == 'mame')))
+          for (var item in _previewItems.where((i) => i.isSelected && (i.wasManuallyEdited || _selectedPlatform?.platformId == 'mame' || DatResolver.isPlatformSupported(_selectedPlatform!.platformId))))
             item.filePath: item.displayName,
         };
         final List<String> manuallyEditedPaths = _previewItems

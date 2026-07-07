@@ -6,6 +6,7 @@ import '../metadata/screenscraper_service.dart';
 import '../lutris/rom_cache_repository.dart';
 import '../metadata/hash_service.dart';
 import 'mame_resolver.dart';
+import 'dat_resolver.dart';
 
 class RomInjector {
   final Map<String, String?> lutrisPaths;
@@ -106,6 +107,43 @@ class RomInjector {
     // Si tenemos cache válido, usarlo
     if (cached != null && cached.identifiedName != null) {
       return cached.identifiedName!;
+    }
+
+    // Si es una plataforma clásica soportada offline por DAT, intentar resolverla offline primero
+    if (DatResolver.isPlatformSupported(platformKey)) {
+      try {
+        final hashes = await HashService.calculateHashes(filePath);
+        final offlineName = await DatResolver.resolveGameName(
+          platformId: platformKey,
+          crc32: hashes.crc32,
+          md5: hashes.md5,
+          sha1: hashes.sha1,
+          filePath: filePath,
+        );
+        if (offlineName != null) {
+          _log("[  INFO ] Nombre resuelto offline (DAT): $offlineName");
+          if (reuseIdentification) {
+            final file = File(filePath);
+            if (file.existsSync()) {
+              final stat = file.statSync();
+              _romCache.cacheRomInfo(
+                filePath: filePath,
+                fileSize: stat.size,
+                lastModified: stat.modified,
+                sha1: hashes.sha1,
+                md5: hashes.md5,
+                crc32: hashes.crc32,
+                identifiedName: offlineName,
+                systemId: screenScraperId,
+                isIdentified: true,
+              );
+            }
+          }
+          return offlineName;
+        }
+      } catch (e) {
+        _log("[  WARN ] Error al resolver offline (DAT): $e");
+      }
     }
 
     // Si no queremos alta precisión o no tenemos systemId, usar nombre de archivo o MAME local
