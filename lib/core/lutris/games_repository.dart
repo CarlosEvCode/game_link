@@ -75,6 +75,7 @@ class GamesRepository {
 
   List<Game> getGamesByRunners(
     List<String> runners, {
+    String? platform,
     int? limit,
     int offset = 0,
     String? filterMode,
@@ -85,6 +86,12 @@ class GamesRepository {
     final db = sqlite3.open(dbPath);
     try {
       String whereClause = "WHERE runner IN ${_inClause(runners.length)} AND installed = 1";
+      final params = <dynamic>[...runners];
+
+      if (platform != null) {
+        whereClause += " AND platform = ?";
+        params.add(platform);
+      }
 
       if (filterMode == 'missingCover') {
         whereClause +=
@@ -95,8 +102,6 @@ class GamesRepository {
       } else if (filterMode == 'missingIcon') {
         whereClause += " AND (has_custom_icon = 0 OR has_custom_icon IS NULL)";
       }
-
-      final params = <dynamic>[...runners];
 
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         whereClause += " AND (LOWER(name) LIKE ? OR LOWER(slug) LIKE ?)";
@@ -125,13 +130,18 @@ class GamesRepository {
     }
   }
 
-  GameMediaStats getMediaStatsByRunners(List<String> runners, {String? searchQuery}) {
+  GameMediaStats getMediaStatsByRunners(List<String> runners, {String? platform, String? searchQuery}) {
     if (runners.isEmpty) return const GameMediaStats(total: 0, missingCover: 0, missingBanner: 0, missingIcon: 0);
 
     final db = sqlite3.open(dbPath);
     try {
       String whereClause = "WHERE runner IN ${_inClause(runners.length)} AND installed = 1";
       final params = <dynamic>[...runners];
+
+      if (platform != null) {
+        whereClause += " AND platform = ?";
+        params.add(platform);
+      }
 
       if (searchQuery != null && searchQuery.trim().isNotEmpty) {
         whereClause += " AND (LOWER(name) LIKE ? OR LOWER(slug) LIKE ?)";
@@ -161,6 +171,7 @@ class GamesRepository {
 
   void syncMetadataWithDiskByRunners({
     required List<String> runners,
+    String? platform,
     required String coversDir,
     required String bannersDir,
     required String iconsDir,
@@ -170,10 +181,15 @@ class GamesRepository {
 
     final db = sqlite3.open(dbPath);
     try {
-      final results = db.select(
-        "SELECT id, slug, has_custom_coverart_big, has_custom_banner, has_custom_icon FROM games WHERE runner IN ${_inClause(runners.length)} AND installed = 1",
-        [...runners],
-      );
+      String query = "SELECT id, slug, has_custom_coverart_big, has_custom_banner, has_custom_icon FROM games WHERE runner IN ${_inClause(runners.length)} AND installed = 1";
+      final params = <dynamic>[...runners];
+
+      if (platform != null) {
+        query += " AND platform = ?";
+        params.add(platform);
+      }
+
+      final results = db.select(query, params);
 
       for (final row in results) {
         final int id = row['id'];

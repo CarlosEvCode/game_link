@@ -159,6 +159,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       _hasMore = true;
       _stats = _repo.getMediaStatsByRunners(
         _selectedRunners,
+        platform: _selectedPlatform?.platformName,
         searchQuery: _searchQuery,
       );
     });
@@ -171,6 +172,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     await Future.microtask(() {
       _repo.syncMetadataWithDiskByRunners(
         runners: _selectedRunners,
+        platform: _selectedPlatform?.platformName,
         coversDir: _lutrisPaths.coversDir,
         bannersDir: _lutrisPaths.bannersDir,
         iconsDir: _lutrisPaths.systemIconsDir,
@@ -188,6 +190,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     final offset = _page * _limit;
     final fetchedGames = _repo.getGamesByRunners(
       _selectedRunners,
+      platform: _selectedPlatform?.platformName,
       limit: _limit,
       offset: offset,
       filterMode: _filterMode != 'all' ? _filterMode : null,
@@ -232,7 +235,10 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     final selectedGames = _games
         .where((g) => _selectedGameIds.contains(g.id))
         .toList();
-    final allPlatformGames = _repo.getGamesByRunners(_selectedRunners);
+    final allPlatformGames = _repo.getGamesByRunners(
+      _selectedRunners,
+      platform: _selectedPlatform?.platformName,
+    );
     final targetGames = selectedOnly ? selectedGames : allPlatformGames;
 
     if (targetGames.isEmpty) {
