@@ -158,30 +158,30 @@ class DatResolver {
           final indexShift = headerBytes[21];
           final numBlocks = totalSize ~/ blockSize;
 
-          final indexTableBytes = await raf.read((numBlocks + 1) * 4);
-          if (indexTableBytes.length < (numBlocks + 1) * 4) return null;
-          final indexTableData = ByteData.sublistView(Uint8List.fromList(indexTableBytes));
-
-          final List<int> blockOffsets = [];
-          final List<bool> blockCompressed = [];
-          for (int i = 0; i <= numBlocks; i++) {
-            final entry = indexTableData.getUint32(i * 4, Endian.little);
-            final isUncompressed = (entry & 0x80000000) != 0;
-            final offset = (entry & 0x7FFFFFFF) << indexShift;
-            blockOffsets.add(offset);
-            blockCompressed.add(!isUncompressed);
-          }
-
+          // Helper local para leer y descomprimir un sector on-demand
           Future<Uint8List?> readSector(int sector) async {
-            if (sector >= blockOffsets.length - 1) return null;
-            final offset = blockOffsets[sector];
-            final nextOffset = blockOffsets[sector + 1];
+            if (sector >= numBlocks) return null;
+            
+            // Cada entrada del índice es de 4 bytes, ubicada a partir de la posición 24
+            await raf.setPosition(24 + sector * 4);
+            final indexBytes = await raf.read(8);
+            if (indexBytes.length < 8) return null;
+
+            final indexData = ByteData.sublistView(Uint8List.fromList(indexBytes));
+            final entryCurrent = indexData.getUint32(0, Endian.little);
+            final entryNext = indexData.getUint32(4, Endian.little);
+
+            final isUncompressed = (entryCurrent & 0x80000000) != 0;
+            final offset = (entryCurrent & 0x7FFFFFFF) << indexShift;
+            final nextOffset = (entryNext & 0x7FFFFFFF) << indexShift;
             final size = nextOffset - offset;
+
             if (size <= 0) return null;
 
             await raf.setPosition(offset);
             final data = await raf.read(size);
-            if (blockCompressed[sector]) {
+
+            if (!isUncompressed) {
               try {
                 return Uint8List.fromList(ZLibDecoder(raw: true).convert(data));
               } catch (_) {
