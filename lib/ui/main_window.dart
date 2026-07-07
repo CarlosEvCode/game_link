@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:sqlite3/sqlite3.dart' show sqlite3;
 import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
@@ -20,14 +19,12 @@ class InjectionItem {
   String displayName;
   bool isSelected;
   bool wasManuallyEdited;
-  bool isAlreadyInLutris;
 
   InjectionItem({
     required this.filePath,
     required this.displayName,
     this.isSelected = true,
     this.wasManuallyEdited = false,
-    this.isAlreadyInLutris = false,
   });
 }
 
@@ -331,39 +328,6 @@ class _MainWindowState extends State<MainWindow> {
         (msg, [progress]) => _log(msg),
       );
 
-      final Set<String> injectedSlugs = {};
-      if (_lutrisPaths != null && _lutrisPaths!['db'] != null && _selectedEmulator != null) {
-        final dbPath = _lutrisPaths!['db']!;
-        final file = File(dbPath);
-        if (file.existsSync()) {
-          final db = sqlite3.open(dbPath);
-          try {
-            final results = db.select(
-              "SELECT slug, configpath FROM games WHERE runner = ?",
-              [_selectedEmulator!.runner],
-            );
-            for (final row in results) {
-              final s = row['slug'] as String?;
-              if (s != null) {
-                injectedSlugs.add(s.toLowerCase());
-              }
-              final configPath = row['configpath'] as String?;
-              if (configPath != null && configPath.contains('-')) {
-                final lastDash = configPath.lastIndexOf('-');
-                if (lastDash > 0) {
-                  final slugPrefix = configPath.substring(0, lastDash).toLowerCase();
-                  injectedSlugs.add(slugPrefix);
-                }
-              }
-            }
-          } catch (e) {
-            _log("[  WARN ] Error al leer juegos de Lutris: $e");
-          } finally {
-            db.dispose();
-          }
-        }
-      }
-
       final List<InjectionItem> detected = [];
       if (_useOfflineId) {
         final romCache = RomCacheRepository();
@@ -378,13 +342,10 @@ class _MainWindowState extends State<MainWindow> {
               displayName = cached.identifiedName!;
             }
 
-            final isAlreadyInLutris = injectedSlugs.contains(slug.toLowerCase());
             detected.add(
               InjectionItem(
                 filePath: file.path,
                 displayName: displayName,
-                isAlreadyInLutris: isAlreadyInLutris,
-                isSelected: !isAlreadyInLutris,
               ),
             );
           }
@@ -394,13 +355,10 @@ class _MainWindowState extends State<MainWindow> {
       } else {
         for (var file in filteredFiles) {
           final slug = p.basenameWithoutExtension(file.path);
-          final isAlreadyInLutris = injectedSlugs.contains(slug.toLowerCase());
           detected.add(
             InjectionItem(
               filePath: file.path,
               displayName: slug,
-              isAlreadyInLutris: isAlreadyInLutris,
-              isSelected: !isAlreadyInLutris,
             ),
           );
         }
@@ -1437,28 +1395,7 @@ class _MainWindowState extends State<MainWindow> {
                   onChanged: (val) => setState(() => item.isSelected = val ?? false),
                   side: const BorderSide(color: Color(0xFF1A1A1A)),
                 ),
-                title: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        item.displayName, 
-                        style: TextStyle(
-                          fontSize: 12, 
-                          color: item.isAlreadyInLutris ? Colors.white30 : Colors.white70,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    if (item.isAlreadyInLutris) ...[
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.check_circle_outline, 
-                        size: 14, 
-                        color: Colors.white24,
-                      ),
-                    ],
-                  ],
-                ),
+                title: Text(item.displayName, style: const TextStyle(fontSize: 12, color: Colors.white70)),
                 trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), onPressed: () => _editItemName(item)),
               );
             },
