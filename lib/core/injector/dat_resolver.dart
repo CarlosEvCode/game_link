@@ -326,7 +326,35 @@ class DatResolver {
         }
       }
 
-      // 5. Fallback para contenedores/EBOOTs/PBPs (primeros 2KB, regex de patrón de ID de disco)
+      // 5. Soporte para GameCube y Wii (.iso y .wbfs)
+      if (platformId == 'gamecube' || platformId == 'wii') {
+        if (ext == '.iso') {
+          final bytes = await file.open();
+          try {
+            final buffer = await bytes.read(6);
+            final serial = ascii.decode(buffer.where((b) => b >= 32 && b <= 126).toList()).trim();
+            if (serial.length == 6) {
+              return serial;
+            }
+          } finally {
+            await bytes.close();
+          }
+        } else if (ext == '.wbfs') {
+          final bytes = await file.open();
+          try {
+            await bytes.setPosition(0x200);
+            final buffer = await bytes.read(6);
+            final serial = ascii.decode(buffer.where((b) => b >= 32 && b <= 126).toList()).trim();
+            if (serial.length == 6) {
+              return serial;
+            }
+          } finally {
+            await bytes.close();
+          }
+        }
+      }
+
+      // 6. Fallback para contenedores/EBOOTs/PBPs (primeros 2KB, regex de patrón de ID de disco)
       final bytes = await file.open();
       final buffer = await bytes.read(2048);
       await bytes.close();

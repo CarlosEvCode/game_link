@@ -390,8 +390,9 @@ class _MainWindowState extends State<MainWindow> {
                 continue;
               }
 
-              _log(platformId == 'mame'
-                  ? "Buscando en base de datos local MAME: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}..."
+              final isNoHashPlatform = (platformId == 'mame' || platformId == 'gamecube' || platformId == 'wii');
+              _log(isNoHashPlatform
+                  ? "Buscando en base de datos local $platformId: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}..."
                   : "Calculando hashes y buscando en base de datos local: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
               
               final Map<String, String> resolvedChunk = {};
@@ -403,7 +404,7 @@ class _MainWindowState extends State<MainWindow> {
                   String? md5;
                   String? sha1;
 
-                  if (platformId == 'mame') {
+                  if (isNoHashPlatform) {
                     resolvedName = await DatResolver.resolveGameName(
                       platformId: platformId,
                       filePath: file.path,
