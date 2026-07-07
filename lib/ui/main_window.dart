@@ -339,13 +339,21 @@ class _MainWindowState extends State<MainWindow> {
           final db = sqlite3.open(dbPath);
           try {
             final results = db.select(
-              "SELECT slug FROM games WHERE runner = ?",
+              "SELECT slug, configpath FROM games WHERE runner = ?",
               [_selectedEmulator!.runner],
             );
             for (final row in results) {
               final s = row['slug'] as String?;
               if (s != null) {
                 injectedSlugs.add(s.toLowerCase());
+              }
+              final configPath = row['configpath'] as String?;
+              if (configPath != null && configPath.contains('-')) {
+                final lastDash = configPath.lastIndexOf('-');
+                if (lastDash > 0) {
+                  final slugPrefix = configPath.substring(0, lastDash).toLowerCase();
+                  injectedSlugs.add(slugPrefix);
+                }
               }
             }
           } catch (e) {
@@ -1436,37 +1444,17 @@ class _MainWindowState extends State<MainWindow> {
                         item.displayName, 
                         style: TextStyle(
                           fontSize: 12, 
-                          color: item.isAlreadyInLutris ? Colors.white38 : Colors.white70,
-                          decoration: item.isAlreadyInLutris ? TextDecoration.none : null,
+                          color: item.isAlreadyInLutris ? Colors.white30 : Colors.white70,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     if (item.isAlreadyInLutris) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF132E20),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: const Color(0xFF1E4530), width: 0.5),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.check, size: 10, color: Color(0xFF52C48A)),
-                            SizedBox(width: 3),
-                            Text(
-                              'EN LUTRIS',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF52C48A),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.check_circle_outline, 
+                        size: 14, 
+                        color: Colors.white24,
                       ),
                     ],
                   ],
