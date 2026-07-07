@@ -435,6 +435,7 @@ system:
     Map<String, dynamic>? specialConfig,
     bool useHighPrecision = false,
     bool reuseIdentification = true,
+    bool useOfflineId = true,
     List<File>? customFiles,
     Map<String, String>? customNames,
     List<String>? manuallyEditedPaths,
@@ -507,7 +508,7 @@ system:
       final isManuallyEdited = manuallyEditedPaths?.contains(fullRomPath) ?? false;
       final isAlreadyIdentified = gameName != gameSlug;
 
-      if (useHighPrecision && !isManuallyEdited && !isAlreadyIdentified) {
+      if (useOfflineId && useHighPrecision && !isManuallyEdited && !isAlreadyIdentified) {
         if (_shouldCalculateHash(
           fullRomPath,
           reuseIdentification: reuseIdentification,

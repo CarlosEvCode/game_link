@@ -55,6 +55,7 @@ class _MainWindowState extends State<MainWindow> {
   bool _cleanOldGames = true;
   bool _useHighPrecision = false;
   bool _reuseIdentification = true;
+  bool _useOfflineId = true;
   bool _isRecursive = false;
   bool _isProcessing = false;
 
@@ -328,27 +329,39 @@ class _MainWindowState extends State<MainWindow> {
       );
 
       final List<InjectionItem> detected = [];
-      final romCache = RomCacheRepository();
-      try {
+      if (_useOfflineId) {
+        final romCache = RomCacheRepository();
+        try {
+          for (var file in filteredFiles) {
+            final slug = p.basenameWithoutExtension(file.path);
+            String displayName = slug;
+
+            // Verificar si ya está en la caché local SQLite para cargar al instante
+            final cached = romCache.shouldProcessRom(file.path);
+            if (cached != null && cached.identifiedName != null) {
+              displayName = cached.identifiedName!;
+            }
+
+            detected.add(
+              InjectionItem(
+                filePath: file.path,
+                displayName: displayName,
+              ),
+            );
+          }
+        } finally {
+          romCache.dispose();
+        }
+      } else {
         for (var file in filteredFiles) {
           final slug = p.basenameWithoutExtension(file.path);
-          String displayName = slug;
-
-          // Verificar si ya está en la caché local SQLite para cargar al instante
-          final cached = romCache.shouldProcessRom(file.path);
-          if (cached != null && cached.identifiedName != null) {
-            displayName = cached.identifiedName!;
-          }
-
           detected.add(
             InjectionItem(
               filePath: file.path,
-              displayName: displayName,
+              displayName: slug,
             ),
           );
         }
-      } finally {
-        romCache.dispose();
       }
 
       if (mounted) {
@@ -357,7 +370,7 @@ class _MainWindowState extends State<MainWindow> {
         });
       }
 
-      if (_selectedPlatform != null && DatResolver.isPlatformSupported(_selectedPlatform!.platformId) && detected.isNotEmpty) {
+      if (_useOfflineId && _selectedPlatform != null && DatResolver.isPlatformSupported(_selectedPlatform!.platformId) && detected.isNotEmpty) {
         final platformId = _selectedPlatform!.platformId;
         _log("Resolviendo nombres de juegos usando base de datos local No-Intro/Redump/MAME...");
         final chunkSize = 50;
@@ -471,7 +484,7 @@ class _MainWindowState extends State<MainWindow> {
         }
       }
 
-      if (_selectedPlatform?.platformId == 'mame' && detected.isNotEmpty) {
+      if (_useOfflineId && _selectedPlatform?.platformId == 'mame' && detected.isNotEmpty) {
         // Recolectamos únicamente los archivos que MAME.dat no pudo identificar (displayName igual al slug)
         final List<File> unresolvedMameFiles = [];
         for (var item in _previewItems) {
@@ -815,6 +828,7 @@ class _MainWindowState extends State<MainWindow> {
           cleanOld: _cleanOldGames,
           useHighPrecision: _useHighPrecision,
           reuseIdentification: _reuseIdentification,
+          useOfflineId: _useOfflineId,
           customFiles: selectedFiles.isNotEmpty ? selectedFiles : null,
           customNames: customNames,
           manuallyEditedPaths: manuallyEditedPaths,
@@ -1173,6 +1187,10 @@ class _MainWindowState extends State<MainWindow> {
         _buildStepHeader('03', 'PREFERENCIAS'),
         const SizedBox(height: 16),
         _buildCompactCheckbox('Limpiar juegos previos', _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
+        _buildCompactCheckbox('Autodetectar nombres (offline)', _useOfflineId, (val) {
+          setState(() => _useOfflineId = val ?? false);
+          _scanFolder();
+        }),
         _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) => setState(() => _useHighPrecision = val ?? false)),
         _buildCompactCheckbox('Escaneo recursivo', _isRecursive, (val) {
           setState(() => _isRecursive = val ?? false);
