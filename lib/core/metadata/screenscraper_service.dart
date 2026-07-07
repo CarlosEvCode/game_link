@@ -417,18 +417,73 @@ class ScreenScraperService {
       'https://www.screenscraper.fr/api2/ssuserInfos.php';
 
   // Credenciales de desarrollador embebidas en compilación via --dart-define
-  static const String _softName = String.fromEnvironment(
-    'SS_SOFT_NAME',
-    defaultValue: 'GameLink',
-  );
-  static const String _devId = String.fromEnvironment(
-    'SS_DEV_ID',
-    defaultValue: '',
-  );
-  static const String _devPassword = String.fromEnvironment(
-    'SS_DEV_PASSWORD',
-    defaultValue: '',
-  );
+  static String? _cachedSoftName;
+  static String? _cachedDevId;
+  static String? _cachedDevPassword;
+
+  static Future<void> _ensureEnvCredentials() async {
+    if (_cachedDevId != null) return;
+
+    // 1. Intentar cargar desde el archivo .env en el directorio actual (útil en desarrollo)
+    try {
+      final envFile = File('.env');
+      if (envFile.existsSync()) {
+        final lines = envFile.readAsLinesSync();
+        for (final line in lines) {
+          final trimmed = line.trim();
+          if (trimmed.isEmpty || trimmed.startsWith('#')) continue;
+          final parts = trimmed.split('=');
+          if (parts.length >= 2) {
+            final key = parts[0].trim();
+            final value = parts.sublist(1).join('=').trim();
+            if (key == 'SS_DEV_ID') _cachedDevId = value;
+            if (key == 'SS_DEV_PASSWORD') _cachedDevPassword = value;
+            if (key == 'SS_SOFT_NAME') _cachedSoftName = value;
+          }
+        }
+      }
+    } catch (_) {}
+
+    // 2. Intentar cargar desde las variables de entorno del sistema
+    try {
+      final envId = Platform.environment['SS_DEV_ID'];
+      if (envId != null && envId.isNotEmpty) _cachedDevId = envId;
+      final envPass = Platform.environment['SS_DEV_PASSWORD'];
+      if (envPass != null && envPass.isNotEmpty) _cachedDevPassword = envPass;
+      final envSoft = Platform.environment['SS_SOFT_NAME'];
+      if (envSoft != null && envSoft.isNotEmpty) _cachedSoftName = envSoft;
+    } catch (_) {}
+
+    // 3. Intentar cargar desde ConfigManager
+    try {
+      if (_cachedDevId == null || _cachedDevId!.isEmpty) {
+        final savedId = await ConfigManager.getDevId();
+        if (savedId.isNotEmpty) _cachedDevId = savedId;
+      }
+      if (_cachedDevPassword == null || _cachedDevPassword!.isEmpty) {
+        final savedPass = await ConfigManager.getDevPassword();
+        if (savedPass.isNotEmpty) _cachedDevPassword = savedPass;
+      }
+    } catch (_) {}
+
+    // 4. Fallbacks con los valores de desarrollo por defecto del usuario
+    // 4. Fallbacks con valores vacíos por defecto para seguridad (se inyectan al compilar con --dart-define)
+    _cachedSoftName ??= const String.fromEnvironment('SS_SOFT_NAME', defaultValue: 'LutrisGameStation');
+    _cachedDevId ??= const String.fromEnvironment('SS_DEV_ID', defaultValue: '');
+    _cachedDevPassword ??= const String.fromEnvironment('SS_DEV_PASSWORD', defaultValue: '');
+  }
+
+  static String get _softName {
+    return _cachedSoftName ?? const String.fromEnvironment('SS_SOFT_NAME', defaultValue: 'LutrisGameStation');
+  }
+
+  static String get _devId {
+    return _cachedDevId ?? const String.fromEnvironment('SS_DEV_ID', defaultValue: '');
+  }
+
+  static String get _devPassword {
+    return _cachedDevPassword ?? const String.fromEnvironment('SS_DEV_PASSWORD', defaultValue: '');
+  }
 
   // Rate limiter y cache (singleton)
   static RateLimiter? _rateLimiter;
@@ -493,6 +548,7 @@ class ScreenScraperService {
 
   /// Obtiene información de quota del usuario
   static Future<ScreenScraperQuota?> getQuota() async {
+    await _ensureEnvCredentials();
     if (!hasDevCredentials) {
       print(
         '[  WARN ] ScreenScraper: Credenciales de desarrollador no configuradas en .env',
@@ -539,6 +595,7 @@ class ScreenScraperService {
 
   /// Valida las credenciales del usuario
   static Future<bool> validateCredentials() async {
+    await _ensureEnvCredentials();
     if (!hasDevCredentials) return false;
     final quota = await getQuota();
     return quota != null;
@@ -547,6 +604,7 @@ class ScreenScraperService {
   /// Verifica si se puede iniciar un escaneo masivo
   static Future<({bool canProceed, String message, int? remainingRequests})>
   canStartMassiveScan(int numberOfRoms) async {
+    await _ensureEnvCredentials();
     if (!hasDevCredentials) {
       return (
         canProceed: false,
@@ -700,6 +758,7 @@ class ScreenScraperService {
     String? fileName,
     String systemId = '57',
   }) async {
+    await _ensureEnvCredentials();
     // Verificar credenciales
     if (!hasDevCredentials) {
       throw AuthenticationException(

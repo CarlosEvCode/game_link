@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import '../metadata/screenscraper_service.dart';
 import '../lutris/rom_cache_repository.dart';
 import '../metadata/hash_service.dart';
+import 'mame_resolver.dart';
 
 class RomInjector {
   final Map<String, String?> lutrisPaths;
@@ -107,9 +108,23 @@ class RomInjector {
       return cached.identifiedName!;
     }
 
-    // Si no queremos alta precisión o no tenemos systemId, usar nombre de archivo
+    // Si no queremos alta precisión o no tenemos systemId, usar nombre de archivo o MAME local
     if (!useHighPrecision || screenScraperId == null) {
-      // Guardar en cache como no identificado
+      String finalName = fallbackName;
+      bool isMameResolved = false;
+
+      if (platformKey == 'mame') {
+        try {
+          final slug = p.basenameWithoutExtension(filePath);
+          final resolvedNames = await MameResolver.resolveNames([slug]);
+          if (resolvedNames.containsKey(slug)) {
+            finalName = resolvedNames[slug]!;
+            isMameResolved = true;
+          }
+        } catch (_) {}
+      }
+
+      // Guardar en cache como no identificado (o identificado con MAME local)
       if (reuseIdentification) {
         final file = File(filePath);
         if (file.existsSync()) {
@@ -118,13 +133,13 @@ class RomInjector {
             filePath: filePath,
             fileSize: stat.size,
             lastModified: stat.modified,
-            identifiedName: fallbackName,
+            identifiedName: finalName,
             systemId: screenScraperId,
-            isIdentified: false,
+            isIdentified: isMameResolved,
           );
         }
       }
-      return fallbackName;
+      return finalName;
     }
 
     // Calcular hash e identificar con ScreenScraper
@@ -153,7 +168,21 @@ class RomInjector {
         _log("[  INFO ] Identificado: $finalName");
       } else {
         finalName = fallbackName;
-        _log("[  WARN ] No identificado, usando nombre de archivo");
+        if (platformKey == 'mame') {
+          try {
+            final slug = p.basenameWithoutExtension(filePath);
+            final resolvedNames = await MameResolver.resolveNames([slug]);
+            if (resolvedNames.containsKey(slug)) {
+              finalName = resolvedNames[slug]!;
+              wasIdentified = true;
+              _log("[  INFO ] MAME local (fallback): $finalName");
+            }
+          } catch (_) {}
+        }
+
+        if (!wasIdentified) {
+          _log("[  WARN ] No identificado por ScreenScraper, usando nombre de archivo");
+        }
       }
 
       // Guardar en cache
@@ -183,7 +212,20 @@ class RomInjector {
     } catch (e) {
       _log("[  WARN ] Error de identificación: $e");
 
-      // Guardar error en cache para evitar reintentar
+      // Guardar error en cache para evitar reintentar (intentando MAME local primero)
+      String finalName = fallbackName;
+      bool wasIdentified = false;
+      if (platformKey == 'mame') {
+        try {
+          final slug = p.basenameWithoutExtension(filePath);
+          final resolvedNames = await MameResolver.resolveNames([slug]);
+          if (resolvedNames.containsKey(slug)) {
+            finalName = resolvedNames[slug]!;
+            wasIdentified = true;
+          }
+        } catch (_) {}
+      }
+
       if (reuseIdentification) {
         final file = File(filePath);
         if (file.existsSync()) {
@@ -192,14 +234,14 @@ class RomInjector {
             filePath: filePath,
             fileSize: stat.size,
             lastModified: stat.modified,
-            identifiedName: fallbackName,
+            identifiedName: finalName,
             systemId: screenScraperId,
-            isIdentified: false,
+            isIdentified: wasIdentified,
           );
         }
       }
 
-      return fallbackName;
+      return finalName;
     }
   }
 
@@ -357,6 +399,7 @@ system:
     bool reuseIdentification = true,
     List<File>? customFiles,
     Map<String, String>? customNames,
+    List<String>? manuallyEditedPaths,
   }) async {
     final folder = Directory(romFolder);
     if (!folder.existsSync()) {
@@ -423,15 +466,17 @@ system:
         continue;
       }
 
-      if (useHighPrecision &&
-          (customNames == null || !customNames.containsKey(fullRomPath))) {
+      final isManuallyEdited = manuallyEditedPaths?.contains(fullRomPath) ?? false;
+      final isAlreadyIdentified = gameName != gameSlug;
+
+      if (useHighPrecision && !isManuallyEdited && !isAlreadyIdentified) {
         if (_shouldCalculateHash(
           fullRomPath,
           reuseIdentification: reuseIdentification,
         )) {
           gameName = await _getIdentifiedName(
             fullRomPath,
-            gameSlug,
+            gameName,
             useHighPrecision: useHighPrecision,
             reuseIdentification: reuseIdentification,
           );

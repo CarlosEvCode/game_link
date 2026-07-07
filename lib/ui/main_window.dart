@@ -3,6 +3,7 @@ import 'package:file_selector/file_selector.dart';
 import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
+import '../core/injector/mame_resolver.dart';
 import '../core/metadata/metadata_downloader.dart';
 import '../core/metadata/screenscraper_service.dart';
 import '../core/lutris/config_manager.dart';
@@ -45,6 +46,7 @@ class _MainWindowState extends State<MainWindow> {
   String _apiKey = '';
   String _ssUser = '';
   String _ssPassword = '';
+  String _mameBinaryPath = '';
 
   List<InjectionItem> _previewItems = [];
   bool _isScanning = false;
@@ -80,6 +82,22 @@ class _MainWindowState extends State<MainWindow> {
     final key = await ConfigManager.getApiKey();
     final ssUser = await ConfigManager.getSSUser();
     final ssPass = await ConfigManager.getSSPassword();
+    final mamePath = await ConfigManager.getMameBinaryPath();
+
+    if (mamePath.isEmpty) {
+      final autoPath = await MameResolver.findMameBinary();
+      if (autoPath != null) {
+        setState(() {
+          _mameBinaryPath = autoPath;
+        });
+        await ConfigManager.saveMameBinaryPath(autoPath);
+        _log("MAME detectado automáticamente en: $autoPath");
+      }
+    } else {
+      setState(() {
+        _mameBinaryPath = mamePath;
+      });
+    }
 
     setState(() {
       _apiKey = key;
@@ -258,6 +276,27 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
+  Future<void> _browseMameBinary() async {
+    final XFile? file = await openFile(
+      acceptedTypeGroups: [
+        const XTypeGroup(
+          label: 'Binarios/AppImages',
+          extensions: ['appimage', 'bin', 'sh'],
+        ),
+      ],
+    );
+    if (file != null) {
+      setState(() {
+        _mameBinaryPath = file.path;
+      });
+      await ConfigManager.saveMameBinaryPath(file.path);
+      _log("Ejecutable de MAME seleccionado: ${file.path}");
+      if (_selectedPlatform?.platformId == 'mame') {
+        _scanFolder();
+      }
+    }
+  }
+
   Future<void> _scanFolder() async {
     if (_romFolder.isEmpty || _selectedPlatform == null || _selectedEmulator == null) return;
 
@@ -288,24 +327,70 @@ class _MainWindowState extends State<MainWindow> {
 
       final List<InjectionItem> detected = [];
       for (var file in filteredFiles) {
+        final slug = p.basenameWithoutExtension(file.path);
         detected.add(
           InjectionItem(
             filePath: file.path,
-            displayName: p.basenameWithoutExtension(file.path),
+            displayName: slug,
           ),
         );
       }
 
-      setState(() {
-        _previewItems = detected;
-      });
+      if (mounted) {
+        setState(() {
+          _previewItems = detected;
+        });
+      }
+
+      if (_selectedPlatform?.platformId == 'mame' && detected.isNotEmpty) {
+        _log("Resolviendo nombres de juegos con MAME...");
+        final romNames = filteredFiles.map((file) => p.basenameWithoutExtension(file.path)).toList();
+        final chunkSize = 50; // Balance perfecto de rendimiento y retroalimentación visual
+        int processedCount = 0;
+        final List<String> unresolvedSlugs = [];
+
+        for (var i = 0; i < romNames.length; i += chunkSize) {
+          final chunk = romNames.skip(i).take(chunkSize).toList();
+          _log("Resolviendo lote ${i ~/ chunkSize + 1} de ${(romNames.length / chunkSize).ceil()} (${chunk.length} ROMs)...");
+          
+          final resolvedChunk = await MameResolver.resolveNames(chunk);
+
+          // Rastrear cuáles no se pudieron resolver
+          for (final slug in chunk) {
+            if (!resolvedChunk.containsKey(slug)) {
+              unresolvedSlugs.add(slug);
+            }
+          }
+          
+          if (mounted) {
+            setState(() {
+              for (var item in _previewItems) {
+                final slug = p.basenameWithoutExtension(item.filePath);
+                if (resolvedChunk.containsKey(slug)) {
+                  item.displayName = resolvedChunk[slug]!;
+                }
+              }
+            });
+          }
+          
+          processedCount += chunk.length;
+          _log("Progreso de MAME: $processedCount / ${romNames.length} juegos procesados.");
+        }
+
+        if (unresolvedSlugs.isNotEmpty) {
+          _log("[  WARN ] MAME no pudo identificar ${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
+        }
+      }
+
       _log("${detected.length} juegos encontrados.");
     } catch (e) {
       _log("Error: $e");
     } finally {
-      setState(() {
-        _isScanning = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isScanning = false;
+        });
+      }
     }
   }
 
@@ -551,9 +636,13 @@ class _MainWindowState extends State<MainWindow> {
       if (action == 'inject' || action == 'full') {
         final selectedFiles = _previewItems.where((item) => item.isSelected).map((item) => File(item.filePath)).toList();
         final Map<String, String> customNames = {
-          for (var item in _previewItems.where((i) => i.isSelected && i.wasManuallyEdited))
+          for (var item in _previewItems.where((i) => i.isSelected && (i.wasManuallyEdited || _selectedPlatform?.platformId == 'mame')))
             item.filePath: item.displayName,
         };
+        final List<String> manuallyEditedPaths = _previewItems
+            .where((item) => item.isSelected && item.wasManuallyEdited)
+            .map((item) => item.filePath)
+            .toList();
 
         final injector = RomInjector(
           lutrisPaths: _lutrisPaths!,
@@ -570,6 +659,7 @@ class _MainWindowState extends State<MainWindow> {
           reuseIdentification: _reuseIdentification,
           customFiles: selectedFiles.isNotEmpty ? selectedFiles : null,
           customNames: customNames,
+          manuallyEditedPaths: manuallyEditedPaths,
         );
       }
 
@@ -815,6 +905,37 @@ class _MainWindowState extends State<MainWindow> {
             items: _selectedPlatform!.emulators.map((e) => DropdownMenuItem(value: e, child: Text(e.name, style: const TextStyle(fontSize: 13)))).toList(),
             onChanged: _isProcessing ? null : _onEmulatorChanged,
             decoration: _inputDecoration(),
+          ),
+        ],
+
+        if (_selectedPlatform?.platformId == 'mame') ...[
+          const SizedBox(height: 20),
+          Text('EJECUTABLE DE MAME', style: labelStyle),
+          const SizedBox(height: 10),
+          InkWell(
+            onTap: _isProcessing ? null : _browseMameBinary,
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A0A0A),
+                border: Border.all(color: const Color(0xFF1A1A1A)),
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      _mameBinaryPath.isEmpty
+                          ? 'Auto-detectar o seleccionar binario...'
+                          : _mameBinaryPath,
+                      style: const TextStyle(fontSize: 12, color: Colors.white70),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const Icon(Icons.file_open, size: 16, color: Colors.white38),
+                ],
+              ),
+            ),
           ),
         ],
 

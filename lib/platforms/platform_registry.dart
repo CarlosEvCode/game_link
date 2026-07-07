@@ -45,6 +45,15 @@ class PlatformInfo {
     this.hideFromInjector = false,
   });
 
+  /// Obtiene todas las extensiones soportadas por los emuladores de esta plataforma
+  List<String> get extensions => emulators.expand((e) => e.extensions).toSet().toList();
+
+  /// Obtiene la prioridad de extensión delegando en el primer emulador
+  int getExtensionPriority(String extension) {
+    if (emulators.isEmpty) return 0;
+    return emulators.first.getExtensionPriority(extension);
+  }
+
   /// Constructor de conveniencia para plataformas con un solo emulador
   factory PlatformInfo.single({
     required String platformId,
