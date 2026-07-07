@@ -7,6 +7,7 @@ class DatParser {
   final Map<String, String> hashToName = {};
   final Map<String, String> serialToName = {};
   final Map<String, String> cleanNameToName = {};
+  final Map<String, String> romSlugToName = {};
 
   DatParser(String datContent) {
     final lines = LineSplitter.split(datContent);
@@ -42,6 +43,7 @@ class DatParser {
           final md5Match = RegExp(r'\bmd5\s+([a-fA-F0-9]{32})\b').firstMatch(trimmed);
           final sha1Match = RegExp(r'\bsha1\s+([a-fA-F0-9]{40})\b').firstMatch(trimmed);
           final serialMatch = RegExp(r'\bserial\s+"([^"]+)"').firstMatch(trimmed);
+          final romNameMatch = RegExp(r'\bname\s+["' "'" r']?([a-zA-Z0-9_\-\.]+)').firstMatch(trimmed);
 
           if (crcMatch != null) hashToName[crcMatch.group(1)!.toLowerCase()] = currentGameName;
           if (md5Match != null) hashToName[md5Match.group(1)!.toLowerCase()] = currentGameName;
@@ -50,6 +52,12 @@ class DatParser {
           if (serialMatch != null) {
             final normalized = serialMatch.group(1)!.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toLowerCase();
             serialToName[normalized] = currentGameName;
+          }
+
+          if (romNameMatch != null) {
+            final romFile = romNameMatch.group(1)!;
+            final romSlug = p.basenameWithoutExtension(romFile).toLowerCase();
+            romSlugToName[romSlug] = currentGameName;
           }
         }
       }
@@ -73,6 +81,7 @@ class DatResolver {
     'dreamcast': 'redump/Sega - Dreamcast.dat',
     'vita': 'no-intro/Sony - PlayStation Vita.dat',
     'xbox': 'redump/Microsoft - Xbox.dat',
+    'mame': 'mame/MAME.dat',
     
     // Adicionales para futuras expansiones
     'nes': 'no-intro/Nintendo - Nintendo Entertainment System.dat',
@@ -245,6 +254,12 @@ class DatResolver {
     final cleanedSlug = cleanGameName(fileSlug);
     if (cleanedSlug.isNotEmpty && parser.cleanNameToName.containsKey(cleanedSlug)) {
       return parser.cleanNameToName[cleanedSlug];
+    }
+
+    // 5. Fallback especial para MAME/Arcade: buscar por el slug de ROM en romSlugToName
+    final lowerSlug = fileSlug.toLowerCase();
+    if (parser.romSlugToName.containsKey(lowerSlug)) {
+      return parser.romSlugToName[lowerSlug];
     }
 
     return null;
