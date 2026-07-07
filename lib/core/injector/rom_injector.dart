@@ -494,8 +494,9 @@ system:
 
     for (int i = 0; i < romFiles.length; i++) {
       final f = romFiles[i];
-      String gameSlug = p.basenameWithoutExtension(f.path);
-      String gameName = customNames?[f.path] ?? gameSlug;
+      final rawName = p.basenameWithoutExtension(f.path);
+      final gameSlug = slugify(rawName);
+      String gameName = customNames?[f.path] ?? rawName;
       final fullRomPath = f.path;
 
       // Early exit si la extensión no es válida para la plataforma
@@ -506,7 +507,7 @@ system:
       }
 
       final isManuallyEdited = manuallyEditedPaths?.contains(fullRomPath) ?? false;
-      final isAlreadyIdentified = gameName != gameSlug;
+      final isAlreadyIdentified = gameName != rawName;
 
       if (useOfflineId && useHighPrecision && !isManuallyEdited && !isAlreadyIdentified) {
         if (_shouldCalculateHash(
@@ -612,5 +613,29 @@ system:
 
   void dispose() {
     _romCache.dispose();
+  }
+
+  static String slugify(String value) {
+    String slug = value.toLowerCase();
+    
+    final accents = {
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+      'ä': 'a', 'ë': 'e', 'ï': 'i', 'ö': 'o', 'ü': 'u',
+      'â': 'a', 'ê': 'e', 'î': 'i', 'ô': 'o', 'û': 'u',
+      'à': 'a', 'è': 'e', 'ì': 'i', 'ò': 'o', 'ù': 'u',
+      'ñ': 'n', 'ç': 'c'
+    };
+    accents.forEach((key, val) {
+      slug = slug.replaceAll(key, val);
+    });
+
+    slug = slug.replaceAll(RegExp(r'[^\w\s\-]'), '');
+    slug = slug.replaceAll(RegExp(r'[-\s_]+'), '-');
+    slug = slug.trim().replaceAll(RegExp(r'^----+|----+$'), '');
+    
+    if (slug.isEmpty) {
+      slug = 'game';
+    }
+    return slug;
   }
 }
