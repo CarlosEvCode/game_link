@@ -328,14 +328,27 @@ class _MainWindowState extends State<MainWindow> {
       );
 
       final List<InjectionItem> detected = [];
-      for (var file in filteredFiles) {
-        final slug = p.basenameWithoutExtension(file.path);
-        detected.add(
-          InjectionItem(
-            filePath: file.path,
-            displayName: slug,
-          ),
-        );
+      final romCache = RomCacheRepository();
+      try {
+        for (var file in filteredFiles) {
+          final slug = p.basenameWithoutExtension(file.path);
+          String displayName = slug;
+
+          // Verificar si ya está en la caché local SQLite para cargar al instante
+          final cached = romCache.shouldProcessRom(file.path);
+          if (cached != null && cached.identifiedName != null) {
+            displayName = cached.identifiedName!;
+          }
+
+          detected.add(
+            InjectionItem(
+              filePath: file.path,
+              displayName: displayName,
+            ),
+          );
+        }
+      } finally {
+        romCache.dispose();
       }
 
       if (mounted) {
@@ -356,56 +369,97 @@ class _MainWindowState extends State<MainWindow> {
         if (datFile == null) {
           _log("[  WARN ] No se pudo cargar la base de datos local para $platformId");
         } else {
-          for (var i = 0; i < filteredFiles.length; i += chunkSize) {
-            final chunk = filteredFiles.skip(i).take(chunkSize).toList();
-            _log(platformId == 'mame'
-                ? "Buscando en base de datos local MAME: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}..."
-                : "Calculando hashes y buscando en base de datos local: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
-            
-            final Map<String, String> resolvedChunk = {};
-            for (final file in chunk) {
-              final slug = p.basenameWithoutExtension(file.path);
-              try {
-                String? resolvedName;
-                if (platformId == 'mame') {
-                  // MAME usa nombres cortos (slugs) directamente mapeados en MAME.dat, omitimos cálculo de hashes
-                  resolvedName = await DatResolver.resolveGameName(
-                    platformId: platformId,
-                    filePath: file.path,
-                  );
+          final scanRomCache = RomCacheRepository();
+          try {
+            for (var i = 0; i < filteredFiles.length; i += chunkSize) {
+              final chunk = filteredFiles.skip(i).take(chunkSize).toList();
+              
+              // Filtrar el lote para excluir los archivos que ya fueron resueltos en caché (displayName != slug)
+              final List<File> chunkToResolve = [];
+              for (final file in chunk) {
+                final slug = p.basenameWithoutExtension(file.path);
+                final item = _previewItems.firstWhere((item) => item.filePath == file.path);
+                if (item.displayName == slug) {
+                  chunkToResolve.add(file);
                 } else {
-                  final hashes = await HashService.calculateHashes(file.path);
-                  resolvedName = await DatResolver.resolveGameName(
-                    platformId: platformId,
-                    crc32: hashes.crc32,
-                    md5: hashes.md5,
-                    sha1: hashes.sha1,
-                    filePath: file.path,
-                  );
+                  processedCount++; // Ya resuelto en caché, contar como procesado
                 }
-                if (resolvedName != null) {
-                  resolvedChunk[slug] = resolvedName;
-                } else {
+              }
+
+              if (chunkToResolve.isEmpty) {
+                continue;
+              }
+
+              _log(platformId == 'mame'
+                  ? "Buscando en base de datos local MAME: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}..."
+                  : "Calculando hashes y buscando en base de datos local: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
+              
+              final Map<String, String> resolvedChunk = {};
+              for (final file in chunkToResolve) {
+                final slug = p.basenameWithoutExtension(file.path);
+                try {
+                  String? resolvedName;
+                  String? crc32;
+                  String? md5;
+                  String? sha1;
+
+                  if (platformId == 'mame') {
+                    resolvedName = await DatResolver.resolveGameName(
+                      platformId: platformId,
+                      filePath: file.path,
+                    );
+                  } else {
+                    final hashes = await HashService.calculateHashes(file.path);
+                    crc32 = hashes.crc32;
+                    md5 = hashes.md5;
+                    sha1 = hashes.sha1;
+                    resolvedName = await DatResolver.resolveGameName(
+                      platformId: platformId,
+                      crc32: crc32,
+                      md5: md5,
+                      sha1: sha1,
+                      filePath: file.path,
+                    );
+                  }
+                  if (resolvedName != null) {
+                    resolvedChunk[slug] = resolvedName;
+                    
+                    // Guardar en la caché local
+                    final stat = file.statSync();
+                    scanRomCache.cacheRomInfo(
+                      filePath: file.path,
+                      fileSize: stat.size,
+                      lastModified: stat.modified,
+                      sha1: sha1,
+                      md5: md5,
+                      crc32: crc32,
+                      identifiedName: resolvedName,
+                      isIdentified: true,
+                    );
+                  } else {
+                    unresolvedSlugs.add(slug);
+                  }
+                } catch (_) {
                   unresolvedSlugs.add(slug);
                 }
-              } catch (_) {
-                unresolvedSlugs.add(slug);
               }
-            }
 
-            if (mounted) {
-              setState(() {
-                for (var item in _previewItems) {
-                  final slug = p.basenameWithoutExtension(item.filePath);
-                  if (resolvedChunk.containsKey(slug)) {
-                    item.displayName = resolvedChunk[slug]!;
+              if (mounted) {
+                setState(() {
+                  for (var item in _previewItems) {
+                    final slug = p.basenameWithoutExtension(item.filePath);
+                    if (resolvedChunk.containsKey(slug)) {
+                      item.displayName = resolvedChunk[slug]!;
+                    }
                   }
-                }
-              });
+                });
+              }
+              
+              processedCount += chunkToResolve.length;
+              _log("Progreso offline: $processedCount / ${filteredFiles.length} juegos procesados.");
             }
-            
-            processedCount += chunk.length;
-            _log("Progreso offline: $processedCount / ${filteredFiles.length} juegos procesados.");
+          } finally {
+            scanRomCache.dispose();
           }
 
           if (unresolvedSlugs.isNotEmpty && platformId != 'mame') {
@@ -431,31 +485,50 @@ class _MainWindowState extends State<MainWindow> {
           int processedCount = 0;
           final List<String> unresolvedSlugs = [];
 
-          for (var i = 0; i < romNames.length; i += chunkSize) {
-            final chunk = romNames.skip(i).take(chunkSize).toList();
-            _log("Resolviendo lote MAME fallback ${i ~/ chunkSize + 1} de ${(romNames.length / chunkSize).ceil()} (${chunk.length} ROMs)...");
-            
-            final resolvedChunk = await MameResolver.resolveNames(chunk);
+          final scanRomCache = RomCacheRepository();
+          try {
+            for (var i = 0; i < romNames.length; i += chunkSize) {
+              final chunk = romNames.skip(i).take(chunkSize).toList();
+              _log("Resolviendo lote MAME fallback ${i ~/ chunkSize + 1} de ${(romNames.length / chunkSize).ceil()} (${chunk.length} ROMs)...");
+              
+              final resolvedChunk = await MameResolver.resolveNames(chunk);
 
-            for (final slug in chunk) {
-              if (!resolvedChunk.containsKey(slug)) {
-                unresolvedSlugs.add(slug);
-              }
-            }
-            
-            if (mounted) {
-              setState(() {
-                for (var item in _previewItems) {
-                  final slug = p.basenameWithoutExtension(item.filePath);
-                  if (resolvedChunk.containsKey(slug)) {
-                    item.displayName = resolvedChunk[slug]!;
+              for (final slug in chunk) {
+                if (!resolvedChunk.containsKey(slug)) {
+                  unresolvedSlugs.add(slug);
+                } else {
+                  final resolvedName = resolvedChunk[slug]!;
+                  final item = _previewItems.firstWhere((i) => p.basenameWithoutExtension(i.filePath) == slug);
+                  final file = File(item.filePath);
+                  if (file.existsSync()) {
+                    final stat = file.statSync();
+                    scanRomCache.cacheRomInfo(
+                      filePath: file.path,
+                      fileSize: stat.size,
+                      lastModified: stat.modified,
+                      identifiedName: resolvedName,
+                      isIdentified: true,
+                    );
                   }
                 }
-              });
+              }
+              
+              if (mounted) {
+                setState(() {
+                  for (var item in _previewItems) {
+                    final slug = p.basenameWithoutExtension(item.filePath);
+                    if (resolvedChunk.containsKey(slug)) {
+                      item.displayName = resolvedChunk[slug]!;
+                    }
+                  }
+                });
+              }
+              
+              processedCount += chunk.length;
+              _log("Progreso MAME fallback: $processedCount / ${romNames.length} juegos procesados.");
             }
-            
-            processedCount += chunk.length;
-            _log("Progreso MAME fallback: $processedCount / ${romNames.length} juegos procesados.");
+          } finally {
+            scanRomCache.dispose();
           }
 
           if (unresolvedSlugs.isNotEmpty) {
