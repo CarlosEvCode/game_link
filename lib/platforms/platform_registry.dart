@@ -294,6 +294,38 @@ class PlatformRegistry {
       screenScraperId: '24',
     );
 
+    _platforms['nes'] = const PlatformInfo(
+      platformId: 'nes',
+      platformName: 'Nintendo NES',
+      screenScraperId: '3',
+      emulators: [
+        EmulatorInfo(
+          id: 'fceumm_libretro',
+          name: 'FCEUmm (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'fceumm',
+          extensions: ['.nes', '.fds', '.unf', '.zip'],
+          extensionPriority: ['.nes', '.fds', '.unf', '.zip'],
+        ),
+        EmulatorInfo(
+          id: 'nestopia_libretro',
+          name: 'Nestopia (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'nestopia',
+          extensions: ['.nes', '.fds', '.unf', '.zip'],
+          extensionPriority: ['.nes', '.fds', '.unf', '.zip'],
+        ),
+        EmulatorInfo(
+          id: 'mesen_libretro',
+          name: 'Mesen (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'mesen',
+          extensions: ['.nes', '.fds', '.unf', '.zip'],
+          extensionPriority: ['.nes', '.fds', '.unf', '.zip'],
+        ),
+      ],
+    );
+
     _platforms['vita'] = PlatformInfo.single(
       platformId: 'vita',
       platformName: 'Sony PS Vita',
