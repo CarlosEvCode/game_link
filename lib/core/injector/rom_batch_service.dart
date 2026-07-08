@@ -3,7 +3,6 @@ import 'package:path/path.dart' as p;
 import '../../platforms/platform_registry.dart';
 import '../lutris/rom_cache_repository.dart';
 import '../metadata/screenscraper_service.dart';
-import 'mame_resolver.dart';
 
 /// Modelo para un archivo ROM seleccionado para procesamiento
 class RomBatchItem {
@@ -280,40 +279,7 @@ class RomBatchService {
           continue;
         }
 
-        // Identificar con MAME local o ScreenScraper
-        if (item.platformKey == 'mame') {
-          final slug = p.basenameWithoutExtension(item.filePath);
-          _log("[ SEARCH ] Identificando con MAME local: $slug...");
-
-          final stat = file.statSync();
-          String finalName = item.displayName;
-          bool wasIdentified = false;
-
-          try {
-            final resolved = await MameResolver.resolveNames([slug]);
-            if (resolved.containsKey(slug)) {
-              finalName = resolved[slug]!;
-              wasIdentified = true;
-              identified++;
-              _log("[  INFO ] Identificado con MAME local: $finalName");
-            } else {
-              _log("[  WARN ] No identificado por MAME local: $slug");
-            }
-          } catch (e) {
-            _log("[  WARN ] Error al resolver con MAME local: $e");
-          }
-
-          if (reuseIdentification) {
-            _cache.cacheRomInfo(
-              filePath: item.filePath,
-              fileSize: stat.size,
-              lastModified: stat.modified,
-              identifiedName: finalName,
-              systemId: screenScraperId,
-              isIdentified: wasIdentified,
-            );
-          }
-        } else if (useHighPrecision) {
+        if (useHighPrecision) {
           _log("[ SEARCH ] Identificando: ${item.displayName}...");
 
           final stat = file.statSync();

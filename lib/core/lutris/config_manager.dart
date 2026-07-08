@@ -98,18 +98,6 @@ class ConfigManager {
     await _writeConfig(config);
   }
 
-  // MAME Binary Path
-  static Future<String> getMameBinaryPath() async {
-    final config = await _readConfig();
-    return config['mame_binary_path'] as String? ?? '';
-  }
-
-  static Future<void> saveMameBinaryPath(String path) async {
-    final config = await _readConfig();
-    config['mame_binary_path'] = path;
-    await _writeConfig(config);
-  }
-
   // Onboarding Status
   static Future<bool> isFirstRun() async {
     final config = await _readConfig();

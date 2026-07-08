@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 import '../metadata/screenscraper_service.dart';
 import '../lutris/rom_cache_repository.dart';
 import '../metadata/hash_service.dart';
-import 'mame_resolver.dart';
 import 'dat_resolver.dart';
 
 class RomInjector {
@@ -149,20 +148,8 @@ class RomInjector {
     // Si no queremos alta precisión o no tenemos systemId, usar nombre de archivo o MAME local
     if (!useHighPrecision || screenScraperId == null) {
       String finalName = fallbackName;
-      bool isMameResolved = false;
 
-      if (platformKey == 'mame') {
-        try {
-          final slug = p.basenameWithoutExtension(filePath);
-          final resolvedNames = await MameResolver.resolveNames([slug]);
-          if (resolvedNames.containsKey(slug)) {
-            finalName = resolvedNames[slug]!;
-            isMameResolved = true;
-          }
-        } catch (_) {}
-      }
-
-      // Guardar en cache como no identificado (o identificado con MAME local)
+      // Guardar en cache como no identificado
       if (reuseIdentification) {
         final file = File(filePath);
         if (file.existsSync()) {
@@ -173,7 +160,7 @@ class RomInjector {
             lastModified: stat.modified,
             identifiedName: finalName,
             systemId: screenScraperId,
-            isIdentified: isMameResolved,
+            isIdentified: false,
           );
         }
       }
@@ -206,21 +193,7 @@ class RomInjector {
         _log("[  INFO ] Identificado: $finalName");
       } else {
         finalName = fallbackName;
-        if (platformKey == 'mame') {
-          try {
-            final slug = p.basenameWithoutExtension(filePath);
-            final resolvedNames = await MameResolver.resolveNames([slug]);
-            if (resolvedNames.containsKey(slug)) {
-              finalName = resolvedNames[slug]!;
-              wasIdentified = true;
-              _log("[  INFO ] MAME local (fallback): $finalName");
-            }
-          } catch (_) {}
-        }
-
-        if (!wasIdentified) {
-          _log("[  WARN ] No identificado por ScreenScraper, usando nombre de archivo");
-        }
+        _log("[  WARN ] No identificado por ScreenScraper, usando nombre de archivo");
       }
 
       // Guardar en cache
@@ -252,18 +225,6 @@ class RomInjector {
 
       // Guardar error en cache para evitar reintentar (intentando MAME local primero)
       String finalName = fallbackName;
-      bool wasIdentified = false;
-      if (platformKey == 'mame') {
-        try {
-          final slug = p.basenameWithoutExtension(filePath);
-          final resolvedNames = await MameResolver.resolveNames([slug]);
-          if (resolvedNames.containsKey(slug)) {
-            finalName = resolvedNames[slug]!;
-            wasIdentified = true;
-          }
-        } catch (_) {}
-      }
-
       if (reuseIdentification) {
         final file = File(filePath);
         if (file.existsSync()) {
@@ -274,7 +235,7 @@ class RomInjector {
             lastModified: stat.modified,
             identifiedName: finalName,
             systemId: screenScraperId,
-            isIdentified: wasIdentified,
+            isIdentified: false,
           );
         }
       }

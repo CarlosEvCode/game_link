@@ -3,7 +3,6 @@ import 'package:file_selector/file_selector.dart';
 import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
-import '../core/injector/mame_resolver.dart';
 import '../core/injector/dat_resolver.dart';
 import '../core/metadata/hash_service.dart';
 import '../core/metadata/metadata_downloader.dart';
@@ -48,7 +47,6 @@ class _MainWindowState extends State<MainWindow> {
   String _apiKey = '';
   String _ssUser = '';
   String _ssPassword = '';
-  String _mameBinaryPath = '';
 
   List<InjectionItem> _previewItems = [];
   bool _isScanning = false;
@@ -85,22 +83,7 @@ class _MainWindowState extends State<MainWindow> {
     final key = await ConfigManager.getApiKey();
     final ssUser = await ConfigManager.getSSUser();
     final ssPass = await ConfigManager.getSSPassword();
-    final mamePath = await ConfigManager.getMameBinaryPath();
 
-    if (mamePath.isEmpty) {
-      final autoPath = await MameResolver.findMameBinary();
-      if (autoPath != null) {
-        setState(() {
-          _mameBinaryPath = autoPath;
-        });
-        await ConfigManager.saveMameBinaryPath(autoPath);
-        _log("MAME detectado automáticamente en: $autoPath");
-      }
-    } else {
-      setState(() {
-        _mameBinaryPath = mamePath;
-      });
-    }
 
     setState(() {
       _apiKey = key;
@@ -279,26 +262,6 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
-  Future<void> _browseMameBinary() async {
-    final XFile? file = await openFile(
-      acceptedTypeGroups: [
-        const XTypeGroup(
-          label: 'Binarios/AppImages',
-          extensions: ['appimage', 'bin', 'sh'],
-        ),
-      ],
-    );
-    if (file != null) {
-      setState(() {
-        _mameBinaryPath = file.path;
-      });
-      await ConfigManager.saveMameBinaryPath(file.path);
-      _log("Ejecutable de MAME seleccionado: ${file.path}");
-      if (_selectedPlatform?.platformId == 'mame') {
-        _scanFolder();
-      }
-    }
-  }
 
   Future<void> _scanFolder() async {
     if (_romFolder.isEmpty || _selectedPlatform == null || _selectedEmulator == null) return;
@@ -485,77 +448,8 @@ class _MainWindowState extends State<MainWindow> {
             scanRomCache.dispose();
           }
 
-          if (unresolvedSlugs.isNotEmpty && platformId != 'mame') {
-            _log("[  WARN ] Base de datos local no pudo identificar ${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
-          }
-        }
-      }
-
-      if (_useOfflineId && _selectedPlatform?.platformId == 'mame' && detected.isNotEmpty) {
-        // Recolectamos únicamente los archivos que MAME.dat no pudo identificar (displayName igual al slug)
-        final List<File> unresolvedMameFiles = [];
-        for (var item in _previewItems) {
-          final slug = p.basenameWithoutExtension(item.filePath);
-          if (item.displayName == slug) {
-            unresolvedMameFiles.add(File(item.filePath));
-          }
-        }
-
-        if (unresolvedMameFiles.isNotEmpty) {
-          _log("MAME.dat no identificó ${unresolvedMameFiles.length} juegos. Intentando resolución con binario MAME...");
-          final romNames = unresolvedMameFiles.map((file) => p.basenameWithoutExtension(file.path)).toList();
-          final chunkSize = 50;
-          int processedCount = 0;
-          final List<String> unresolvedSlugs = [];
-
-          final scanRomCache = RomCacheRepository();
-          try {
-            for (var i = 0; i < romNames.length; i += chunkSize) {
-              final chunk = romNames.skip(i).take(chunkSize).toList();
-              _log("Resolviendo lote MAME fallback ${i ~/ chunkSize + 1} de ${(romNames.length / chunkSize).ceil()} (${chunk.length} ROMs)...");
-              
-              final resolvedChunk = await MameResolver.resolveNames(chunk);
-
-              for (final slug in chunk) {
-                if (!resolvedChunk.containsKey(slug)) {
-                  unresolvedSlugs.add(slug);
-                } else {
-                  final resolvedName = resolvedChunk[slug]!;
-                  final item = _previewItems.firstWhere((i) => p.basenameWithoutExtension(i.filePath) == slug);
-                  final file = File(item.filePath);
-                  if (file.existsSync()) {
-                    final stat = file.statSync();
-                    scanRomCache.cacheRomInfo(
-                      filePath: file.path,
-                      fileSize: stat.size,
-                      lastModified: stat.modified,
-                      identifiedName: resolvedName,
-                      isIdentified: true,
-                    );
-                  }
-                }
-              }
-              
-              if (mounted) {
-                setState(() {
-                  for (var item in _previewItems) {
-                    final slug = p.basenameWithoutExtension(item.filePath);
-                    if (resolvedChunk.containsKey(slug)) {
-                      item.displayName = resolvedChunk[slug]!;
-                    }
-                  }
-                });
-              }
-              
-              processedCount += chunk.length;
-              _log("Progreso MAME fallback: $processedCount / ${romNames.length} juegos procesados.");
-            }
-          } finally {
-            scanRomCache.dispose();
-          }
-
           if (unresolvedSlugs.isNotEmpty) {
-            _log("[  WARN ] MAME local (fallback) no pudo identificar ${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
+            _log("[  WARN ] Base de datos local no pudo identificar ${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
           }
         }
       }
@@ -1087,36 +981,6 @@ class _MainWindowState extends State<MainWindow> {
           ),
         ],
 
-        if (_selectedPlatform?.platformId == 'mame') ...[
-          const SizedBox(height: 20),
-          Text('EJECUTABLE DE MAME', style: labelStyle),
-          const SizedBox(height: 10),
-          InkWell(
-            onTap: _isProcessing ? null : _browseMameBinary,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0A0A0A),
-                border: Border.all(color: const Color(0xFF1A1A1A)),
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      _mameBinaryPath.isEmpty
-                          ? 'Auto-detectar o seleccionar binario...'
-                          : _mameBinaryPath,
-                      style: const TextStyle(fontSize: 12, color: Colors.white70),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const Icon(Icons.file_open, size: 16, color: Colors.white38),
-                ],
-              ),
-            ),
-          ),
-        ],
 
         const SizedBox(height: 32),
         const Divider(color: Colors.white10),

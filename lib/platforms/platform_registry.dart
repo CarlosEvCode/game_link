@@ -658,10 +658,14 @@ class PlatformRegistry {
   }
 
   static List<PlatformInfo> getAllPlatforms() {
-    return _platforms.values.toList();
+    final list = _platforms.values.toList();
+    list.sort((a, b) => a.platformName.toLowerCase().compareTo(b.platformName.toLowerCase()));
+    return list;
   }
 
   static List<PlatformInfo> getInjectorPlatforms() {
-    return _platforms.values.where((p) => !p.hideFromInjector).toList();
+    final list = _platforms.values.where((p) => !p.hideFromInjector).toList();
+    list.sort((a, b) => a.platformName.toLowerCase().compareTo(b.platformName.toLowerCase()));
+    return list;
   }
 }
