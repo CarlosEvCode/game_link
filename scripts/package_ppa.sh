@@ -28,8 +28,8 @@ tar -cJf "../game-link_${VERSION_CLEAN}.orig.tar.xz" \
     .
 
 # 3. Construir el paquete fuente en Docker
-docker run --rm -v "$(pwd)/..:/build_parent" -v "$(pwd):/build" game-link-debian bash -c "
-    cd /build
+docker run --rm -v "$(pwd)/..:/build_parent" game-link-debian bash -c "
+    cd /build_parent/lutris_game_station
     # Generar el paquete fuente (-S)
     # -us -uc para no firmar dentro del contenedor (se firma fuera con la llave del usuario)
     dpkg-buildpackage -S -us -uc
