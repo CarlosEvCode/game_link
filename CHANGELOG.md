@@ -1,5 +1,22 @@
 # Changelog
 
+## [2.17.0](https://github.com/CarlosEvCode/game_link/compare/v2.16.0...v2.17.0) (2026-07-08)
+
+
+### Features
+
+* **mame:** automatically filter out BIOS and device files during folder scan ([5b5e138](https://github.com/CarlosEvCode/game_link/commit/5b5e1389795a1dcb233fb432513e10af013eb27f))
+* **platforms:** add N64, SNES, and Game Boy (Color) platforms and restrict GBA to libretro only ([5abb79a](https://github.com/CarlosEvCode/game_link/commit/5abb79ab5acc45eb5c457ca91cefd33921e4c44b))
+* **platforms:** add RetroArch (libretro) cores for PS1, PS2, GameCube, Wii, Arcade, 3DS, and GBA ([603bdaf](https://github.com/CarlosEvCode/game_link/commit/603bdaffa805a7c0bdbaaee431c450fef4545801))
+* **platforms:** expand libretro cores selection with more popular emulator cores ([7813e84](https://github.com/CarlosEvCode/game_link/commit/7813e8403056b9c23730adc9c94acab0f5998549))
+* **wiiu:** add Cemu support with automatic game directory detection and DLC/Update filtering ([00f8c33](https://github.com/CarlosEvCode/game_link/commit/00f8c3382bd700840d926877279dd6a850dafac6))
+* **wiiu:** resolve real game names from meta.xml/folder, fix gameSlug, and set cleanOldGames default to false ([6411148](https://github.com/CarlosEvCode/game_link/commit/6411148afe6a16b1414a757e805b6f1da9df67c1))
+
+
+### Bug Fixes
+
+* **platforms:** align platformNames with official Lutris database values ([5d3ae48](https://github.com/CarlosEvCode/game_link/commit/5d3ae48d2c86925264244575f2f110fea5c34d3d))
+
 ## [2.16.0](https://github.com/CarlosEvCode/game_link/compare/v2.15.0...v2.16.0) (2026-07-08)
 
 
