@@ -317,7 +317,14 @@ class _MainWindowState extends State<MainWindow> {
         if (entity is File) {
           final ext = p.extension(entity.path).toLowerCase();
           if (_selectedExtensions.contains(ext)) {
-            matchingFiles.add(entity);
+            final slug = p.basenameWithoutExtension(entity.path);
+            if (_selectedPlatform?.platformId == 'mame') {
+              if (await DatResolver.isMameGame(slug)) {
+                matchingFiles.add(entity);
+              }
+            } else {
+              matchingFiles.add(entity);
+            }
           }
         }
       }

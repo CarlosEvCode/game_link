@@ -478,4 +478,41 @@ class DatResolver {
 
     return null;
   }
+
+  static const Set<String> _commonMameBios = {
+    'neogeo', 'qsound', 'qsound_hle', 'pgm', 'naomi', 'naomi2', 'awbios', 
+    'cpzn1', 'cpzn2', 'decocass', 'konamih', 'playch10', 'skns', 'stvbios', 
+    'taito_h', 'taitofx1', 'tpgm', 'triforce', 'ym2608', 'bios', 'hikaru', 
+    'islands', 'hng64', 'maxaflex', 'megaplay', 'megatech', 'nss', 'nps', 
+    'namcoc74', 'namcoc75', 'namcoc76', 'suprnova', 'sys24', 'sys573', 'taito_g',
+    'taitotz', 'cchip', 'k052109', 'k053246', 'k053260', 'k055555', 'kondev',
+    'namcoc148', 'namcops2', 'namcopsx', 'stv', 'sys141b', 'sys142b', 'sys246',
+    'sys256', 't5182', 'taito68705', 'taitosjsecmcu', 'tourvis', 'v4bios',
+    'ymf281', 'z8671', 'z8682', 'zorba_kbd', 'zorro_a2091', 'zorro_a2232', 'zorro_a590',
+    'zorro_ar1', 'zorro_ar2', 'zorro_ar3', 'zorro_buddha'
+  };
+
+  /// Verifica si el slug de un archivo ROM de Arcade corresponde a un juego jugable en lugar de una BIOS/dispositivo.
+  static Future<bool> isMameGame(String slug) async {
+    final lowerSlug = slug.toLowerCase();
+    if (_commonMameBios.contains(lowerSlug)) {
+      return false;
+    }
+
+    if (!_parsedDatCache.containsKey('mame')) {
+      final datFile = await getDatFile('mame');
+      if (datFile == null || !datFile.existsSync()) {
+        return true; // Fallback si no se puede cargar el DAT
+      }
+      try {
+        final content = await datFile.readAsString();
+        _parsedDatCache['mame'] = DatParser(content);
+      } catch (_) {
+        return true;
+      }
+    }
+    
+    final parser = _parsedDatCache['mame']!;
+    return parser.romSlugToName.containsKey(lowerSlug);
+  }
 }
