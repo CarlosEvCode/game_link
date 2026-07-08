@@ -3,8 +3,19 @@ set -e
 
 # Asegurarse de que el bundle de Flutter esté construido
 if [ ! -d "build/linux/x64/release/bundle" ]; then
+    DART_DEFINES=""
+    if [ -f .env ]; then
+        echo "Cargando variables de entorno desde .env..."
+        while IFS= read -r line || [ -n "$line" ]; do
+            if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]]; then
+                key=$(echo "$line" | cut -d'=' -f1)
+                val=$(echo "$line" | cut -d'=' -f2-)
+                DART_DEFINES="$DART_DEFINES --dart-define=$key=$val"
+            fi
+        done < .env
+    fi
     echo "Construyendo Flutter..."
-    flutter build linux --release
+    flutter build linux --release $DART_DEFINES
 fi
 
 # Construir la imagen de Docker

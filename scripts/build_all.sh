@@ -32,9 +32,21 @@ else
     fi
 fi
 
-# 4. Compilación de Flutter
+# 4. Compilación de Flutter con credenciales si existen
+DART_DEFINES=""
+if [ -f .env ]; then
+    echo -e "${BLUE}[ ENV ] Cargando variables de entorno desde .env...${NC}"
+    while IFS= read -r line || [ -n "$line" ]; do
+        if [[ ! "$line" =~ ^# ]] && [[ -n "$line" ]]; then
+            key=$(echo "$line" | cut -d'=' -f1)
+            val=$(echo "$line" | cut -d'=' -f2-)
+            DART_DEFINES="$DART_DEFINES --dart-define=$key=$val"
+        fi
+    done < .env
+fi
+
 echo -e "${BLUE}[ BUILD ] Compilando Flutter para Linux (Release)...${NC}"
-flutter build linux --release --build-name=$VERSION_CLEAN
+flutter build linux --release --build-name=$VERSION_CLEAN $DART_DEFINES
 
 # 5. Empaquetado
 echo -e "${GREEN}[  INFO ] Generando paquetes...${NC}"
