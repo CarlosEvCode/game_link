@@ -428,16 +428,40 @@ class DatResolver {
   }) async {
     // 1. Asegurar la carga de la base de datos en caché
     if (!_parsedDatCache.containsKey(platformId)) {
-      final datFile = await getDatFile(platformId);
-      if (datFile == null || !datFile.existsSync()) {
-        return null;
-      }
-      try {
-        final content = await datFile.readAsString();
-        _parsedDatCache[platformId] = DatParser(content);
-      } catch (e) {
-        print('[  FAIL ] Error leyendo/parseando el archivo DAT para $platformId: $e');
-        return null;
+      if (platformId == 'gb') {
+        try {
+          final datFileGb = await getDatFile('gb');
+          final datFileGbc = await getDatFile('gbc');
+          
+          String content = '';
+          if (datFileGb != null && datFileGb.existsSync()) {
+            content += await datFileGb.readAsString();
+          }
+          if (datFileGbc != null && datFileGbc.existsSync()) {
+            content += '\n' + await datFileGbc.readAsString();
+          }
+          
+          if (content.isNotEmpty) {
+            _parsedDatCache[platformId] = DatParser(content);
+          } else {
+            return null;
+          }
+        } catch (e) {
+          print('[  FAIL ] Error leyendo/parseando archivos DAT combinados para GB: $e');
+          return null;
+        }
+      } else {
+        final datFile = await getDatFile(platformId);
+        if (datFile == null || !datFile.existsSync()) {
+          return null;
+        }
+        try {
+          final content = await datFile.readAsString();
+          _parsedDatCache[platformId] = DatParser(content);
+        } catch (e) {
+          print('[  FAIL ] Error leyendo/parseando el archivo DAT para $platformId: $e');
+          return null;
+        }
       }
     }
 

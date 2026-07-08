@@ -444,13 +444,6 @@ class PlatformRegistry {
       screenScraperId: '24',
       emulators: [
         EmulatorInfo(
-          id: 'mgba_standalone',
-          name: 'mGBA (Standalone)',
-          runner: 'mgba',
-          extensions: ['.gba'],
-          extensionPriority: ['.gba'],
-        ),
-        EmulatorInfo(
           id: 'mgba_libretro',
           name: 'mGBA (Libretro)',
           runner: 'libretro',
@@ -543,6 +536,111 @@ class PlatformRegistry {
       extensionPriority: ['.iso', '.xiso'],
       screenScraperId: '32',
       disableRuntime: true,
+    );
+
+    _platforms['n64'] = const PlatformInfo(
+      platformId: 'n64',
+      platformName: 'Nintendo 64',
+      screenScraperId: '14',
+      emulators: [
+        EmulatorInfo(
+          id: 'mupen64plus_standalone',
+          name: 'Mupen64Plus (Standalone)',
+          runner: 'mupen64plus',
+          extensions: ['.n64', '.z64', '.v64', '.zip'],
+          extensionPriority: ['.z64', '.v64', '.n64', '.zip'],
+          disableRuntime: true,
+        ),
+        EmulatorInfo(
+          id: 'mupen64plus_next_libretro',
+          name: 'Mupen64Plus-Next (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'mupen64plus_next',
+          extensions: ['.n64', '.z64', '.v64', '.zip'],
+          extensionPriority: ['.z64', '.v64', '.n64', '.zip'],
+          disableRuntime: true,
+        ),
+      ],
+    );
+
+    _platforms['snes'] = const PlatformInfo(
+      platformId: 'snes',
+      platformName: 'Nintendo SNES',
+      screenScraperId: '4',
+      emulators: [
+        EmulatorInfo(
+          id: 'snes9x_libretro',
+          name: 'Snes9x (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'snes9x',
+          extensions: ['.sfc', '.smc', '.zip', '.7z'],
+          extensionPriority: ['.sfc', '.smc', '.zip', '.7z'],
+        ),
+        EmulatorInfo(
+          id: 'snes9x2010_libretro',
+          name: 'Snes9x 2010 (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'snes9x2010',
+          extensions: ['.sfc', '.smc', '.zip', '.7z'],
+          extensionPriority: ['.sfc', '.smc', '.zip', '.7z'],
+        ),
+        EmulatorInfo(
+          id: 'bsnes_libretro',
+          name: 'bsnes (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'bsnes',
+          extensions: ['.sfc', '.smc', '.zip', '.7z'],
+          extensionPriority: ['.sfc', '.smc', '.zip', '.7z'],
+        ),
+        EmulatorInfo(
+          id: 'mesen_s_libretro',
+          name: 'Mesen-S (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'mesen-s',
+          extensions: ['.sfc', '.smc', '.zip', '.7z'],
+          extensionPriority: ['.sfc', '.smc', '.zip', '.7z'],
+        ),
+      ],
+    );
+
+    _platforms['gb'] = const PlatformInfo(
+      platformId: 'gb',
+      platformName: 'Nintendo Game Boy (Color)',
+      screenScraperId: '9',
+      emulators: [
+        EmulatorInfo(
+          id: 'gambatte_libretro',
+          name: 'Gambatte (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'gambatte',
+          extensions: ['.gb', '.gbc', '.zip', '.7z'],
+          extensionPriority: ['.gbc', '.gb', '.zip', '.7z'],
+        ),
+        EmulatorInfo(
+          id: 'sameboy_libretro',
+          name: 'SameBoy (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'sameboy',
+          extensions: ['.gb', '.gbc', '.zip', '.7z'],
+          extensionPriority: ['.gbc', '.gb', '.zip', '.7z'],
+        ),
+        EmulatorInfo(
+          id: 'gearboy_libretro',
+          name: 'Gearboy (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'gearboy',
+          extensions: ['.gb', '.gbc', '.zip', '.7z'],
+          extensionPriority: ['.gbc', '.gb', '.zip', '.7z'],
+        ),
+        EmulatorInfo(
+          id: 'tgbdual_libretro',
+          name: 'TGB Dual (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'tgbdual',
+          extensions: ['.gb', '.gbc', '.zip', '.7z'],
+          extensionPriority: ['.gbc', '.gb', '.zip', '.7z'],
+        ),
+      ],
     );
 
     _platforms['windows'] = PlatformInfo.single(
