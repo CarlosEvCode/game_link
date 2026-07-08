@@ -136,7 +136,7 @@ class PlatformRegistry {
     
     _platforms['wii_u'] = PlatformInfo.single(
       platformId: 'wii_u',
-      platformName: 'Nintendo Wii U',
+      platformName: 'Wii U',
       runner: 'cemu',
       extensions: ['.wud', '.wux', '.rpx', '.wua'],
       extensionPriority: ['.wua', '.rpx', '.wud', '.wux'],
@@ -146,7 +146,7 @@ class PlatformRegistry {
     
     _platforms['mame'] = PlatformInfo.single(
       platformId: 'mame',
-      platformName: 'Arcade (MAME)',
+      platformName: 'Arcade',
       runner: 'mame',
       extensions: ['.zip', '.7z'],
       extensionPriority: ['.zip', '.7z'],
@@ -182,7 +182,7 @@ class PlatformRegistry {
 
     _platforms['psp'] = const PlatformInfo(
       platformId: 'psp',
-      platformName: 'Sony PSP',
+      platformName: 'Sony Playstation Portable',
       screenScraperId: '61',
       emulators: [
         EmulatorInfo(
@@ -328,7 +328,7 @@ class PlatformRegistry {
 
     _platforms['vita'] = PlatformInfo.single(
       platformId: 'vita',
-      platformName: 'Sony PS Vita',
+      platformName: 'Sony PlayStation Vita',
       runner: 'vita3k',
       extensions: ['.vpk', '.zip'],
       extensionPriority: ['.vpk', '.zip'],
@@ -338,7 +338,7 @@ class PlatformRegistry {
 
     _platforms['xbox'] = PlatformInfo.single(
       platformId: 'xbox',
-      platformName: 'Microsoft Xbox',
+      platformName: 'Xbox',
       runner: 'xemu',
       extensions: ['.iso', '.xiso'],
       extensionPriority: ['.iso', '.xiso'],
