@@ -1,3 +1,13 @@
+game-link (2.17.0-1) noble; urgency=medium
+
+  * New release 2.17.0.
+  * Added N64, SNES, and Game Boy (Color) platforms.
+  * Restructured GBA and added RetroArch (libretro) cores selection.
+  * Implemented Wii U/Cemu standalone runner support with automatic folder detection.
+  * Added automatic filtering of updates and DLCs for Wii U folders.
+
+ -- Carlos EvCode <programer.cm12@gmail.com>  Wed, 08 Jul 2026 14:20:00 -0500
+
 game-link (2.15.0-1) noble; urgency=medium
 
   * New release 2.15.0.
