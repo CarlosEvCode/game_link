@@ -94,44 +94,111 @@ class PlatformRegistry {
   static void initialize() {
     if (_platforms.isNotEmpty) return;
 
-    _platforms['ps1'] = PlatformInfo.single(
+    _platforms['ps1'] = const PlatformInfo(
       platformId: 'ps1',
       platformName: 'Sony PlayStation',
-      runner: 'duckstation',
-      extensions: ['.bin', '.chd', '.pbp', '.cue'],
-      extensionPriority: ['.bin', '.chd', '.pbp', '.cue'],
       screenScraperId: '57',
-      disableRuntime: true,
+      emulators: [
+        EmulatorInfo(
+          id: 'duckstation_standalone',
+          name: 'DuckStation (Standalone)',
+          runner: 'duckstation',
+          extensions: ['.bin', '.chd', '.pbp', '.cue'],
+          extensionPriority: ['.bin', '.chd', '.pbp', '.cue'],
+          disableRuntime: true,
+        ),
+        EmulatorInfo(
+          id: 'beetle_psx_hw_libretro',
+          name: 'Beetle PSX HW (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'beetle_psx_hw',
+          extensions: ['.bin', '.chd', '.pbp', '.cue'],
+          extensionPriority: ['.bin', '.chd', '.pbp', '.cue'],
+          disableRuntime: true,
+        ),
+        EmulatorInfo(
+          id: 'pcsx_rearmed_libretro',
+          name: 'PCSX ReARMed (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'pcsx_rearmed',
+          extensions: ['.bin', '.chd', '.pbp', '.cue'],
+          extensionPriority: ['.bin', '.chd', '.pbp', '.cue'],
+          disableRuntime: true,
+        ),
+      ],
     );
     
-    _platforms['ps2'] = PlatformInfo.single(
+    _platforms['ps2'] = const PlatformInfo(
       platformId: 'ps2',
       platformName: 'Sony PlayStation 2',
-      runner: 'pcsx2',
-      extensions: ['.iso', '.chd'],
-      extensionPriority: ['.iso', '.chd'],
       screenScraperId: '58',
-      disableRuntime: true,
+      emulators: [
+        EmulatorInfo(
+          id: 'pcsx2_standalone',
+          name: 'PCSX2 (Standalone)',
+          runner: 'pcsx2',
+          extensions: ['.iso', '.chd'],
+          extensionPriority: ['.iso', '.chd'],
+          disableRuntime: true,
+        ),
+        EmulatorInfo(
+          id: 'pcsx2_libretro',
+          name: 'PCSX2 (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'pcsx2',
+          extensions: ['.iso', '.chd'],
+          extensionPriority: ['.iso', '.chd'],
+          disableRuntime: true,
+        ),
+      ],
     );
     
-    _platforms['gamecube'] = PlatformInfo.single(
+    _platforms['gamecube'] = const PlatformInfo(
       platformId: 'gamecube',
       platformName: 'Nintendo GameCube',
-      runner: 'dolphin',
-      extensions: ['.iso', '.gcz', '.rvz'],
-      extensionPriority: ['.iso', '.gcz', '.rvz'],
       screenScraperId: '13',
-      specialConfig: {'platform': '0'}, // 0 = GameCube
+      emulators: [
+        EmulatorInfo(
+          id: 'dolphin_standalone',
+          name: 'Dolphin (Standalone)',
+          runner: 'dolphin',
+          extensions: ['.iso', '.gcz', '.rvz'],
+          extensionPriority: ['.iso', '.gcz', '.rvz'],
+          specialConfig: {'platform': '0'}, // 0 = GameCube
+        ),
+        EmulatorInfo(
+          id: 'dolphin_libretro',
+          name: 'Dolphin (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'dolphin',
+          extensions: ['.iso', '.gcz', '.rvz'],
+          extensionPriority: ['.iso', '.gcz', '.rvz'],
+        ),
+      ],
     );
     
-    _platforms['wii'] = PlatformInfo.single(
+    _platforms['wii'] = const PlatformInfo(
       platformId: 'wii',
       platformName: 'Nintendo Wii',
-      runner: 'dolphin',
-      extensions: ['.iso', '.wbfs', '.rvz'],
-      extensionPriority: ['.iso', '.wbfs', '.rvz'],
       screenScraperId: '16',
-      specialConfig: {'platform': '1'}, // 1 = Wii
+      emulators: [
+        EmulatorInfo(
+          id: 'dolphin_standalone',
+          name: 'Dolphin (Standalone)',
+          runner: 'dolphin',
+          extensions: ['.iso', '.wbfs', '.rvz'],
+          extensionPriority: ['.iso', '.wbfs', '.rvz'],
+          specialConfig: {'platform': '1'}, // 1 = Wii
+        ),
+        EmulatorInfo(
+          id: 'dolphin_libretro',
+          name: 'Dolphin (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'dolphin',
+          extensions: ['.iso', '.wbfs', '.rvz'],
+          extensionPriority: ['.iso', '.wbfs', '.rvz'],
+        ),
+      ],
     );
     
     _platforms['wii_u'] = PlatformInfo.single(
@@ -144,15 +211,39 @@ class PlatformRegistry {
       screenScraperId: '18',
     );
     
-    _platforms['mame'] = PlatformInfo.single(
+    _platforms['mame'] = const PlatformInfo(
       platformId: 'mame',
       platformName: 'Arcade',
-      runner: 'mame',
-      extensions: ['.zip', '.7z'],
-      extensionPriority: ['.zip', '.7z'],
       hasSpecialFeatures: true,
-      disableRuntime: false,
       screenScraperId: '75',
+      emulators: [
+        EmulatorInfo(
+          id: 'mame_standalone',
+          name: 'MAME (Standalone)',
+          runner: 'mame',
+          extensions: ['.zip', '.7z'],
+          extensionPriority: ['.zip', '.7z'],
+          disableRuntime: false,
+        ),
+        EmulatorInfo(
+          id: 'mame_libretro',
+          name: 'MAME (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'mame',
+          extensions: ['.zip', '.7z'],
+          extensionPriority: ['.zip', '.7z'],
+          disableRuntime: false,
+        ),
+        EmulatorInfo(
+          id: 'fbneo_libretro',
+          name: 'FinalBurn Neo (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'fbneo',
+          extensions: ['.zip', '.7z'],
+          extensionPriority: ['.zip', '.7z'],
+          disableRuntime: false,
+        ),
+      ],
     );
 
     // Nintendo 3DS con múltiples emuladores
@@ -173,6 +264,15 @@ class PlatformRegistry {
           id: 'citra',
           name: 'Citra',
           runner: 'citra',
+          extensions: ['.3ds', '.cia', '.cci'],
+          extensionPriority: ['.3ds', '.cia', '.cci'],
+          disableRuntime: true,
+        ),
+        EmulatorInfo(
+          id: 'citra_libretro',
+          name: 'Citra (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'citra',
           extensions: ['.3ds', '.cia', '.cci'],
           extensionPriority: ['.3ds', '.cia', '.cci'],
           disableRuntime: true,
@@ -285,13 +385,27 @@ class PlatformRegistry {
       ],
     );
 
-    _platforms['gba'] = PlatformInfo.single(
+    _platforms['gba'] = const PlatformInfo(
       platformId: 'gba',
       platformName: 'Nintendo Game Boy Advance',
-      runner: 'mgba',
-      extensions: ['.gba'],
-      extensionPriority: ['.gba'],
       screenScraperId: '24',
+      emulators: [
+        EmulatorInfo(
+          id: 'mgba_standalone',
+          name: 'mGBA (Standalone)',
+          runner: 'mgba',
+          extensions: ['.gba'],
+          extensionPriority: ['.gba'],
+        ),
+        EmulatorInfo(
+          id: 'mgba_libretro',
+          name: 'mGBA (Libretro)',
+          runner: 'libretro',
+          libretroCore: 'mgba',
+          extensions: ['.gba'],
+          extensionPriority: ['.gba'],
+        ),
+      ],
     );
 
     _platforms['nes'] = const PlatformInfo(
