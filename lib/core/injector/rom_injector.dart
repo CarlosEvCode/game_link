@@ -321,6 +321,34 @@ system:
   disable_runtime: ${disableRuntime.toString().toLowerCase()}
   prefer_system_libs: true
 ''';
+    } else if (runner == "cemu") {
+      final disableRuntimeStr = disableRuntime ? "true" : "false";
+      final ext = p.extension(romPath).toLowerCase();
+      String gameSection = '';
+
+      if (ext == '.wua' || ext == '.wux') {
+        gameSection = '  wua_rom: "$romPath"';
+      } else if (ext == '.rpx') {
+        final parentDir = p.dirname(romPath);
+        final parentName = p.basename(parentDir).toLowerCase();
+        if (parentName == 'code') {
+          final gameDir = p.dirname(parentDir);
+          gameSection = '  main_file: "$gameDir"';
+        } else {
+          gameSection = '  main_file: "$romPath"';
+        }
+      } else {
+        gameSection = '  main_file: "$romPath"';
+      }
+
+      yamlContent =
+          '''
+game:
+$gameSection
+system:
+  disable_runtime: $disableRuntimeStr
+  prefer_system_libs: true
+''';
     } else if (runner == "libretro" && emulatorInfo.libretroCore != null) {
       final disableRuntimeStr = disableRuntime ? "true" : "false";
       yamlContent =

@@ -262,6 +262,26 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
+  Future<bool> _isWiiUBaseGame(String rpxPath) async {
+    try {
+      final codeDir = p.dirname(rpxPath);
+      final appXmlFile = File(p.join(codeDir, 'app.xml'));
+      if (appXmlFile.existsSync()) {
+        final content = await appXmlFile.readAsString();
+        final match = RegExp(r'<title_id[^>]*>([a-fA-F0-9]{16})</title_id>').firstMatch(content);
+        if (match != null) {
+          final titleId = match.group(1)!.toLowerCase();
+          // 0005000e = Update, 0005000c = DLC
+          if (titleId.startsWith('0005000e') || titleId.startsWith('0005000c')) {
+            return false;
+          }
+        }
+      }
+    } catch (e) {
+      _log("[  WARN ] Error al leer app.xml: $e");
+    }
+    return true;
+  }
 
   Future<void> _scanFolder() async {
     if (_romFolder.isEmpty || _selectedPlatform == null || _selectedEmulator == null) return;
@@ -283,6 +303,10 @@ class _MainWindowState extends State<MainWindow> {
             final slug = p.basenameWithoutExtension(entity.path);
             if (_selectedPlatform?.platformId == 'mame') {
               if (await DatResolver.isMameGame(slug)) {
+                matchingFiles.add(entity);
+              }
+            } else if (ext == '.rpx') {
+              if (await _isWiiUBaseGame(entity.path)) {
                 matchingFiles.add(entity);
               }
             } else {
