@@ -1,5 +1,41 @@
 # Changelog
 
+## [2.16.0](https://github.com/CarlosEvCode/game_link/compare/v2.15.0...v2.16.0) (2026-07-08)
+
+
+### Features
+
+* **gc/wii:** support game serial extraction for GameCube and Wii and skip hash calculations during scan ([bb53072](https://github.com/CarlosEvCode/game_link/commit/bb53072b72b9a875a0aa57145a5dfeda3c8b35da))
+* **injector:** add offline ClrMamePro DAT name resolution for classic platforms ([37a036e](https://github.com/CarlosEvCode/game_link/commit/37a036e63eac93de67e373153a8262c906ab8416))
+* **mame:** add local MAME name resolution fallback & progressive scan ([d3b2ca5](https://github.com/CarlosEvCode/game_link/commit/d3b2ca5938abe6a65e2f70d5fc4bc995e6153492))
+* **mame:** prioritize offline MAME.dat resolution over emulator binary command ([f1eaea8](https://github.com/CarlosEvCode/game_link/commit/f1eaea87d711deeea5897bbcd55ece65a8c9e873))
+* **platforms:** add Nintendo NES platform with libretro cores ([4282451](https://github.com/CarlosEvCode/game_link/commit/428245164560ceacc22ceeecf47a10cda2b7de4e))
+* **platforms:** support .nes, .zip, and .7z formats for NES instead of .fds and .unf ([47dcf3a](https://github.com/CarlosEvCode/game_link/commit/47dcf3a0c6981684820646392561a1a344fcfb38))
+* **psp:** support game identification from compressed CSO and raw ISO formats using ISO9660 PVD parsing ([802a203](https://github.com/CarlosEvCode/game_link/commit/802a203e2a129dfaf09bce26bfb3356e395d2677))
+* **ui:** add option to toggle offline game name auto-detection and inject using raw filenames ([593d784](https://github.com/CarlosEvCode/game_link/commit/593d784d493b7dd008f94cd9753c242ac5d10699))
+* **ui:** cache resolved ROM names to local SQLite database during folder scan ([8e56f8d](https://github.com/CarlosEvCode/game_link/commit/8e56f8daf9edd9b71850456a616168e55955520f))
+* **ui:** show already injected badge in rom list and add a folder refresh button ([14d7f88](https://github.com/CarlosEvCode/game_link/commit/14d7f88970edfa84b00d3f2e96d7c2c9a5fc656f))
+* **ui:** simplify already injected indicator to a subtle gray check circle icon ([1574988](https://github.com/CarlosEvCode/game_link/commit/15749882129e477783f32c3977b9408c887781a3))
+
+
+### Bug Fixes
+
+* **build:** import dart:typed_data to resolve ByteData and Uint8List undefined names ([a564429](https://github.com/CarlosEvCode/game_link/commit/a5644291e8cf8ed66d5cdb8fa9ed5317d789ac93))
+* **injector:** slugify game slugs to avoid special characters/apostrophe issues in Lutris ([1ea3574](https://github.com/CarlosEvCode/game_link/commit/1ea35744ca51dee0af755f492dea8cc820dbba83))
+* **metadata:** automatically check disk for existing media and set database flags correctly ([d5c8f21](https://github.com/CarlosEvCode/game_link/commit/d5c8f2152421a3cc4d7efc6130594dece42f36ff))
+* **ui:** define isNoHashPlatform correctly and skip hashes for compressed/disc formats ([1338134](https://github.com/CarlosEvCode/game_link/commit/1338134907624bbd57188d7ba2fbddace32c1826))
+* **visual-manager:** separate games by platform to avoid mixing games sharing the same runner ([da691c7](https://github.com/CarlosEvCode/game_link/commit/da691c7f4c037d83d679cfbb32d8ac7764e56543))
+
+
+### Performance Improvements
+
+* **psp:** optimize CSO index parser to read block offsets on-demand without memory allocation ([0f67a48](https://github.com/CarlosEvCode/game_link/commit/0f67a486ca4565fb20cdf76c9b1875ad5234261f))
+
+
+### Reverts
+
+* **ui:** remove already injected check indicator and database check ([eaa6438](https://github.com/CarlosEvCode/game_link/commit/eaa6438d4a1318ff05fcc010bcd1ee842eb841e8))
+
 ## [2.15.0](https://github.com/CarlosEvCode/game_link/compare/v2.14.0...v2.15.0) (2026-05-11)
 
 
