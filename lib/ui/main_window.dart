@@ -50,7 +50,7 @@ class _MainWindowState extends State<MainWindow> {
 
   List<InjectionItem> _previewItems = [];
   bool _isScanning = false;
-  bool _cleanOldGames = true;
+  bool _cleanOldGames = false;
   bool _useHighPrecision = false;
   bool _reuseIdentification = true;
   bool _useOfflineId = true;
@@ -283,6 +283,58 @@ class _MainWindowState extends State<MainWindow> {
     return true;
   }
 
+  Future<String> _getWiiUGameName(String rpxPath) async {
+    try {
+      final codeDir = p.dirname(rpxPath);
+      final gameDir = p.dirname(codeDir);
+      final metaXmlFile = File(p.join(gameDir, 'meta', 'meta.xml'));
+
+      if (metaXmlFile.existsSync()) {
+        final content = await metaXmlFile.readAsString();
+
+        // 1. Intentar longname_es (Idioma principal del usuario)
+        final matchEs = RegExp(r'<longname_es[^>]*>([^<]+)</longname_es>').firstMatch(content);
+        if (matchEs != null) {
+          final name = matchEs.group(1)!.trim().replaceAll(RegExp(r'\s+'), ' ');
+          if (name.isNotEmpty) return name;
+        }
+
+        // 2. Intentar longname_en
+        final matchEn = RegExp(r'<longname_en[^>]*>([^<]+)</longname_en>').firstMatch(content);
+        if (matchEn != null) {
+          final name = matchEn.group(1)!.trim().replaceAll(RegExp(r'\s+'), ' ');
+          if (name.isNotEmpty) return name;
+        }
+
+        // 3. Fallback a shortname
+        final matchShortEs = RegExp(r'<shortname_es[^>]*>([^<]+)</shortname_es>').firstMatch(content);
+        if (matchShortEs != null) {
+          final name = matchShortEs.group(1)!.trim().replaceAll(RegExp(r'\s+'), ' ');
+          if (name.isNotEmpty) return name;
+        }
+
+        final matchShortEn = RegExp(r'<shortname_en[^>]*>([^<]+)</shortname_en>').firstMatch(content);
+        if (matchShortEn != null) {
+          final name = matchShortEn.group(1)!.trim().replaceAll(RegExp(r'\s+'), ' ');
+          if (name.isNotEmpty) return name;
+        }
+      }
+
+      // Fallback: Nombre de la carpeta que contiene code/content/meta
+      final folderName = p.basename(gameDir);
+      if (folderName.isNotEmpty && folderName != 'code' && folderName != 'WiiU' && folderName != 'Wii U') {
+        // Remover corchetes con IDs de región/versión al final (ej: [ALZE01])
+        final cleanedName = folderName.replaceAll(RegExp(r'\s*\[[a-zA-Z0-9]{6}\]\s*$'), '').trim();
+        if (cleanedName.isNotEmpty) return cleanedName;
+        return folderName;
+      }
+    } catch (e) {
+      _log("[  WARN ] Error al obtener nombre desde meta.xml: $e");
+    }
+
+    return p.basenameWithoutExtension(rpxPath);
+  }
+
   Future<void> _scanFolder() async {
     if (_romFolder.isEmpty || _selectedPlatform == null || _selectedEmulator == null) return;
 
@@ -328,12 +380,17 @@ class _MainWindowState extends State<MainWindow> {
         try {
           for (var file in filteredFiles) {
             final slug = p.basenameWithoutExtension(file.path);
+            final ext = p.extension(file.path).toLowerCase();
             String displayName = slug;
 
-            // Verificar si ya está en la caché local SQLite para cargar al instante
-            final cached = romCache.shouldProcessRom(file.path);
-            if (cached != null && cached.identifiedName != null) {
-              displayName = cached.identifiedName!;
+            if (ext == '.rpx') {
+              displayName = await _getWiiUGameName(file.path);
+            } else {
+              // Verificar si ya está en la caché local SQLite para cargar al instante
+              final cached = romCache.shouldProcessRom(file.path);
+              if (cached != null && cached.identifiedName != null) {
+                displayName = cached.identifiedName!;
+              }
             }
 
             detected.add(
@@ -349,10 +406,17 @@ class _MainWindowState extends State<MainWindow> {
       } else {
         for (var file in filteredFiles) {
           final slug = p.basenameWithoutExtension(file.path);
+          final ext = p.extension(file.path).toLowerCase();
+          String displayName = slug;
+
+          if (ext == '.rpx') {
+            displayName = await _getWiiUGameName(file.path);
+          }
+
           detected.add(
             InjectionItem(
               filePath: file.path,
-              displayName: slug,
+              displayName: displayName,
             ),
           );
         }
@@ -732,7 +796,7 @@ class _MainWindowState extends State<MainWindow> {
       if (action == 'inject' || action == 'full') {
         final selectedFiles = _previewItems.where((item) => item.isSelected).map((item) => File(item.filePath)).toList();
         final Map<String, String> customNames = {
-          for (var item in _previewItems.where((i) => i.isSelected && (i.wasManuallyEdited || _selectedPlatform?.platformId == 'mame' || DatResolver.isPlatformSupported(_selectedPlatform!.platformId))))
+          for (var item in _previewItems.where((i) => i.isSelected && (i.wasManuallyEdited || _selectedPlatform?.platformId == 'mame' || DatResolver.isPlatformSupported(_selectedPlatform!.platformId) || p.basenameWithoutExtension(i.filePath) != i.displayName)))
             item.filePath: item.displayName,
         };
         final List<String> manuallyEditedPaths = _previewItems

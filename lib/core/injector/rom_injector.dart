@@ -484,7 +484,6 @@ system:
     for (int i = 0; i < romFiles.length; i++) {
       final f = romFiles[i];
       final rawName = p.basenameWithoutExtension(f.path);
-      final gameSlug = slugify(rawName);
       String gameName = customNames?[f.path] ?? rawName;
       final fullRomPath = f.path;
 
@@ -516,6 +515,8 @@ system:
           }
         }
       }
+
+      final gameSlug = slugify(gameName);
 
       if (processedSlugs.contains(gameSlug)) {
         _log(
