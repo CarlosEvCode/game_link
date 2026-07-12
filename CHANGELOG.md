@@ -1,5 +1,36 @@
 # Changelog
 
+## [2.18.0](https://github.com/CarlosEvCode/game_link/compare/v2.17.0...v2.18.0) (2026-07-12)
+
+
+### Features
+
+* **i18n:** complete English/Spanish translation system across entire codebase ([c771e35](https://github.com/CarlosEvCode/game_link/commit/c771e3592def67dbb1448e76ef581066e1e1870b))
+* **injector:** implement incremental scan and visual batch game deletion ([ac8a2cb](https://github.com/CarlosEvCode/game_link/commit/ac8a2cbc7f3409641817031659a263d3745517bf))
+* **ui:** auto-refresh scanned folder when switching to injector tab and shorten existing indicator ([8648086](https://github.com/CarlosEvCode/game_link/commit/86480861237cd3188295e641dba1e343460be4ef))
+* **ui:** consolidate steam exports and use square icon buttons in selection toolbar ([f563f83](https://github.com/CarlosEvCode/game_link/commit/f563f83ee5353de3a7331855de0d33389a3b570b))
+* **ui:** eliminate bottom selection bar and integrate batch actions into top toolbar ([f03e25c](https://github.com/CarlosEvCode/game_link/commit/f03e25ca8a82033adad1418e6a33752cfe8e1327))
+* **ui:** focus settings tab based on missing service credentials and add registration links ([a441af3](https://github.com/CarlosEvCode/game_link/commit/a441af3591cd3e5fdeb2692060c040d525245210))
+* **ui:** implement discrete page-by-page navigation with limit 24 in Visual Manager ([ae2b595](https://github.com/CarlosEvCode/game_link/commit/ae2b5955775015d43049a24a77fd25b743b53cea))
+* **ui:** relocate filters to top header row and implement cross-page select all ([6fb1b56](https://github.com/CarlosEvCode/game_link/commit/6fb1b56a6029c061bf09e41a9123d15ec1267848))
+
+
+### Bug Fixes
+
+* **injector:** determine ROM existing state in Lutris via config yml ROM paths to survive toggle settings ([5833929](https://github.com/CarlosEvCode/game_link/commit/5833929f2a63e9044dcb5a4838ac13e31848c581))
+* **injector:** prevent duplication by verifying absolute ROM paths during scanning and injection phases ([91fb0fe](https://github.com/CarlosEvCode/game_link/commit/91fb0feec2d501b528c696d55a91092e515eb2e1))
+* **injector:** resolve duplicate name collisions for similar game versions using claimedSlugs mapping ([2e44145](https://github.com/CarlosEvCode/game_link/commit/2e44145b0b92116b571f8de2170c30e918fea7f5))
+* **injector:** support both quoted and unquoted ROM paths in Lutris YAML configs ([7d6d9e4](https://github.com/CarlosEvCode/game_link/commit/7d6d9e41a3ad9d97ca7ead796deccb20452a5c76))
+* **regex:** constrain main_file and wua_rom regex patterns to single line to prevent greedy multiline captures ([93a63e0](https://github.com/CarlosEvCode/game_link/commit/93a63e072e43be7f7bd1eeb7a91e48ed44d141af))
+* **regex:** use triple-quoted raw string literals to prevent Dart compilation errors ([d70a135](https://github.com/CarlosEvCode/game_link/commit/d70a135f20ac26e8319a04fa6a26af3e4075eb14))
+* **test:** correct CRC32 hash expectation and rewrite obsolete counter widget test ([5d47e00](https://github.com/CarlosEvCode/game_link/commit/5d47e00e4bc595e9402e9a6cc27ac00b5979ee7d))
+* **ui:** hide Row from sqlite3 import to avoid widget name conflict ([5024dad](https://github.com/CarlosEvCode/game_link/commit/5024dad2ddbd40c3aa664e14ccff0e250ccd06e5))
+
+
+### Performance Improvements
+
+* **ui:** optimize image decoding memory using cacheWidth in VisualManagerScreen ([e9eecea](https://github.com/CarlosEvCode/game_link/commit/e9eecea7ba8c74ecbc4c2967d4db12297418d809))
+
 ## [2.17.0](https://github.com/CarlosEvCode/game_link/compare/v2.16.0...v2.17.0) (2026-07-08)
 
 
