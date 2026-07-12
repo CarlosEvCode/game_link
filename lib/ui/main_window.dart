@@ -400,13 +400,13 @@ class _MainWindowState extends State<MainWindow> {
           for (var f in files) {
             if (f is File && f.path.endsWith('.yml')) {
               final content = f.readAsStringSync();
-              final matchMain = RegExp(r'^\s*main_file:\s*"(.*)"', multiLine: true).firstMatch(content);
+              final matchMain = RegExp(r'^\s*main_file:\s*["\']?([^"\']+)["\']?$', multiLine: true).firstMatch(content);
               if (matchMain != null) {
-                existingRomPaths.add(p.normalize(matchMain.group(1)!));
+                existingRomPaths.add(p.normalize(matchMain.group(1)!.trim()));
               }
-              final matchWua = RegExp(r'^\s*wua_rom:\s*"(.*)"', multiLine: true).firstMatch(content);
+              final matchWua = RegExp(r'^\s*wua_rom:\s*["\']?([^"\']+)["\']?$', multiLine: true).firstMatch(content);
               if (matchWua != null) {
-                existingRomPaths.add(p.normalize(matchWua.group(1)!));
+                existingRomPaths.add(p.normalize(matchWua.group(1)!.trim()));
               }
             }
           }
