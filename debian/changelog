@@ -1,3 +1,11 @@
+game-link (2.18.0-1) noble; urgency=medium
+
+  * New release 2.18.0.
+  * Complete English/Spanish translation system across entire codebase.
+  * Support dynamic language changing via a new General/Language tab.
+
+ -- Carlos EvCode <programer.cm12@gmail.com>  Sun, 12 Jul 2026 03:40:00 -0500
+
 game-link (2.17.0-2) noble; urgency=medium
 
   * Rebuilt with ScreenScraper developer credentials built-in.
