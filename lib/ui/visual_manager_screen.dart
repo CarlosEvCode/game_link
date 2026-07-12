@@ -486,186 +486,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     );
   }
 
-  Widget _buildLibrarySummary() {
-    final theme = Theme.of(context);
-    final total = _stats.total;
 
-    Widget buildChip(String label, int missing, IconData icon, Color color) {
-      return Tooltip(
-        message: label,
-        child: InkWell(
-          onTap: missing == 0
-              ? null
-              : () {
-                  setState(
-                    () => _filterMode = label == 'Sin portada'
-                        ? 'missingCover'
-                        : label == 'Sin banner'
-                        ? 'missingBanner'
-                        : 'missingIcon',
-                  );
-                  _refreshList();
-                },
-          borderRadius: BorderRadius.circular(4),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0A0A),
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(
-                color: missing > 0
-                    ? const Color(0xFF333333)
-                    : const Color(0xFF1A1A1A),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: 14,
-                  color: missing > 0 ? Colors.white70 : Colors.white24,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  '$missing',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                    color: missing > 0 ? Colors.white : Colors.white38,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Text(
-              'BIBLIOTECA',
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 1,
-                color: Colors.white38,
-              ),
-            ),
-            const Spacer(),
-            Text(
-              '$total JUEGOS',
-              style: const TextStyle(
-                fontSize: 10,
-                color: Colors.white70,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Wrap(
-          spacing: 8,
-          runSpacing: 8,
-          children: [
-            buildChip(
-              'Sin portada',
-              _stats.missingCover,
-              Icons.photo_library_outlined,
-              Colors.white,
-            ),
-            buildChip(
-              'Sin banner',
-              _stats.missingBanner,
-              Icons.panorama_horizontal_outlined,
-              Colors.white,
-            ),
-            buildChip(
-              'Sin icono',
-              _stats.missingIcon,
-              Icons.apps_outlined,
-              Colors.white,
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        _buildFiltersSection(),
-      ],
-    );
-  }
-
-  Widget _buildFiltersSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'FILTROS',
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-            color: Colors.white38,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 6,
-          runSpacing: 6,
-          children: [
-            _buildMinimalChoiceChip('Todos', _filterMode == 'all', () {
-              setState(() => _filterMode = 'all');
-              _refreshList();
-            }),
-            _buildMinimalChoiceChip('Sin portada', _filterMode == 'missingCover', () {
-              setState(() => _filterMode = 'missingCover');
-              _refreshList();
-            }),
-            _buildMinimalChoiceChip('Sin banner', _filterMode == 'missingBanner', () {
-              setState(() => _filterMode = 'missingBanner');
-              _refreshList();
-            }),
-            _buildMinimalChoiceChip('Sin icono', _filterMode == 'missingIcon', () {
-              setState(() => _filterMode = 'missingIcon');
-              _refreshList();
-            }),
-          ],
-        ),
-        const SizedBox(height: 32),
-        const Text(
-          'HERRAMIENTAS',
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1,
-            color: Colors.white38,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Column(
-          children: [
-            _buildSideActionButton(
-              icon: Icons.select_all,
-              label: _selectionMode
-                  ? 'Cancelar Selección'
-                  : 'Selección Múltiple',
-              onPressed: _toggleSelectionMode,
-              isActive: _selectionMode,
-            ),
-            const SizedBox(height: 8),
-            _buildSideActionButton(
-              icon: Icons.refresh,
-              label: 'Sincronizar Disco',
-              onPressed: _refreshList,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
 
   Widget _buildMinimalChoiceChip(String label, bool isSelected, VoidCallback onSelected) {
     return InkWell(
@@ -690,158 +511,198 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     );
   }
 
-  Widget _buildSideActionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-    bool isActive = false,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
-        decoration: BoxDecoration(
-          color: isActive
-              ? Colors.white.withOpacity(0.05)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          border: Border.all(color: isActive ? Colors.white24 : const Color(0xFF1A1A1A)),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 16,
-              color: isActive ? Colors.white : Colors.white38,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: isActive ? Colors.white : Colors.white70,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: const BoxDecoration(
         color: Colors.black,
         border: Border(
           bottom: BorderSide(color: Color(0xFF1A1A1A)),
         ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          // Platform dropdown
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0A0A),
-              border: Border.all(color: const Color(0xFF1A1A1A)),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<PlatformInfo>(
-                value: _selectedPlatform,
-                dropdownColor: const Color(0xFF0A0A0A),
-                items: _platforms.map((p) {
-                  return DropdownMenuItem(
-                    value: p,
-                    child: Text(
-                      p.platformName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 13,
-                        color: Colors.white,
-                      ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => _selectedPlatform = val);
+          Row(
+            children: [
+              // Platform dropdown
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A0A0A),
+                  border: Border.all(color: const Color(0xFF1A1A1A)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<PlatformInfo>(
+                    value: _selectedPlatform,
+                    dropdownColor: const Color(0xFF0A0A0A),
+                    items: _platforms.map((p) {
+                      return DropdownMenuItem(
+                        value: p,
+                        child: Text(
+                          p.platformName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            color: Colors.white,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      if (val != null) {
+                        setState(() => _selectedPlatform = val);
+                        _refreshList();
+                      }
+                    },
+                  ),
+                ),
+              ),
+              const SizedBox(width: 16),
+              // Search bar
+              Expanded(
+                child: TextField(
+                  controller: _searchController,
+                  onChanged: (value) {
+                    setState(() => _searchQuery = value.trim());
                     _refreshList();
-                  }
-                },
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          // Search bar
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                setState(() => _searchQuery = value.trim());
-                _refreshList();
-              },
-              style: const TextStyle(fontSize: 13),
-              decoration: InputDecoration(
-                hintText: 'Buscar juego...',
-                prefixIcon: const Icon(Icons.search, size: 18, color: Colors.white24),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear, size: 16, color: Colors.white38),
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() => _searchQuery = '');
-                          _refreshList();
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: const Color(0xFF0A0A0A),
-                isDense: true,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(4),
-                  borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(4),
-                  borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                  },
+                  style: const TextStyle(fontSize: 13),
+                  decoration: InputDecoration(
+                    hintText: 'Buscar juego...',
+                    prefixIcon: const Icon(Icons.search, size: 18, color: Colors.white24),
+                    suffixIcon: _searchQuery.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear, size: 16, color: Colors.white38),
+                            onPressed: () {
+                              _searchController.clear();
+                              setState(() => _searchQuery = '');
+                              _refreshList();
+                            },
+                          )
+                        : null,
+                    filled: true,
+                    fillColor: const Color(0xFF0A0A0A),
+                    isDense: true,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                    ),
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: 16),
+              // View toggle
+              Container(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0A0A0A),
+                  border: Border.all(color: const Color(0xFF1A1A1A)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  children: [
+                    _buildViewToggleButton(Icons.grid_view, _isGridView, () => setState(() => _isGridView = true)),
+                    Container(width: 1, height: 20, color: const Color(0xFF1A1A1A)),
+                    _buildViewToggleButton(Icons.view_list, !_isGridView, () => setState(() => _isGridView = false)),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildMinimalHeaderButton(
+                icon: Icons.cloud_upload_outlined,
+                label: 'Exportar a Steam',
+                onPressed: _isSteamAvailable
+                    ? () => _confirmAndExportToSteam(selectedOnly: false)
+                    : () => SteamDependenciesDialog.show(context),
+                isDisabled: !_isSteamAvailable,
+              ),
+            ],
           ),
-          const SizedBox(width: 16),
-          // View toggle
+          const SizedBox(height: 12),
           Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF0A0A0A),
-              border: Border.all(color: const Color(0xFF1A1A1A)),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              children: [
-                _buildViewToggleButton(Icons.grid_view, _isGridView, () => setState(() => _isGridView = true)),
-                Container(width: 1, height: 20, color: const Color(0xFF1A1A1A)),
-                _buildViewToggleButton(Icons.view_list, !_isGridView, () => setState(() => _isGridView = false)),
-              ],
-            ),
+            height: 1,
+            color: const Color(0xFF1A1A1A),
           ),
-          const SizedBox(width: 16),
-          _buildMinimalHeaderButton(
-            icon: Icons.cloud_upload_outlined,
-            label: 'Exportar a Steam',
-            onPressed: _isSteamAvailable
-                ? () => _confirmAndExportToSteam(selectedOnly: false)
-                : () => SteamDependenciesDialog.show(context),
-            isDisabled: !_isSteamAvailable,
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Wrap(
+                spacing: 8,
+                children: [
+                  _buildMinimalChoiceChip('Todos', _filterMode == 'all', () {
+                    setState(() => _filterMode = 'all');
+                    _refreshList();
+                  }),
+                  _buildMinimalChoiceChip('Sin portada (${_stats.missingCover})', _filterMode == 'missingCover', () {
+                    setState(() => _filterMode = 'missingCover');
+                    _refreshList();
+                  }),
+                  _buildMinimalChoiceChip('Sin banner (${_stats.missingBanner})', _filterMode == 'missingBanner', () {
+                    setState(() => _filterMode = 'missingBanner');
+                    _refreshList();
+                  }),
+                  _buildMinimalChoiceChip('Sin icono (${_stats.missingIcon})', _filterMode == 'missingIcon', () {
+                    setState(() => _filterMode = 'missingIcon');
+                    _refreshList();
+                  }),
+                ],
+              ),
+              const Spacer(),
+              Text(
+                '${_stats.total} JUEGOS',
+                style: const TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                  color: Colors.white38,
+                ),
+              ),
+              const SizedBox(width: 16),
+              _buildToolbarActionButton(
+                icon: Icons.checklist,
+                label: _selectionMode ? 'Cancelar Selección' : 'Selección Múltiple',
+                onPressed: _toggleSelectionMode,
+                isActive: _selectionMode,
+              ),
+              const SizedBox(width: 8),
+              _buildToolbarActionButton(
+                icon: Icons.sync,
+                label: 'Sincronizar Disco',
+                onPressed: _refreshList,
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildToolbarActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    bool isActive = false,
+  }) {
+    return TextButton.icon(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: isActive ? Colors.white : const Color(0xFF0A0A0A),
+        foregroundColor: isActive ? Colors.black : Colors.white70,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(4),
+          side: BorderSide(color: isActive ? Colors.white : const Color(0xFF1A1A1A)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      ),
+      icon: Icon(icon, size: 14),
+      label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
     );
   }
 
@@ -872,24 +733,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     );
   }
 
-  Widget _buildSidePanel() {
-    return Container(
-      width: 280,
-      padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Color(0xFF020202),
-        border: Border(
-          right: BorderSide(color: Color(0xFF1A1A1A)),
-        ),
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildLibrarySummary()],
-        ),
-      ),
-    );
-  }
+
 
   Widget _buildGameGrid() {
     return GridView.builder(
@@ -1315,10 +1159,16 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
           ),
           const SizedBox(width: 24),
           _buildMinimalSelectionButton('SELECCIONAR TODO', () {
+            final allIds = _repo.getGameIdsByRunners(
+              _selectedRunners,
+              platform: _selectedPlatform?.platformName,
+              filterMode: _filterMode != 'all' ? _filterMode : null,
+              searchQuery: _searchQuery.isNotEmpty ? _searchQuery : null,
+            );
             setState(() {
               _selectedGameIds
                 ..clear()
-                ..addAll(_games.map((g) => g.id));
+                ..addAll(allIds);
             });
           }),
           const SizedBox(width: 12),
@@ -1368,12 +1218,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       children: [
         _buildHeader(),
         Expanded(
-          child: Row(
-            children: [
-              _buildSidePanel(),
-              Expanded(child: _buildContentArea()),
-            ],
-          ),
+          child: _buildContentArea(),
         ),
         _buildSelectionBar(),
       ],
