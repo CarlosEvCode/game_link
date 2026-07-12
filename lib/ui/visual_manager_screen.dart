@@ -666,17 +666,68 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               ),
               const SizedBox(width: 16),
               _buildToolbarActionButton(
-                icon: Icons.checklist,
-                label: _selectionMode ? 'Cancelar Selección' : 'Selección Múltiple',
+                icon: _selectionMode ? Icons.close : Icons.checklist,
+                label: _selectionMode ? 'Cancelar' : 'Selección Múltiple',
                 onPressed: _toggleSelectionMode,
                 isActive: _selectionMode,
               ),
-              const SizedBox(width: 8),
-              _buildToolbarActionButton(
-                icon: Icons.sync,
-                label: 'Sincronizar Disco',
-                onPressed: _refreshList,
-              ),
+              if (_selectionMode) ...[
+                const SizedBox(width: 8),
+                Container(width: 1, height: 24, color: const Color(0xFF1A1A1A)),
+                const SizedBox(width: 8),
+                Text(
+                  '${_selectedGameIds.length} SEL.',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.amber,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                _buildToolbarActionButton(
+                  icon: Icons.done_all,
+                  label: 'Todo',
+                  onPressed: () {
+                    final allIds = _repo.getGameIdsByRunners(
+                      _selectedRunners,
+                      platform: _selectedPlatform?.platformName,
+                      filterMode: _filterMode != 'all' ? _filterMode : null,
+                      searchQuery: _searchQuery.isNotEmpty ? _searchQuery : null,
+                    );
+                    setState(() {
+                      _selectedGameIds
+                        ..clear()
+                        ..addAll(allIds);
+                    });
+                  },
+                ),
+                const SizedBox(width: 8),
+                _buildToolbarActionButton(
+                  icon: Icons.cloud_upload_outlined,
+                  label: 'Exportar',
+                  onPressed: _selectedGameIds.isEmpty
+                      ? () {}
+                      : (_isSteamAvailable
+                          ? () => _confirmAndExportToSteam(selectedOnly: true)
+                          : () => SteamDependenciesDialog.show(context)),
+                  isDisabled: _selectedGameIds.isEmpty || !_isSteamAvailable,
+                ),
+                const SizedBox(width: 8),
+                TextButton.icon(
+                  onPressed: _selectedGameIds.isEmpty ? null : _deleteSelectedGames,
+                  style: TextButton.styleFrom(
+                    backgroundColor: _selectedGameIds.isEmpty ? Colors.transparent : Colors.red[900],
+                    foregroundColor: _selectedGameIds.isEmpty ? Colors.white24 : Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                      side: _selectedGameIds.isEmpty ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  icon: const Icon(Icons.delete_outline, size: 14),
+                  label: const Text('Eliminar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+              ],
             ],
           ),
         ],
@@ -689,15 +740,24 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     required String label,
     required VoidCallback onPressed,
     bool isActive = false,
+    bool isDisabled = false,
   }) {
     return TextButton.icon(
-      onPressed: onPressed,
+      onPressed: isDisabled ? null : onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: isActive ? Colors.white : const Color(0xFF0A0A0A),
-        foregroundColor: isActive ? Colors.black : Colors.white70,
+        backgroundColor: isDisabled 
+            ? Colors.transparent 
+            : (isActive ? Colors.white : const Color(0xFF0A0A0A)),
+        foregroundColor: isDisabled 
+            ? Colors.white24 
+            : (isActive ? Colors.black : Colors.white70),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
-          side: BorderSide(color: isActive ? Colors.white : const Color(0xFF1A1A1A)),
+          side: BorderSide(
+            color: isDisabled 
+                ? const Color(0xFF1A1A1A) 
+                : (isActive ? Colors.white : const Color(0xFF1A1A1A)),
+          ),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
@@ -1141,77 +1201,6 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     );
   }
 
-  Widget _buildSelectionBar() {
-    if (!_selectionMode) return const SizedBox.shrink();
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        border: Border(
-          top: BorderSide(color: Color(0xFF1A1A1A)),
-        ),
-      ),
-      child: Row(
-        children: [
-          Text(
-            '${_selectedGameIds.length} SELECCIONADOS',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11, letterSpacing: 0.5, color: Colors.white70),
-          ),
-          const SizedBox(width: 24),
-          _buildMinimalSelectionButton('SELECCIONAR TODO', () {
-            final allIds = _repo.getGameIdsByRunners(
-              _selectedRunners,
-              platform: _selectedPlatform?.platformName,
-              filterMode: _filterMode != 'all' ? _filterMode : null,
-              searchQuery: _searchQuery.isNotEmpty ? _searchQuery : null,
-            );
-            setState(() {
-              _selectedGameIds
-                ..clear()
-                ..addAll(allIds);
-            });
-          }),
-          const SizedBox(width: 12),
-          _buildMinimalSelectionButton('LIMPIAR', () => _selectedGameIds.clear()),
-          const Spacer(),
-          _buildMinimalHeaderButton(
-            icon: Icons.cloud_upload_outlined,
-            label: 'Exportar Seleccionados',
-            onPressed: _selectedGameIds.isEmpty
-                ? () {}
-                : (_isSteamAvailable
-                    ? () => _confirmAndExportToSteam(selectedOnly: true)
-                    : () => SteamDependenciesDialog.show(context)),
-            isDisabled: _selectedGameIds.isEmpty || !_isSteamAvailable,
-          ),
-          const SizedBox(width: 12),
-          TextButton.icon(
-            onPressed: _selectedGameIds.isEmpty ? null : _deleteSelectedGames,
-            style: TextButton.styleFrom(
-              backgroundColor: _selectedGameIds.isEmpty ? Colors.transparent : Colors.red[900],
-              foregroundColor: _selectedGameIds.isEmpty ? Colors.white24 : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
-                side: _selectedGameIds.isEmpty ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            ),
-            icon: const Icon(Icons.delete_outline, size: 18),
-            label: const Text('Eliminar Seleccionados', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMinimalSelectionButton(String label, VoidCallback onTap) {
-    return TextButton(
-      onPressed: onTap,
-      style: TextButton.styleFrom(foregroundColor: Colors.white38),
-      child: Text(label, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -1220,7 +1209,6 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
         Expanded(
           child: _buildContentArea(),
         ),
-        _buildSelectionBar(),
       ],
     );
   }
