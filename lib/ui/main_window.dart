@@ -14,6 +14,7 @@ import 'visual_manager_screen.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart' show rootBundle;
 
 class InjectionItem {
   final String filePath;
@@ -51,6 +52,7 @@ class _MainWindowState extends State<MainWindow> {
   String _apiKey = '';
   String _ssUser = '';
   String _ssPassword = '';
+  String _appVersion = 'v2.9.10';
 
   List<InjectionItem> _previewItems = [];
   bool _isScanning = false;
@@ -77,6 +79,7 @@ class _MainWindowState extends State<MainWindow> {
     super.initState();
     _detectLutris();
     _loadPersistedConfig();
+    _loadAppVersion();
     final platforms = PlatformRegistry.getInjectorPlatforms();
     if (platforms.isNotEmpty) {
       _onPlatformChanged(platforms.first);
@@ -745,18 +748,18 @@ class _MainWindowState extends State<MainWindow> {
                         ),
                         const SizedBox(height: 12),
                         InkWell(
-                          onTap: () => _launchUrl('https://www.steamgriddb.com/profile/api'),
-                          child: const Row(
+                          onTap: () => _launchUrl('https://www.steamgriddb.com/profile/preferences/api'),
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.open_in_new_rounded, size: 10, color: Colors.blueAccent),
-                              SizedBox(width: 4),
+                              Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
+                              const SizedBox(width: 6),
                               Text(
                                 'Obtén tu API Key en SteamGridDB',
                                 style: TextStyle(
-                                  color: Colors.blueAccent,
+                                  color: Colors.white.withOpacity(0.85),
                                   fontSize: 11,
-                                  decoration: TextDecoration.underline,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -811,17 +814,17 @@ class _MainWindowState extends State<MainWindow> {
                         const SizedBox(height: 12),
                         InkWell(
                           onTap: () => _launchUrl('https://www.screenscraper.fr/'),
-                          child: const Row(
+                          child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              Icon(Icons.open_in_new_rounded, size: 10, color: Colors.blueAccent),
-                              SizedBox(width: 4),
+                              Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
+                              const SizedBox(width: 6),
                               Text(
                                 'Regístrate en ScreenScraper',
                                 style: TextStyle(
-                                  color: Colors.blueAccent,
+                                  color: Colors.white.withOpacity(0.85),
                                   fontSize: 11,
-                                  decoration: TextDecoration.underline,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ],
@@ -988,6 +991,29 @@ class _MainWindowState extends State<MainWindow> {
     }
   }
 
+  Future<void> _loadAppVersion() async {
+    try {
+      final versionStr = await rootBundle.loadString('version.txt');
+      if (mounted) {
+        setState(() {
+          _appVersion = 'v${versionStr.trim()}';
+        });
+      }
+    } catch (_) {
+      try {
+        final file = File('version.txt');
+        if (file.existsSync()) {
+          final content = file.readAsStringSync().trim();
+          if (content.isNotEmpty && mounted) {
+            setState(() {
+              _appVersion = 'v$content';
+            });
+          }
+        }
+      } catch (_) {}
+    }
+  }
+
   void _showAboutDialog() {
     showDialog(
       context: context,
@@ -1022,9 +1048,9 @@ class _MainWindowState extends State<MainWindow> {
               ),
             ),
             const SizedBox(height: 4),
-            const Text(
-              'v2.9.10',
-              style: TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold),
+            Text(
+              _appVersion,
+              style: const TextStyle(color: Colors.white38, fontSize: 12, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 24),
             const Text(
