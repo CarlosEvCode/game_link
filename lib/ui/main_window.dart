@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:sqlite3/sqlite3.dart';
+import 'package:sqlite3/sqlite3.dart' hide Row;
 import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
