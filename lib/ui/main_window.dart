@@ -378,7 +378,10 @@ class _MainWindowState extends State<MainWindow> {
       );
 
       final Set<String> existingSlugs = {};
+      final Set<String> existingRomPaths = {};
       final dbPath = _lutrisPaths?['db_path'];
+      final configDir = _lutrisPaths?['config_dir_main'];
+
       if (dbPath != null && File(dbPath).existsSync()) {
         try {
           final db = sqlite3.open(dbPath);
@@ -387,6 +390,26 @@ class _MainWindowState extends State<MainWindow> {
             existingSlugs.add(row['slug'] as String);
           }
           db.dispose();
+        } catch (_) {}
+      }
+
+      if (configDir != null && Directory(configDir).existsSync()) {
+        try {
+          final dir = Directory(configDir);
+          final files = dir.listSync();
+          for (var f in files) {
+            if (f is File && f.path.endsWith('.yml')) {
+              final content = f.readAsStringSync();
+              final matchMain = RegExp(r'^\s*main_file:\s*"(.*)"', multiLine: true).firstMatch(content);
+              if (matchMain != null) {
+                existingRomPaths.add(p.normalize(matchMain.group(1)!));
+              }
+              final matchWua = RegExp(r'^\s*wua_rom:\s*"(.*)"', multiLine: true).firstMatch(content);
+              if (matchWua != null) {
+                existingRomPaths.add(p.normalize(matchWua.group(1)!));
+              }
+            }
+          }
         } catch (_) {}
       }
 
@@ -410,7 +433,7 @@ class _MainWindowState extends State<MainWindow> {
             }
 
             final gameSlug = RomInjector.slugify(displayName);
-            final exists = existingSlugs.contains(gameSlug);
+            final exists = existingRomPaths.contains(p.normalize(file.path)) || existingSlugs.contains(gameSlug);
 
             detected.add(
               InjectionItem(
@@ -435,7 +458,7 @@ class _MainWindowState extends State<MainWindow> {
           }
 
           final gameSlug = RomInjector.slugify(displayName);
-          final exists = existingSlugs.contains(gameSlug);
+          final exists = existingRomPaths.contains(p.normalize(file.path)) || existingSlugs.contains(gameSlug);
 
           detected.add(
             InjectionItem(
@@ -553,7 +576,7 @@ class _MainWindowState extends State<MainWindow> {
                       item.displayName = resolvedName;
 
                       final resolvedSlug = RomInjector.slugify(resolvedName);
-                      final exists = existingSlugs.contains(resolvedSlug);
+                      final exists = existingRomPaths.contains(p.normalize(item.filePath)) || existingSlugs.contains(resolvedSlug);
                       item.alreadyExists = exists;
                       item.isSelected = !exists;
                     }
@@ -1218,7 +1241,10 @@ class _MainWindowState extends State<MainWindow> {
           setState(() => _useOfflineId = val ?? false);
           _scanFolder();
         }),
-        _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) => setState(() => _useHighPrecision = val ?? false)),
+        _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) {
+          setState(() => _useHighPrecision = val ?? false);
+          _scanFolder();
+        }),
         _buildCompactCheckbox('Escaneo recursivo', _isRecursive, (val) {
           setState(() => _isRecursive = val ?? false);
           _scanFolder();
