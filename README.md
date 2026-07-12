@@ -1,278 +1,231 @@
 # Game Link
 
-Desktop companion for Linux users who manage game libraries across multiple launchers (Lutris, Steam, etc.).
+Desktop companion for Linux users who manage game libraries across multiple launchers (Lutris, Steam, etc.). 
 
-Game Link combines several workflows in one application:
+Game Link unifies your retro and modern gaming setup:
+- **ROM Injection**: Automatically scans, identifies, and injects local ROM collections directly into Lutris.
+- **Visual Metadata Management**: Downloads and applies high-quality covers, banners, and icons from SteamGridDB.
+- **High-Precision Identification**: Uses offline DAT databases by default for precise name resolution, with optional ScreenScraper hash-matching integration (CRC32, MD5, SHA1) for extra metadata.
+- **Steam Integration**: Exports shortcuts and artwork to Steam for seamless non-Steam game management.
 
-- **ROM injection**: import local ROM collections and generate Lutris entries.
-- **Visual metadata management**: apply cover art, banners, and icons from SteamGridDB, with optional high-precision identification using ScreenScraper.
+---
 
-## Contents
-
-- [Overview](#overview)
+## Table of Contents
 - [Key Features](#key-features)
 - [Supported Platforms](#supported-platforms)
-- [How Metadata Works](#how-metadata-works)
-- [Requirements](#requirements)
 - [Installation](#installation)
+  - [Arch Linux](#arch-linux)
+  - [Ubuntu / Debian](#ubuntu--debian)
+  - [Fedora](#fedora)
+  - [AppImage](#appimage-universal-linux)
+  - [From Source](#from-source)
 - [Configuration](#configuration)
-- [Build with ScreenScraper Developer Credentials](#build-with-screenscraper-developer-credentials)
+- [How Metadata Works](#how-metadata-works)
 - [Steam Export Requirements](#steam-export-requirements)
-- [Usage](#usage)
-- [Lutris Path Detection](#lutris-path-detection)
+- [Lutris Integration](#lutris-integration)
 - [Project Structure](#project-structure)
 - [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 
-## Overview
-
-Game Link is a Flutter desktop app focused on improving the day-to-day management of large Lutris libraries.
-
-It reads and updates Lutris data directly (including `pga.db`, YAML game configs, and media folders), while keeping operations practical for real-world setups:
-
-- Native Lutris installation
-- Flatpak Lutris installation
-- Mixed ROM sets with multiple file formats
-- Large metadata runs with API quota constraints
+---
 
 ## Key Features
 
-### 1) ROM injection and batch import
+### 1. Smart ROM Injection & Platform Mapping
+- **Batch Scans**: Identifies games by platform-specific extensions.
+- **Standalone Runner Support**: Automatically configures emulators like **Cemu (Wii U)**, mapping unpacked Loadiine folders (using `meta/meta.xml` and `code/app.rpx`) or compressed formats (`.wua`/`.wux`).
+- **BIOS & Update Filtering**:
+  - Filters out arcade BIOS/devices (MAME) automatically.
+  - Skips Wii U updates and DLCs by inspecting Title IDs in `code/app.xml`.
+- **Duplicate Prevention**: Handles extension priority (e.g., favoring `.bin`/`.iso` over `.cue`).
+- **Cleanups**: Option to clean previous entries of a platform before re-injecting.
 
-- Scans local folders and filters files by platform extension
-- Creates Lutris-compatible game entries
-- Supports cleaning previous runner entries before re-injection
-- Handles extension priority to avoid duplicate game entries (for example, `.bin` over `.cue`)
+### 2. High-Precision Identification (ScreenScraper)
+- **Offline DAT Databases**: Uses Libretro databases to resolve game names offline.
+- **Serial Parsing**: Parses game serials directly from **PlayStation (PS1, PS2, PSP)** ISOs/CSOs and **GameCube/Wii** ISOs/WBFs for 100% accurate matches.
+- **Online Matching**: Uses CRC32, MD5, and SHA1 hashes to query ScreenScraper.
+- **Syncd Quota & Caches**: Keeps persistent local caches and respects daily API request limits.
 
-### 2) SteamGridDB visual manager
+### 3. Visual Media Manager (SteamGridDB)
+- **Grid Layout**: Preview and apply cover art (portrait), banners (landscape), and icons (square).
+- **Lutris Integration**: Writes downloaded artwork directly into Lutris's media directories and updates Lutris databases.
+- **Artwork Caching**: Minimizes API requests and speeds up loading times.
 
-- Search and select SteamGridDB game matches
-- Download and apply:
-  - **Cover** (portrait)
-  - **Banner** (landscape)
-  - **Icon** (square)
-- Writes assets to Lutris media folders and updates icon files for Lutris/system usage
-- Includes cache to reduce repeated API calls and improve responsiveness
+### 4. Steam Export
+- **Non-Steam Shortcuts**: Creates and updates shortcuts linking to `lutris:rungameid/<id>`.
+- **Artwork Sync**: Automatically maps Steam artwork slots (`cover`, `hero`, `icon`, `wide`).
+- **Auto-Collections**: Groups games into Steam categories by platform.
 
-### 3) ScreenScraper high-precision identification
-
-- Optional hash-based identification (CRC32/MD5/SHA1)
-- Intelligent request limiting based on current quota
-- In-memory and persistent disk caching
-- Failed-lookups cache to avoid repeated expensive misses
-- Extra metadata enrichment when available (developer, release date, synopsis, media URLs)
-
-### 4) Desktop-first detail workflow
-
-- Game detail view before opening the visual selector
-- Current Lutris media preview and ScreenScraper media preview in one place
-- Per-media edit shortcuts (cover/banner/icon) to jump directly to the relevant selector tab
-
-### 5) Steam export for non-Steam shortcuts
-
-- Export single games from detail view or batch export from Visual Manager
-- Creates/updates non-Steam shortcuts using `lutris:rungameid/<id>`
-- Syncs Steam artwork slots (`cover`, `hero`, `icon`, `wide`)
-- Auto-creates and updates simple Steam collections by platform
-- Hides Steam export actions automatically when Steam or required runtime dependencies are unavailable
+---
 
 ## Supported Platforms
 
-Current platform registry includes:
+| Platform | ID | Supported Extensions | Identification Features |
+| :--- | :--- | :--- | :--- |
+| **Arcade (MAME)** | `mame` | `.zip`, `.7z` | Offline DAT resolution, BIOS & device filtering |
+| **Sega Dreamcast** | `dreamcast` | `.chd`, `.gdi`, `.cdi` | Offline DAT & clean name matching |
+| **Sony PlayStation** | `ps1` | `.bin`, `.chd`, `.pbp`, `.cue` | Serial extraction from disc files |
+| **Sony PlayStation 2** | `ps2` | `.iso`, `.chd` | Serial extraction from disc files |
+| **Sony PlayStation Portable** | `psp` | `.iso`, `.cso`, `.pbp` | Serial extraction from disc files |
+| **Sony PlayStation Vita** | `vita` | `.vpk`, `.zip` | Clean name matching |
+| **Nintendo Game Boy (Color)** | `gb` | `.gb`, `.gbc`, `.zip`, `.7z` | Offline DAT resolution |
+| **Nintendo Game Boy Advance** | `gba` | `.gba`, `.zip`, `.7z` | Offline DAT resolution |
+| **Nintendo DS** | `ds` | `.nds`, `.ds` | Header serial extraction |
+| **Nintendo 3DS** | `3ds` | `.3ds`, `.cia`, `.cci` | Header serial extraction |
+| **Nintendo GameCube** | `gamecube` | `.iso`, `.gcz`, `.rvz` | Disc header serial extraction |
+| **Nintendo Wii** | `wii` | `.iso`, `.wbfs`, `.rvz` | Disc header serial extraction |
+| **Nintendo Wii U** | `wii_u` | Folder (`code/`), `.wua`, `.wux`, `.wud`, `.rpx` | XML Title ID parsing, automatic DLC/Update filtering |
+| **Nintendo NES** | `nes` | `.nes`, `.zip`, `.7z` | Offline DAT resolution |
+| **Super Nintendo** | `snes` | `.sfc`, `.smc`, `.zip`, `.7z` | Offline DAT resolution |
+| **Nintendo 64** | `n64` | `.n64`, `.z64`, `.v64`, `.zip` | Clean name matching |
+| **Sega Genesis / Mega Drive**| `genesis` / `megadrive` | `.md`, `.smd`, `.gen`, `.zip`, `.7z` | Offline DAT resolution |
+| **Nintendo Switch** | `switch` | `.nsp`, `.xci`, `.nca`, `.nso` | Clean name matching |
+| **Xbox** | `xbox` | `.iso`, `.xiso` | Clean name matching |
 
-- Sony PlayStation (`ps1`)
-- Sony PlayStation 2 (`ps2`)
-- Nintendo GameCube (`gamecube`)
-- Nintendo Wii (`wii`)
-- Nintendo Wii U (`wii_u`)
-- Nintendo 3DS (`3ds`)
-- Arcade MAME (`mame`)
-
-Platform definitions live in `lib/platforms/platform_registry.dart`.
-
-## How Metadata Works
-
-Game Link separates responsibilities between providers:
-
-- **SteamGridDB**: primary source for downloadable visual assets used in Lutris UI.
-- **ScreenScraper**: high-precision game identification and supplemental metadata.
-
-In practice:
-
-1. You can inject/import ROMs first.
-2. If high-precision mode is enabled, the app attempts ScreenScraper identification using file hashes.
-3. SteamGridDB is used to search and apply visual art.
-4. The detail screen shows both current local media and available ScreenScraper extras when present.
-
-This keeps the visual workflow flexible while preserving accurate matching where possible.
-
-## Requirements
-
-- Linux desktop
-- **Lutris v0.5.18+** (native or Flatpak)
-- Flutter SDK (for running/building from source)
-- SteamGridDB API key
-
-Optional (for high-precision mode):
-
-- ScreenScraper user credentials (`ssid` / password)
-- ScreenScraper developer credentials (`SS_DEV_ID`, `SS_DEV_PASSWORD`, `SS_SOFT_NAME`) embedded at build time
-
-Optional (for Steam export workflow):
-
-- Python 3 runtime
-- `vdf` Python module
-- `Pillow` (`PIL`) Python module
+---
 
 ## Installation
 
+### Arch Linux
+Install the pre-compiled binary package directly from the **AUR** using your preferred AUR helper:
 ```bash
-git clone https://github.com/CarlosEvCode/game_link.git
-cd game_link
-flutter pub get
+paru -S game-link-bin
+# or
+yay -S game-link-bin
+```
+*Note: You can also download the pre-compiled `.tar.xz` directly from the [Releases](https://github.com/CarlosEvCode/game_link/releases) page.*
+
+### Ubuntu / Debian
+Add the official **PPA** repository and install:
+```bash
+sudo add-apt-repository ppa:evcode/ubuntu/game-link
+sudo apt update
+sudo apt install game-link
+```
+*Note: You can also download the standalone `.deb` package directly from the [Releases](https://github.com/CarlosEvCode/game_link/releases) page.*
+
+### Fedora
+Enable the **Copr** repository and install:
+```bash
+sudo dnf copr enable evcode/game-link
+sudo dnf install game-link
+```
+*Note: You can also download the standalone `.rpm` package directly from the [Releases](https://github.com/CarlosEvCode/game_link/releases) page.*
+
+### AppImage (Universal Linux)
+You can download the standalone `.AppImage` directly from the [Releases](https://github.com/CarlosEvCode/game_link/releases) page.
+
+To run it manually:
+```bash
+chmod +x game-link-*.AppImage
+./game-link-*.AppImage
 ```
 
-Run in development:
+*Tip: For seamless desktop integration (automatic menu shortcuts, system updates, and isolated file management), we highly recommend using an AppImage manager like **Gear Lever**, **AppImageLauncher**, or **AppImageKitDaemon**.*
 
-```bash
-flutter run -d linux
-```
+### From Source
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/CarlosEvCode/game_link.git
+   cd game_link
+   ```
+2. **Setup environment variables**:
+   Create a `.env` file in the root directory to automatically embed ScreenScraper developer credentials at compile time:
+   ```env
+   SS_DEV_ID=your_screenscraper_dev_id
+   SS_DEV_PASSWORD=your_screenscraper_dev_password
+   SS_SOFT_NAME=your_registered_soft_name
+   ```
+3. **Compile or Run**:
+   - Run in development mode:
+     ```bash
+     flutter run -d linux
+     ```
+   - Build a production release:
+     ```bash
+     # The build script will automatically detect and load your .env credentials
+     ./scripts/build_all.sh
+     ```
+
+---
 
 ## Configuration
 
-Use the app settings dialog to configure your credentials. These keys are essential for the application to fetch high-quality artwork and identify your games accurately.
+Open the **Settings** dialog in Game Link to configure your API keys.
 
-### Obtaining API Keys
+1. **SteamGridDB API Key (Required for Artwork)**:
+   - Create an account at [steamgriddb.com](https://www.steamgriddb.com/).
+   - Generate your API key at [steamgriddb.com/profile/api](https://www.steamgriddb.com/profile/api) and paste it into the app.
 
-#### 1. SteamGridDB (Required for Artwork)
-SteamGridDB is the primary source for covers, banners, and icons.
-1.  Go to [steamgriddb.com](https://www.steamgriddb.com/) and log in (typically via Steam).
-2.  Navigate to your **Profile Settings** or go directly to [steamgriddb.com/profile/api](https://www.steamgriddb.com/profile/api).
-3.  Click on **"Generate API Key"**.
-4.  Copy the key and paste it into the **Settings** dialog within Game Link.
+2. **ScreenScraper User Credentials (Optional for High-Precision)**:
+   - Register an account at [screenscraper.fr](https://www.screenscraper.fr/).
+   - Enter your username and password in Settings to unlock hash-based scraping.
 
-#### 2. ScreenScraper (Optional for High-Precision)
-ScreenScraper is used for hash-based identification (ensuring the "Right Game" is matched).
-1.  Register an account at [screenscraper.fr](https://www.screenscraper.fr/).
-2.  In the app's **Settings**, enter your **Username** and **Password**.
-3.  *Note:* High-precision features also require **Developer Credentials** to be embedded at build time (see the [Build section](#build-with-screenscraper-developer-credentials) below).
+---
 
-## Build with ScreenScraper Developer Credentials
+## How Metadata Works
 
-ScreenScraper developer credentials are read via compile-time defines.
+Game Link separates responsibilities between metadata providers:
+1. **Lutris Database Mapping**: Scans ROM directories and checks offline DAT/Serials first to find the clean game title.
+2. **ScreenScraper**: Supplements local games with release dates, developers, descriptions, and verified IDs via hash matching.
+3. **SteamGridDB**: Used during the visual selection step to fetch, display, and apply cover grids, banners, and icons.
 
-Use `.env.example` as reference, then build with:
-
-```bash
-flutter build linux \
-  --dart-define=SS_DEV_ID=your_dev_id \
-  --dart-define=SS_DEV_PASSWORD=your_dev_password \
-  --dart-define=SS_SOFT_NAME=GameLink
-```
-
-Notes:
-
-- These values are consumed by `ScreenScraperService`.
-- Without developer credentials, high-precision features are limited/disabled.
-- User credentials (ssid/password) are still needed at runtime for quota/account checks.
+---
 
 ## Steam Export Requirements
 
-Game Link can export your games to Steam as non-Steam shortcuts, including artwork sync and platform-based collections.
+To sync artwork and create shortcuts for non-Steam games, ensure the following are installed on your system:
+- Python 3
+- Python modules: `vdf` and `Pillow`
 
-> **Note:** Currently, only the **Native** installation of Steam is automatically detected and supported for export operations. Support for Steam via Flatpak is planned for future updates.
-
-Required on the target system:
-
-- `python3`
-- `vdf`
-- `Pillow`
-
-Install command:
-
+Install python modules:
 ```bash
 python3 -m pip install --user vdf pillow
 ```
+*Note: Export options are dynamically hidden if Steam or Python runtime requirements are not detected.*
 
-Notes:
+---
 
-- Export buttons are shown only when Steam paths and required dependencies are detected.
-- This behavior prevents partial exports on systems missing Steam or Python modules.
+## Lutris Integration
 
-## Usage
+Game Link seamlessly integrates with Lutris by auto-detecting user directories for both Native and Flatpak installations:
+- **Native Lutris**: `~/.local/share/lutris/`
+- **Flatpak Lutris**: `~/.var/app/net.lutris.Lutris/data/lutris/`
 
-### Basic flow
+To reflect your game imports and visual media choices without manual intervention, the app writes directly to the standard Lutris configuration files:
+- **Game Configurations**: updates or creates the `games/*.yml` game runner settings.
+- **SQLite Database (`pga.db`)**: registers injected ROMs into the central library database.
+- **Visual Assets**: places covers, banners, and icons in their respective subdirectories (`coverart/`, `banners/`, and `icons/`).
 
-1. Open Settings and configure SteamGridDB API key.
-2. Select a platform and ROM folder.
-3. Preview detected files and run injection.
-4. Open Visual Manager to inspect/update game media.
-
-### High-precision flow (optional)
-
-1. Configure ScreenScraper user credentials in Settings.
-2. Build with developer credentials (`--dart-define`).
-3. Enable high-precision identification before batch processing.
-4. The app checks quota and warns when remaining capacity is insufficient.
-
-### Steam export flow (optional)
-
-1. Ensure Steam is installed and closed during export operations.
-2. Verify Python modules are installed (`vdf`, `pillow`).
-3. Export from game detail (single game) or Visual Manager (platform/selected batch).
-4. Re-open Steam and confirm shortcuts, artwork, and platform collections.
-
-## Lutris Path Detection
-
-The app auto-detects and configures Lutris paths depending on installation mode.
-
-- **Native** (data): `~/.local/share/lutris/`
-- **Flatpak** (data): `~/.var/app/net.lutris.Lutris/data/lutris/`
-
-It manages distinct paths for:
-
-- database (`pga.db`)
-- covers (`coverart/`)
-- banners (`banners/`)
-- icons (`icons/`)
-- game configs (`games/` or `~/.config/lutris/games/` depending on mode)
+---
 
 ## Project Structure
 
-Key directories/files:
+- `lib/ui/` - Desktop GUI screens, detail panels, and settings.
+- `lib/core/injector/` - Scanners, serial extraction algorithms, and database injection.
+- `lib/core/lutris/` - PGA database repository and Flatpak/Native path detection.
+- `lib/core/metadata/` - SteamGridDB and ScreenScraper clients, query limits, and cache.
+- `lib/platforms/` - Supported systems registry and extension parameters.
 
-- `lib/ui/` - desktop UI screens and dialogs
-- `lib/core/injector/` - ROM injection and batch logic
-- `lib/core/lutris/` - Lutris repository and path handling
-- `lib/core/metadata/` - SteamGridDB and ScreenScraper services/cache
-- `lib/platforms/` - platform definitions and extension rules
+---
 
 ## Troubleshooting
 
-### SteamGridDB search does not work
+### SteamGridDB search returns no matches
+- Double-check that your API key is correct in Settings.
+- Verify your internet connection.
 
-- Verify API key in Settings.
-- Confirm internet access and API key validity.
+### High-precision mode is grayed out
+- Verify that your ScreenScraper username and password are saved in Settings.
+- Ensure the app was compiled with developer credentials (defined in `.env` or passed via `--dart-define`).
 
-### High-precision identification unavailable
+### Artwork does not show up in Lutris
+- Verify whether Lutris is installed as a Flatpak or Native package, and check that the path in Settings matches.
 
-- Ensure app was built with `SS_DEV_ID`, `SS_DEV_PASSWORD`, `SS_SOFT_NAME`.
-- Verify ScreenScraper user credentials in Settings.
-- Check remaining daily quota.
-
-### Media is not visible in detail view
-
-- Confirm Lutris mode/path detection is correct (native vs Flatpak).
-- Verify files exist in Lutris media folders (`coverart`, `banners`, `icons`).
+---
 
 ## Contributing
 
-Contributions are welcome.
-
-If you want to add support for another platform, improve metadata matching, or refine desktop UX:
-
-1. Open an issue describing the problem/proposal.
-2. Submit a pull request with clear scope and test steps.
-
-Please keep changes aligned with existing architecture and path-detection behavior for both native and Flatpak Lutris installations.
-ak Lutris installations.
+Contributions are welcome! If you want to add support for a new platform, improve parsing/scanners, or enhance the UI:
+1. Open an issue describing your proposal.
+2. Submit a pull request targetting the `features` branch.
