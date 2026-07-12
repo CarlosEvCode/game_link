@@ -213,7 +213,24 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   }
 
   Widget _buildHeader() {
+    final hasAllMedia = File(_coverPath).existsSync() &&
+        File(_bannerPath).existsSync() &&
+        (File(_iconPath).existsSync() || File(_lutrisPaths.systemIconPath(widget.game.slug)).existsSync());
+
     final identified = _screenScraperInfo?.isIdentified == true;
+
+    String statusText;
+    Color statusColor;
+    if (identified) {
+      statusText = 'SCREEN SCRAPER OK';
+      statusColor = Colors.white70;
+    } else if (hasAllMedia) {
+      statusText = 'MEDIA COMPLETO';
+      statusColor = Colors.white70;
+    } else {
+      statusText = 'SIN IDENTIFICAR';
+      statusColor = Colors.white24;
+    }
 
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 20, 16, 20),
@@ -260,8 +277,8 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                       Colors.white,
                     ),
                     _buildMinimalChip(
-                      identified ? 'SCREEN SCRAPER OK' : 'SIN IDENTIFICAR',
-                      identified ? Colors.white70 : Colors.white24,
+                      statusText,
+                      statusColor,
                     ),
                   ],
                 ),
