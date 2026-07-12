@@ -528,7 +528,9 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
             children: [
               // Platform dropdown
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                height: 40,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                alignment: Alignment.center,
                 decoration: BoxDecoration(
                   color: const Color(0xFF0A0A0A),
                   border: Border.all(color: const Color(0xFF1A1A1A)),
@@ -563,37 +565,42 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               const SizedBox(width: 16),
               // Search bar
               Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: (value) {
-                    setState(() => _searchQuery = value.trim());
-                    _refreshList();
-                  },
-                  style: const TextStyle(fontSize: 13),
-                  decoration: InputDecoration(
-                    hintText: 'Buscar juego...',
-                    prefixIcon: const Icon(Icons.search, size: 18, color: Colors.white24),
-                    suffixIcon: _searchQuery.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.clear, size: 16, color: Colors.white38),
-                            onPressed: () {
-                              _searchController.clear();
-                              setState(() => _searchQuery = '');
-                              _refreshList();
-                            },
-                          )
-                        : null,
-                    filled: true,
-                    fillColor: const Color(0xFF0A0A0A),
-                    isDense: true,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: (value) {
+                      setState(() => _searchQuery = value.trim());
+                      _refreshList();
+                    },
+                    style: const TextStyle(fontSize: 13),
+                    decoration: InputDecoration(
+                      hintText: 'Buscar juego...',
+                      prefixIcon: const Icon(Icons.search, size: 16, color: Colors.white24),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear, size: 14, color: Colors.white38),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              onPressed: () {
+                                _searchController.clear();
+                                setState(() => _searchQuery = '');
+                                _refreshList();
+                              },
+                            )
+                          : null,
+                      filled: true,
+                      fillColor: const Color(0xFF0A0A0A),
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(4),
+                        borderSide: const BorderSide(color: Color(0xFF1A1A1A)),
+                      ),
                     ),
                   ),
                 ),
@@ -601,6 +608,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               const SizedBox(width: 16),
               // View toggle
               Container(
+                height: 40,
                 decoration: BoxDecoration(
                   color: const Color(0xFF0A0A0A),
                   border: Border.all(color: const Color(0xFF1A1A1A)),
@@ -617,11 +625,13 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               const SizedBox(width: 16),
               _buildMinimalHeaderButton(
                 icon: Icons.cloud_upload_outlined,
-                label: 'Exportar a Steam',
+                label: _selectedGameIds.isNotEmpty
+                    ? 'Exportar Seleccionados (${_selectedGameIds.length})'
+                    : 'Exportar a Steam',
                 onPressed: _isSteamAvailable
-                    ? () => _confirmAndExportToSteam(selectedOnly: false)
+                    ? () => _confirmAndExportToSteam(selectedOnly: _selectedGameIds.isNotEmpty)
                     : () => SteamDependenciesDialog.show(context),
-                isDisabled: !_isSteamAvailable,
+                isDisabled: !_isSteamAvailable || (_selectedGameIds.isEmpty && _games.isEmpty),
               ),
             ],
           ),
@@ -675,18 +685,9 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                 const SizedBox(width: 8),
                 Container(width: 1, height: 24, color: const Color(0xFF1A1A1A)),
                 const SizedBox(width: 8),
-                Text(
-                  '${_selectedGameIds.length} SEL.',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.amber,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _buildToolbarActionButton(
+                _buildToolbarIconButton(
                   icon: Icons.done_all,
-                  label: 'Todo',
+                  tooltip: 'Seleccionar Todo',
                   onPressed: () {
                     final allIds = _repo.getGameIdsByRunners(
                       _selectedRunners,
@@ -702,30 +703,13 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                   },
                 ),
                 const SizedBox(width: 8),
-                _buildToolbarActionButton(
-                  icon: Icons.cloud_upload_outlined,
-                  label: 'Exportar',
-                  onPressed: _selectedGameIds.isEmpty
-                      ? () {}
-                      : (_isSteamAvailable
-                          ? () => _confirmAndExportToSteam(selectedOnly: true)
-                          : () => SteamDependenciesDialog.show(context)),
-                  isDisabled: _selectedGameIds.isEmpty || !_isSteamAvailable,
-                ),
-                const SizedBox(width: 8),
-                TextButton.icon(
-                  onPressed: _selectedGameIds.isEmpty ? null : _deleteSelectedGames,
-                  style: TextButton.styleFrom(
-                    backgroundColor: _selectedGameIds.isEmpty ? Colors.transparent : Colors.red[900],
-                    foregroundColor: _selectedGameIds.isEmpty ? Colors.white24 : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(4),
-                      side: _selectedGameIds.isEmpty ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                  ),
-                  icon: const Icon(Icons.delete_outline, size: 14),
-                  label: const Text('Eliminar', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                _buildToolbarIconButton(
+                  icon: Icons.delete_outline,
+                  tooltip: 'Eliminar Seleccionados',
+                  backgroundColor: _selectedGameIds.isEmpty ? null : Colors.red[900],
+                  foregroundColor: _selectedGameIds.isEmpty ? null : Colors.white,
+                  isDisabled: _selectedGameIds.isEmpty,
+                  onPressed: _deleteSelectedGames,
                 ),
               ],
             ],
@@ -742,54 +726,95 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     bool isActive = false,
     bool isDisabled = false,
   }) {
-    return TextButton.icon(
-      onPressed: isDisabled ? null : onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: isDisabled 
-            ? Colors.transparent 
-            : (isActive ? Colors.white : const Color(0xFF0A0A0A)),
-        foregroundColor: isDisabled 
-            ? Colors.white24 
-            : (isActive ? Colors.black : Colors.white70),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-          side: BorderSide(
-            color: isDisabled 
-                ? const Color(0xFF1A1A1A) 
-                : (isActive ? Colors.white : const Color(0xFF1A1A1A)),
+    return SizedBox(
+      height: 36,
+      child: TextButton.icon(
+        onPressed: isDisabled ? null : onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: isDisabled 
+              ? Colors.transparent 
+              : (isActive ? Colors.white : const Color(0xFF0A0A0A)),
+          foregroundColor: isDisabled 
+              ? Colors.white24 
+              : (isActive ? Colors.black : Colors.white70),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+            side: BorderSide(
+              color: isDisabled 
+                  ? const Color(0xFF1A1A1A) 
+                  : (isActive ? Colors.white : const Color(0xFF1A1A1A)),
+            ),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+        ),
+        icon: Icon(icon, size: 14),
+        label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+
+  Widget _buildToolbarIconButton({
+    required IconData icon,
+    required String tooltip,
+    required VoidCallback onPressed,
+    bool isDisabled = false,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    final bg = backgroundColor ?? const Color(0xFF0A0A0A);
+    final fg = foregroundColor ?? Colors.white70;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: isDisabled ? null : onPressed,
+        borderRadius: BorderRadius.circular(4),
+        child: Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: isDisabled ? Colors.transparent : bg,
+            border: Border.all(color: isDisabled ? const Color(0xFF1A1A1A) : const Color(0xFF1A1A1A)),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: isDisabled ? Colors.white24 : fg,
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       ),
-      icon: Icon(icon, size: 14),
-      label: Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
     );
   }
 
   Widget _buildViewToggleButton(IconData icon, bool isActive, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Icon(icon, size: 18, color: isActive ? Colors.white : Colors.white24),
+      child: Container(
+        width: 38,
+        height: 38,
+        alignment: Alignment.center,
+        child: Icon(icon, size: 16, color: isActive ? Colors.white : Colors.white24),
       ),
     );
   }
 
   Widget _buildMinimalHeaderButton({required IconData icon, required String label, required VoidCallback onPressed, bool isDisabled = false}) {
-    return TextButton.icon(
-      onPressed: onPressed,
-      style: TextButton.styleFrom(
-        backgroundColor: isDisabled ? Colors.transparent : Colors.white,
-        foregroundColor: isDisabled ? Colors.white24 : Colors.black,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(4),
-          side: isDisabled ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
+    return SizedBox(
+      height: 40,
+      child: TextButton.icon(
+        onPressed: onPressed,
+        style: TextButton.styleFrom(
+          backgroundColor: isDisabled ? Colors.transparent : Colors.white,
+          foregroundColor: isDisabled ? Colors.white24 : Colors.black,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(4),
+            side: isDisabled ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        icon: Icon(icon, size: 16),
+        label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
       ),
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
     );
   }
 
