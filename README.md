@@ -18,6 +18,7 @@ Game Link unifies your retro and modern gaming setup:
   - [Ubuntu / Debian](#ubuntu--debian)
   - [Fedora](#fedora)
   - [AppImage](#appimage-universal-linux)
+  - [Flatpak](#flatpak-universal-linux)
   - [From Source](#from-source)
 - [Configuration](#configuration)
 - [How Metadata Works](#how-metadata-works)
@@ -123,6 +124,14 @@ chmod +x game-link-*.AppImage
 
 *Tip: For seamless desktop integration (automatic menu shortcuts, system updates, and isolated file management), we highly recommend using an AppImage manager like **Gear Lever**, **AppImageLauncher**, or **AppImageKitDaemon**.*
 
+### Flatpak (Universal Linux)
+You can download the `.flatpak` package directly from the [Releases](https://github.com/CarlosEvCode/game_link/releases) page.
+
+To install it:
+```bash
+flatpak install --user game_link-*.flatpak
+```
+
 ### From Source
 1. **Clone the repository**:
    ```bash
@@ -155,7 +164,7 @@ Open the **Settings** dialog in Game Link to configure your API keys.
 
 1. **SteamGridDB API Key (Required for Artwork)**:
    - Create an account at [steamgriddb.com](https://www.steamgriddb.com/).
-   - Generate your API key at [steamgriddb.com/profile/api](https://www.steamgriddb.com/profile/api) and paste it into the app.
+   - Generate your API key at [steamgriddb.com/profile/preferences/api](https://www.steamgriddb.com/profile/preferences/api) and paste it into the app.
 
 2. **ScreenScraper User Credentials (Optional for High-Precision)**:
    - Register an account at [screenscraper.fr](https://www.screenscraper.fr/).
