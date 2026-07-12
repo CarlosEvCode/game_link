@@ -1003,7 +1003,14 @@ class _MainWindowState extends State<MainWindow> {
       bottomNavigationBar: NavigationBar(
         height: 56,
         selectedIndex: _currentIndex,
-        onDestinationSelected: (index) => setState(() => _currentIndex = index),
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+          if (index == 0) {
+            _scanFolder();
+          }
+        },
         destinations: const [
           NavigationDestination(icon: Icon(Icons.flash_on, size: 20), label: 'Inyector'),
           NavigationDestination(icon: Icon(Icons.grid_view, size: 20), label: 'Gestor Visual'),
@@ -1394,7 +1401,7 @@ class _MainWindowState extends State<MainWindow> {
                   side: const BorderSide(color: Color(0xFF1A1A1A)),
                 ),
                 title: Text(item.displayName, style: TextStyle(fontSize: 12, color: item.alreadyExists ? Colors.white38 : Colors.white70)),
-                subtitle: item.alreadyExists ? const Text('Ya en la biblioteca de Lutris', style: TextStyle(fontSize: 9, color: Colors.amber, fontWeight: FontWeight.w400)) : null,
+                subtitle: item.alreadyExists ? const Text('En biblioteca', style: TextStyle(fontSize: 9, color: Colors.amber, fontWeight: FontWeight.w400)) : null,
                 trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), onPressed: () => _editItemName(item)),
               );
             },
