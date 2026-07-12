@@ -1401,8 +1401,23 @@ class _MainWindowState extends State<MainWindow> {
                   side: const BorderSide(color: Color(0xFF1A1A1A)),
                 ),
                 title: Text(item.displayName, style: TextStyle(fontSize: 12, color: item.alreadyExists ? Colors.white38 : Colors.white70)),
-                subtitle: item.alreadyExists ? const Text('En biblioteca', style: TextStyle(fontSize: 9, color: Colors.amber, fontWeight: FontWeight.w400)) : null,
-                trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), onPressed: () => _editItemName(item)),
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (item.alreadyExists)
+                      const Tooltip(
+                        message: 'Ya en la biblioteca de Lutris',
+                        child: Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: Icon(Icons.check_circle_outline_rounded, size: 14, color: Colors.white38),
+                        ),
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), 
+                      onPressed: () => _editItemName(item),
+                    ),
+                  ],
+                ),
               );
             },
           ),
