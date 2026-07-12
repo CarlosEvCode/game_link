@@ -471,6 +471,7 @@ system:
     // Obtener juegos existentes en DB para evitar duplicados si cleanOld es false
     Set<String> existingSlugs = {};
     Set<String> existingRomPaths = {};
+    Set<String> claimedSlugs = {};
     if (!cleanOld) {
       final rows = db.select("SELECT slug FROM games WHERE runner = ?", [
         runner,
@@ -496,6 +497,27 @@ system:
             }
           }
         } catch (_) {}
+      }
+
+      // Pre-calcular slugs reclamados por archivos ya inyectados
+      final romCache = RomCacheRepository();
+      try {
+        for (var file in romFiles) {
+          final normalizedPath = _getLutrisRomPath(file.path);
+          if (existingRomPaths.contains(normalizedPath)) {
+            final rawName = p.basenameWithoutExtension(file.path);
+            String gameName = customNames?[file.path] ?? rawName;
+            if (useOfflineId) {
+              final cached = romCache.shouldProcessRom(file.path);
+              if (cached?.identifiedName != null) {
+                gameName = cached!.identifiedName!;
+              }
+            }
+            claimedSlugs.add(slugify(gameName));
+          }
+        }
+      } finally {
+        romCache.dispose();
       }
     }
 
@@ -547,7 +569,7 @@ system:
       processedSlugs.add(gameSlug);
 
       final normalizedRomPath = _getLutrisRomPath(fullRomPath);
-      if (!cleanOld && (existingRomPaths.contains(normalizedRomPath) || existingSlugs.contains(gameSlug))) {
+      if (!cleanOld && (existingRomPaths.contains(normalizedRomPath) || (existingSlugs.contains(gameSlug) && !claimedSlugs.contains(gameSlug)))) {
         _log("[  SKIP ] Juego ya existe en Lutris: $gameSlug");
         continue;
       }

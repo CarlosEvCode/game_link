@@ -413,6 +413,33 @@ class _MainWindowState extends State<MainWindow> {
         } catch (_) {}
       }
 
+      // Pre-calcular slugs que ya tienen su ruta correspondiente agregada en Lutris
+      final Set<String> claimedSlugs = {};
+      final romCache = RomCacheRepository();
+      try {
+        for (var file in filteredFiles) {
+          final normalizedPath = _getLutrisRomPath(file.path);
+          if (existingRomPaths.contains(normalizedPath)) {
+            final slug = p.basenameWithoutExtension(file.path);
+            final ext = p.extension(file.path).toLowerCase();
+            String displayName = slug;
+
+            if (ext == '.rpx') {
+              displayName = await _getWiiUGameName(file.path);
+            } else if (_useOfflineId) {
+              final cached = romCache.shouldProcessRom(file.path);
+              if (cached != null && cached.identifiedName != null) {
+                displayName = cached.identifiedName!;
+              }
+            }
+            final gameSlug = RomInjector.slugify(displayName);
+            claimedSlugs.add(gameSlug);
+          }
+        }
+      } finally {
+        romCache.dispose();
+      }
+
       final List<InjectionItem> detected = [];
       if (_useOfflineId) {
         final romCache = RomCacheRepository();
@@ -433,7 +460,8 @@ class _MainWindowState extends State<MainWindow> {
             }
 
             final gameSlug = RomInjector.slugify(displayName);
-            final exists = existingRomPaths.contains(_getLutrisRomPath(file.path)) || existingSlugs.contains(gameSlug);
+            final exists = existingRomPaths.contains(_getLutrisRomPath(file.path)) ||
+                (existingSlugs.contains(gameSlug) && !claimedSlugs.contains(gameSlug));
 
             detected.add(
               InjectionItem(
@@ -458,7 +486,8 @@ class _MainWindowState extends State<MainWindow> {
           }
 
           final gameSlug = RomInjector.slugify(displayName);
-          final exists = existingRomPaths.contains(_getLutrisRomPath(file.path)) || existingSlugs.contains(gameSlug);
+          final exists = existingRomPaths.contains(_getLutrisRomPath(file.path)) ||
+              (existingSlugs.contains(gameSlug) && !claimedSlugs.contains(gameSlug));
 
           detected.add(
             InjectionItem(
@@ -576,7 +605,8 @@ class _MainWindowState extends State<MainWindow> {
                       item.displayName = resolvedName;
 
                       final resolvedSlug = RomInjector.slugify(resolvedName);
-                      final exists = existingRomPaths.contains(_getLutrisRomPath(item.filePath)) || existingSlugs.contains(resolvedSlug);
+                      final exists = existingRomPaths.contains(_getLutrisRomPath(item.filePath)) ||
+                          (existingSlugs.contains(resolvedSlug) && !claimedSlugs.contains(resolvedSlug));
                       item.alreadyExists = exists;
                       item.isSelected = !exists;
                     }
