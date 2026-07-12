@@ -41,12 +41,13 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
   List<Game> _games = [];
   bool _isLoading = false;
   bool _isSteamAvailable = false;
-  bool _hasMore = true;
   bool _isGridView = true;
   bool _selectionMode = false;
 
   int _page = 0;
-  final int _limit = 30;
+  final int _limit = 24;
+  int _totalGames = 0;
+  int _totalPages = 1;
   String _searchQuery = '';
   String _filterMode = 'all';
   int _imageVersion = 0;
@@ -66,7 +67,6 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     _lutrisPaths = LutrisPaths.fromMap(widget.lutrisPaths);
     _repo = GamesRepository(_lutrisPaths.dbPath);
     _initSteamAvailability();
-    _scrollController.addListener(_onScroll);
     _loadPlatforms();
   }
 
@@ -108,7 +108,6 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
           _selectedPlatform = target;
           _games = [];
           _page = 0;
-          _hasMore = true;
           _selectedGameIds.clear();
         });
         _refreshList();
@@ -121,15 +120,6 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     _scrollController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 600) {
-      if (!_isLoading && _hasMore) {
-        _loadMoreGames();
-      }
-    }
   }
 
   Future<void> _loadPlatforms() async {
@@ -153,10 +143,19 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
     await _syncMetadata();
 
+    final total = _repo.getGamesCountByRunners(
+      _selectedRunners,
+      platform: _selectedPlatform?.platformName,
+      searchQuery: _searchQuery.isNotEmpty ? _searchQuery : null,
+      filterMode: _filterMode != 'all' ? _filterMode : null,
+    );
+
     setState(() {
       _page = 0;
+      _totalGames = total;
+      _totalPages = (total / _limit).ceil();
+      if (_totalPages < 1) _totalPages = 1;
       _games = [];
-      _hasMore = true;
       _stats = _repo.getMediaStatsByRunners(
         _selectedRunners,
         platform: _selectedPlatform?.platformName,
@@ -164,7 +163,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       );
     });
 
-    _loadMoreGames();
+    _loadPageGames();
   }
 
   Future<void> _syncMetadata() async {
@@ -181,8 +180,8 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     });
   }
 
-  Future<void> _loadMoreGames() async {
-    if (_selectedPlatform == null || _isLoading || !_hasMore) return;
+  Future<void> _loadPageGames() async {
+    if (_selectedPlatform == null || _isLoading) return;
 
     setState(() => _isLoading = true);
     await Future.delayed(const Duration(milliseconds: 80));
@@ -199,11 +198,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
     setState(() {
       _isLoading = false;
-      if (fetchedGames.length < _limit) {
-        _hasMore = false;
-      }
-      _games.addAll(fetchedGames);
-      _page++;
+      _games = fetchedGames;
     });
   }
 
@@ -906,13 +901,9 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
         crossAxisSpacing: 20,
         mainAxisSpacing: 20,
       ),
-      itemCount: _games.length + (_hasMore ? 1 : 0),
+      itemCount: _games.length,
       itemBuilder: (context, index) {
-        if (index < _games.length) {
-          return _buildGameCard(_games[index]);
-        } else {
-          return const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)));
-        }
+        return _buildGameCard(_games[index]);
       },
     );
   }
@@ -921,14 +912,10 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     return ListView.separated(
       controller: _scrollController,
       padding: const EdgeInsets.all(24),
-      itemCount: _games.length + (_hasMore ? 1 : 0),
+      itemCount: _games.length,
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, index) {
-        if (index < _games.length) {
-          return _buildGameListTile(_games[index]);
-        } else {
-          return const Center(child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white24)));
-        }
+        return _buildGameListTile(_games[index]);
       },
     );
   }
@@ -1238,7 +1225,76 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       return _buildEmptyState();
     }
 
-    return _isGridView ? _buildGameGrid() : _buildGameList();
+    return Column(
+      children: [
+        Expanded(
+          child: _isGridView ? _buildGameGrid() : _buildGameList(),
+        ),
+        _buildPaginationBar(),
+      ],
+    );
+  }
+
+  Widget _buildPaginationBar() {
+    if (_totalPages <= 1) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+      decoration: const BoxDecoration(
+        color: Colors.black,
+        border: Border(
+          top: BorderSide(color: Color(0xFF1A1A1A)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          TextButton.icon(
+            onPressed: _page > 0
+                ? () {
+                    setState(() => _page--);
+                    _loadPageGames();
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(0);
+                    }
+                  }
+                : null,
+            icon: const Icon(Icons.arrow_back_ios_new, size: 12),
+            label: const Text('Anterior', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white70,
+              disabledForegroundColor: Colors.white24,
+            ),
+          ),
+          Text(
+            'PÁGINA ${_page + 1} DE $_totalPages  •  $_totalGames JUEGOS',
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+              color: Colors.white38,
+            ),
+          ),
+          TextButton.icon(
+            onPressed: (_page + 1) < _totalPages
+                ? () {
+                    setState(() => _page++);
+                    _loadPageGames();
+                    if (_scrollController.hasClients) {
+                      _scrollController.jumpTo(0);
+                    }
+                  }
+                : null,
+            icon: const Text('Siguiente', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            label: const Icon(Icons.arrow_forward_ios, size: 12),
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white70,
+              disabledForegroundColor: Colors.white24,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildSelectionBar() {

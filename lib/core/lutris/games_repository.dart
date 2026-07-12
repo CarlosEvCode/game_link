@@ -355,4 +355,46 @@ class GamesRepository {
       db.dispose();
     }
   }
+
+  int getGamesCountByRunners(
+    List<String> runners, {
+    String? platform,
+    String? searchQuery,
+    String? filterMode,
+  }) {
+    if (runners.isEmpty) return 0;
+    
+    final db = sqlite3.open(dbPath);
+    try {
+      String whereClause = "WHERE runner IN ${_inClause(runners.length)} AND installed = 1";
+      final params = <dynamic>[...runners];
+
+      if (platform != null) {
+        whereClause += " AND platform = ?";
+        params.add(platform);
+      }
+
+      if (filterMode == 'missingCover') {
+        whereClause +=
+            " AND (has_custom_coverart_big = 0 OR has_custom_coverart_big IS NULL)";
+      } else if (filterMode == 'missingBanner') {
+        whereClause +=
+            " AND (has_custom_banner = 0 OR has_custom_banner IS NULL)";
+      } else if (filterMode == 'missingIcon') {
+        whereClause += " AND (has_custom_icon = 0 OR has_custom_icon IS NULL)";
+      }
+
+      if (searchQuery != null && searchQuery.trim().isNotEmpty) {
+        whereClause += " AND (LOWER(name) LIKE ? OR LOWER(slug) LIKE ?)";
+        final likeQuery = '%${searchQuery.toLowerCase()}%';
+        params.addAll([likeQuery, likeQuery]);
+      }
+
+      final query = 'SELECT COUNT(*) as count FROM games $whereClause';
+      final results = db.select(query, params);
+      return results.first['count'] as int;
+    } finally {
+      db.dispose();
+    }
+  }
 }
