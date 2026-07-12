@@ -470,12 +470,32 @@ system:
 
     // Obtener juegos existentes en DB para evitar duplicados si cleanOld es false
     Set<String> existingSlugs = {};
+    Set<String> existingRomPaths = {};
     if (!cleanOld) {
       final rows = db.select("SELECT slug FROM games WHERE runner = ?", [
         runner,
       ]);
       for (final row in rows) {
         existingSlugs.add(row['slug'] as String);
+      }
+
+      if (Directory(configDir).existsSync()) {
+        try {
+          final files = Directory(configDir).listSync();
+          for (var f in files) {
+            if (f is File && f.path.endsWith('.yml')) {
+              final content = f.readAsStringSync();
+              final matchMain = RegExp(r'^\s*main_file:\s*"(.*)"', multiLine: true).firstMatch(content);
+              if (matchMain != null) {
+                existingRomPaths.add(p.normalize(matchMain.group(1)!));
+              }
+              final matchWua = RegExp(r'^\s*wua_rom:\s*"(.*)"', multiLine: true).firstMatch(content);
+              if (matchWua != null) {
+                existingRomPaths.add(p.normalize(matchWua.group(1)!));
+              }
+            }
+          }
+        } catch (_) {}
       }
     }
 
@@ -526,7 +546,8 @@ system:
       }
       processedSlugs.add(gameSlug);
 
-      if (!cleanOld && existingSlugs.contains(gameSlug)) {
+      final normalizedRomPath = _getLutrisRomPath(fullRomPath);
+      if (!cleanOld && (existingRomPaths.contains(normalizedRomPath) || existingSlugs.contains(gameSlug))) {
         _log("[  SKIP ] Juego ya existe en Lutris: $gameSlug");
         continue;
       }
@@ -627,5 +648,17 @@ system:
       slug = 'game';
     }
     return slug;
+  }
+
+  String _getLutrisRomPath(String romPath) {
+    final ext = p.extension(romPath).toLowerCase();
+    if (ext == '.rpx') {
+      final parentDir = p.dirname(romPath);
+      final parentName = p.basename(parentDir).toLowerCase();
+      if (parentName == 'code') {
+        return p.normalize(p.dirname(parentDir));
+      }
+    }
+    return p.normalize(romPath);
   }
 }

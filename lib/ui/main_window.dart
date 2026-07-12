@@ -433,7 +433,7 @@ class _MainWindowState extends State<MainWindow> {
             }
 
             final gameSlug = RomInjector.slugify(displayName);
-            final exists = existingRomPaths.contains(p.normalize(file.path)) || existingSlugs.contains(gameSlug);
+            final exists = existingRomPaths.contains(_getLutrisRomPath(file.path)) || existingSlugs.contains(gameSlug);
 
             detected.add(
               InjectionItem(
@@ -458,7 +458,7 @@ class _MainWindowState extends State<MainWindow> {
           }
 
           final gameSlug = RomInjector.slugify(displayName);
-          final exists = existingRomPaths.contains(p.normalize(file.path)) || existingSlugs.contains(gameSlug);
+          final exists = existingRomPaths.contains(_getLutrisRomPath(file.path)) || existingSlugs.contains(gameSlug);
 
           detected.add(
             InjectionItem(
@@ -576,7 +576,7 @@ class _MainWindowState extends State<MainWindow> {
                       item.displayName = resolvedName;
 
                       final resolvedSlug = RomInjector.slugify(resolvedName);
-                      final exists = existingRomPaths.contains(p.normalize(item.filePath)) || existingSlugs.contains(resolvedSlug);
+                      final exists = existingRomPaths.contains(_getLutrisRomPath(item.filePath)) || existingSlugs.contains(resolvedSlug);
                       item.alreadyExists = exists;
                       item.isSelected = !exists;
                     }
@@ -1241,10 +1241,11 @@ class _MainWindowState extends State<MainWindow> {
           setState(() => _useOfflineId = val ?? false);
           _scanFolder();
         }),
-        _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) {
-          setState(() => _useHighPrecision = val ?? false);
-          _scanFolder();
-        }),
+        if (_useOfflineId)
+          _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) {
+            setState(() => _useHighPrecision = val ?? false);
+            _scanFolder();
+          }),
         _buildCompactCheckbox('Escaneo recursivo', _isRecursive, (val) {
           setState(() => _isRecursive = val ?? false);
           _scanFolder();
@@ -1464,5 +1465,17 @@ class _MainWindowState extends State<MainWindow> {
         ],
       ),
     );
+  }
+
+  String _getLutrisRomPath(String romPath) {
+    final ext = p.extension(romPath).toLowerCase();
+    if (ext == '.rpx') {
+      final parentDir = p.dirname(romPath);
+      final parentName = p.basename(parentDir).toLowerCase();
+      if (parentName == 'code') {
+        return p.normalize(p.dirname(parentDir));
+      }
+    }
+    return p.normalize(romPath);
   }
 }
