@@ -1082,13 +1082,17 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     BoxFit fit = BoxFit.cover,
   }) {
     String? path;
+    int? cacheWidth;
 
     if (type == 'cover') {
       path = _lutrisPaths.coverPath(game.slug);
+      cacheWidth = 240;
     } else if (type == 'banner') {
       path = _lutrisPaths.bannerPath(game.slug);
+      cacheWidth = 320;
     } else if (type == 'icon') {
       path = _lutrisPaths.systemIconPath(game.slug);
+      cacheWidth = 48;
     }
 
     if (path != null && File(path).existsSync()) {
@@ -1096,6 +1100,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
         File(path),
         key: ValueKey("$path-$_imageVersion"),
         fit: fit,
+        cacheWidth: cacheWidth,
         errorBuilder: (context, error, stackTrace) => _buildPlaceholder(type),
       );
     }
