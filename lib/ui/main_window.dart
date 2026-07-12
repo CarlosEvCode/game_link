@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:sqlite3/sqlite3.dart';
 import '../platforms/platform_registry.dart';
 import '../core/lutris/lutris_detector.dart';
 import '../core/injector/rom_injector.dart';
@@ -18,12 +19,14 @@ class InjectionItem {
   String displayName;
   bool isSelected;
   bool wasManuallyEdited;
+  bool alreadyExists;
 
   InjectionItem({
     required this.filePath,
     required this.displayName,
     this.isSelected = true,
     this.wasManuallyEdited = false,
+    this.alreadyExists = false,
   });
 }
 
@@ -374,6 +377,19 @@ class _MainWindowState extends State<MainWindow> {
         (msg, [progress]) => _log(msg),
       );
 
+      final Set<String> existingSlugs = {};
+      final dbPath = _lutrisPaths?['db_path'];
+      if (dbPath != null && File(dbPath).existsSync()) {
+        try {
+          final db = sqlite3.open(dbPath);
+          final rows = db.select("SELECT slug FROM games WHERE runner = ?", [_selectedEmulator!.runner]);
+          for (final row in rows) {
+            existingSlugs.add(row['slug'] as String);
+          }
+          db.dispose();
+        } catch (_) {}
+      }
+
       final List<InjectionItem> detected = [];
       if (_useOfflineId) {
         final romCache = RomCacheRepository();
@@ -393,10 +409,15 @@ class _MainWindowState extends State<MainWindow> {
               }
             }
 
+            final gameSlug = RomInjector.slugify(displayName);
+            final exists = existingSlugs.contains(gameSlug);
+
             detected.add(
               InjectionItem(
                 filePath: file.path,
                 displayName: displayName,
+                isSelected: !exists,
+                alreadyExists: exists,
               ),
             );
           }
@@ -413,10 +434,15 @@ class _MainWindowState extends State<MainWindow> {
             displayName = await _getWiiUGameName(file.path);
           }
 
+          final gameSlug = RomInjector.slugify(displayName);
+          final exists = existingSlugs.contains(gameSlug);
+
           detected.add(
             InjectionItem(
               filePath: file.path,
               displayName: displayName,
+              isSelected: !exists,
+              alreadyExists: exists,
             ),
           );
         }
@@ -523,7 +549,13 @@ class _MainWindowState extends State<MainWindow> {
                   for (var item in _previewItems) {
                     final slug = p.basenameWithoutExtension(item.filePath);
                     if (resolvedChunk.containsKey(slug)) {
-                      item.displayName = resolvedChunk[slug]!;
+                      final resolvedName = resolvedChunk[slug]!;
+                      item.displayName = resolvedName;
+
+                      final resolvedSlug = RomInjector.slugify(resolvedName);
+                      final exists = existingSlugs.contains(resolvedSlug);
+                      item.alreadyExists = exists;
+                      item.isSelected = !exists;
                     }
                   }
                 });
@@ -795,6 +827,13 @@ class _MainWindowState extends State<MainWindow> {
     try {
       if (action == 'inject' || action == 'full') {
         final selectedFiles = _previewItems.where((item) => item.isSelected).map((item) => File(item.filePath)).toList();
+        if (selectedFiles.isEmpty) {
+          _log("[  WARN ] No hay ningún juego seleccionado para inyectar.");
+          setState(() {
+            _isProcessing = false;
+          });
+          return;
+        }
         final Map<String, String> customNames = {
           for (var item in _previewItems.where((i) => i.isSelected && (i.wasManuallyEdited || _selectedPlatform?.platformId == 'mame' || DatResolver.isPlatformSupported(_selectedPlatform!.platformId) || p.basenameWithoutExtension(i.filePath) != i.displayName)))
             item.filePath: item.displayName,
@@ -818,7 +857,7 @@ class _MainWindowState extends State<MainWindow> {
           useHighPrecision: _useHighPrecision,
           reuseIdentification: _reuseIdentification,
           useOfflineId: _useOfflineId,
-          customFiles: selectedFiles.isNotEmpty ? selectedFiles : null,
+          customFiles: selectedFiles,
           customNames: customNames,
           manuallyEditedPaths: manuallyEditedPaths,
         );
@@ -1354,7 +1393,8 @@ class _MainWindowState extends State<MainWindow> {
                   onChanged: (val) => setState(() => item.isSelected = val ?? false),
                   side: const BorderSide(color: Color(0xFF1A1A1A)),
                 ),
-                title: Text(item.displayName, style: const TextStyle(fontSize: 12, color: Colors.white70)),
+                title: Text(item.displayName, style: TextStyle(fontSize: 12, color: item.alreadyExists ? Colors.white38 : Colors.white70)),
+                subtitle: item.alreadyExists ? const Text('Ya en la biblioteca de Lutris', style: TextStyle(fontSize: 9, color: Colors.amber, fontWeight: FontWeight.w400)) : null,
                 trailing: IconButton(icon: const Icon(Icons.edit_outlined, size: 14, color: Colors.white24), onPressed: () => _editItemName(item)),
               );
             },

@@ -323,4 +323,36 @@ class GamesRepository {
       db.dispose();
     }
   }
+
+  List<Game> getGamesByIds(List<int> ids) {
+    if (ids.isEmpty) return [];
+    final db = sqlite3.open(dbPath);
+    try {
+      final results = db.select(
+        '''
+        SELECT id, slug, name, platform, configpath,
+               has_custom_coverart_big, has_custom_banner, has_custom_icon
+        FROM games 
+        WHERE id IN ${_inClause(ids.length)}
+        ''',
+        ids,
+      );
+      return results.map((r) => Game.fromMap(r)).toList();
+    } finally {
+      db.dispose();
+    }
+  }
+
+  void deleteGames(List<int> ids) {
+    if (ids.isEmpty) return;
+    final db = sqlite3.open(dbPath);
+    try {
+      db.execute(
+        "DELETE FROM games WHERE id IN ${_inClause(ids.length)}",
+        ids,
+      );
+    } finally {
+      db.dispose();
+    }
+  }
 }

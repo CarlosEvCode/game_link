@@ -229,6 +229,95 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
   bool _isGameSelected(Game game) => _selectedGameIds.contains(game.id);
 
+  Future<void> _deleteSelectedGames() async {
+    if (_selectedGameIds.isEmpty) return;
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF0F0F0F),
+        title: const Text('¿Eliminar juegos seleccionados?', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        content: Text(
+          '¿Estás seguro de que deseas eliminar ${_selectedGameIds.length} juego(s) de la biblioteca de Lutris?\nEsto borrará permanentemente sus registros de base de datos, archivos de configuración (.yml) y archivos multimedia.',
+          style: const TextStyle(color: Colors.white70, fontSize: 13),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancelar', style: TextStyle(color: Colors.white30, fontSize: 12)),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red[800], foregroundColor: Colors.white),
+            child: const Text('Eliminar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final selectedIds = _selectedGameIds.toList();
+      final games = _repo.getGamesByIds(selectedIds);
+
+      // 1. Borrar archivos asociados a cada juego
+      for (final game in games) {
+        if (game.configPath.isNotEmpty) {
+          final configFile = File(_lutrisPaths.resolveConfigPath(game.configPath));
+          if (configFile.existsSync()) {
+            configFile.deleteSync();
+          }
+        }
+
+        final cover = File(_lutrisPaths.coverPath(game.slug));
+        if (cover.existsSync()) cover.deleteSync();
+
+        final banner = File(_lutrisPaths.bannerPath(game.slug));
+        if (banner.existsSync()) banner.deleteSync();
+
+        final lutrisIcon = File(_lutrisPaths.lutrisIconPath(game.slug));
+        if (lutrisIcon.existsSync()) lutrisIcon.deleteSync();
+
+        final systemIcon = File(_lutrisPaths.systemIconPath(game.slug));
+        if (systemIcon.existsSync()) systemIcon.deleteSync();
+      }
+
+      // 2. Eliminar registros en base de datos
+      _repo.deleteGames(selectedIds);
+
+      _selectedGameIds.clear();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Juegos eliminados con éxito de la biblioteca'),
+            backgroundColor: Color(0xFF0F0F0F),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al eliminar juegos: $e'),
+            backgroundColor: Colors.red[900],
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+        _refreshList();
+      }
+    }
+  }
+
   Future<void> _confirmAndExportToSteam({required bool selectedOnly}) async {
     if (_selectedPlatform == null) return;
 
@@ -1188,6 +1277,21 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                     ? () => _confirmAndExportToSteam(selectedOnly: true)
                     : () => SteamDependenciesDialog.show(context)),
             isDisabled: _selectedGameIds.isEmpty || !_isSteamAvailable,
+          ),
+          const SizedBox(width: 12),
+          TextButton.icon(
+            onPressed: _selectedGameIds.isEmpty ? null : _deleteSelectedGames,
+            style: TextButton.styleFrom(
+              backgroundColor: _selectedGameIds.isEmpty ? Colors.transparent : Colors.red[900],
+              foregroundColor: _selectedGameIds.isEmpty ? Colors.white24 : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+                side: _selectedGameIds.isEmpty ? const BorderSide(color: Color(0xFF1A1A1A)) : BorderSide.none,
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+            ),
+            icon: const Icon(Icons.delete_outline, size: 18),
+            label: const Text('Eliminar Seleccionados', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

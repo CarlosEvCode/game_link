@@ -378,7 +378,7 @@ class DatResolver {
     if (relativePath == null) return null;
 
     // 1. Intentar buscar en tu repositorio clonado localmente para pruebas de desarrollo rápido
-    final localRepoDir = '/home/carlos/Proyectos/libretro-database/metadat';
+    final localRepoDir = '/home/carlos/Proyectos/libretro-databases/metadat';
     final localFile = File(p.join(localRepoDir, relativePath));
     if (localFile.existsSync()) {
       return localFile;
@@ -496,6 +496,14 @@ class DatResolver {
 
     // 5. Fallback especial para MAME/Arcade: buscar por el slug de ROM en romSlugToName
     final lowerSlug = fileSlug.toLowerCase();
+    if (platformId == 'mame') {
+      if (lowerSlug == 'cvs2') {
+        return 'Capcom Vs. SNK 2 Millionaire Fighting 2001';
+      }
+      if (lowerSlug == 'cvs') {
+        return 'Capcom Vs. SNK Millenium Fight 2000';
+      }
+    }
     if (parser.romSlugToName.containsKey(lowerSlug)) {
       return parser.romSlugToName[lowerSlug];
     }
@@ -513,12 +521,15 @@ class DatResolver {
     'namcoc148', 'namcops2', 'namcopsx', 'stv', 'sys141b', 'sys142b', 'sys246',
     'sys256', 't5182', 'taito68705', 'taitosjsecmcu', 'tourvis', 'v4bios',
     'ymf281', 'z8671', 'z8682', 'zorba_kbd', 'zorro_a2091', 'zorro_a2232', 'zorro_a590',
-    'zorro_ar1', 'zorro_ar2', 'zorro_ar3', 'zorro_buddha'
+    'zorro_ar1', 'zorro_ar2', 'zorro_ar3', 'zorro_buddha', 'cvs2gd'
   };
 
   /// Verifica si el slug de un archivo ROM de Arcade corresponde a un juego jugable en lugar de una BIOS/dispositivo.
   static Future<bool> isMameGame(String slug) async {
     final lowerSlug = slug.toLowerCase();
+    if (lowerSlug == 'cvs2' || lowerSlug == 'cvs') {
+      return true;
+    }
     if (_commonMameBios.contains(lowerSlug)) {
       return false;
     }
