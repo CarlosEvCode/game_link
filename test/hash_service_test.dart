@@ -8,7 +8,7 @@ void main() {
     const testContent = 'Hello World';
     
     // Expected hashes for "Hello World" (no newline)
-    const expectedCrc32 = '411AF231';
+    const expectedCrc32 = '4A17B156';
     const expectedMd5 = 'b10a8db164e0754105b7a99be72e3fe5';
     const expectedSha1 = '0a4d55a8d778e5022fab701977c5d840bbc486d0';
 
