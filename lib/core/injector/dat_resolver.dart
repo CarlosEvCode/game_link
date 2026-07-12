@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'package:http/http.dart' as http;
+import '../lutris/translation_manager.dart';
 
 class DatParser {
   final Map<String, String> hashToName = {};
@@ -396,7 +397,7 @@ class DatResolver {
     // 3. Descargar desde GitHub de forma automatizada
     try {
       final rawUrl = 'https://raw.githubusercontent.com/libretro/libretro-database/master/metadat/$relativePath';
-      print('[  INFO ] Descargando base de datos para $platformId desde GitHub...');
+      print('${'[  INFO ] Descargando base de datos para '.t()}$platformId ${'desde GitHub...'.t()}');
       final response = await http.get(Uri.parse(rawUrl));
       if (response.statusCode == 200) {
         // Crear directorios si no existen
@@ -406,13 +407,13 @@ class DatResolver {
         }
         // Guardar el archivo en caché
         await cachedFile.writeAsString(response.body);
-        print('[  DONE ] Base de datos de $platformId guardada localmente.');
+        print('${'[  DONE ] Base de datos de '.t()}$platformId ${'guardada localmente.'.t()}');
         return cachedFile;
       } else {
-        print('[  FAIL ] Error al descargar base de datos de GitHub (status: ${response.statusCode})');
+        print('${'[  FAIL ] Error al descargar base de datos de GitHub (status: '.t()}${response.statusCode})');
       }
     } catch (e) {
-      print('[  FAIL ] Error de red descargando base de datos: $e');
+      print('${'[  FAIL ] Error de red descargando base de datos: '.t()}$e');
     }
 
     return null;
@@ -447,7 +448,7 @@ class DatResolver {
             return null;
           }
         } catch (e) {
-          print('[  FAIL ] Error leyendo/parseando archivos DAT combinados para GB: $e');
+          print('${'[  FAIL ] Error leyendo/parseando archivos DAT combinados para GB: '.t()}$e');
           return null;
         }
       } else {
@@ -459,7 +460,7 @@ class DatResolver {
           final content = await datFile.readAsString();
           _parsedDatCache[platformId] = DatParser(content);
         } catch (e) {
-          print('[  FAIL ] Error leyendo/parseando el archivo DAT para $platformId: $e');
+          print('${'[  FAIL ] Error leyendo/parseando el archivo DAT para '.t()}$platformId: $e');
           return null;
         }
       }

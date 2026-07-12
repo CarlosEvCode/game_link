@@ -9,6 +9,7 @@ import '../core/steam/steam_detector.dart';
 import '../core/steam/steam_export_service.dart';
 import 'steam_dependencies_dialog.dart';
 import 'steamgriddb_visual_selector.dart';
+import '../core/lutris/translation_manager.dart';
 
 /// Pantalla de detalle del juego que muestra información completa
 /// antes de permitir editar metadata visual
@@ -222,13 +223,13 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     String statusText;
     Color statusColor;
     if (identified) {
-      statusText = 'SCREEN SCRAPER OK';
+      statusText = 'SCREEN SCRAPER OK'.t();
       statusColor = Colors.white70;
     } else if (hasAllMedia) {
-      statusText = 'MEDIA COMPLETO';
+      statusText = 'MEDIA COMPLETO'.t();
       statusColor = Colors.white70;
     } else {
-      statusText = 'SIN IDENTIFICAR';
+      statusText = 'SIN IDENTIFICAR'.t();
       statusColor = Colors.white24;
     }
 
@@ -246,9 +247,9 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'DETALLE DEL JUEGO',
-                  style: TextStyle(
+                Text(
+                  'DETALLE DEL JUEGO'.t(),
+                  style: const TextStyle(
                     color: Colors.white38,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
@@ -348,7 +349,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('MEDIA', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
+        Text('MEDIA'.t(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
         const SizedBox(height: 16),
         Expanded(
           child: DefaultTabController(
@@ -362,7 +363,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   indicatorWeight: 2,
                   labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                   tabs: [
-                    const Tab(text: 'ACTUAL'),
+                    Tab(text: 'ACTUAL'.t()),
                     if (hasScraperMedia) const Tab(text: 'SCREEN SCRAPER'),
                   ],
                 ),
@@ -395,7 +396,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               Expanded(
                 flex: 3,
                 child: _buildMediaItem(
-                  'COVER',
+                  'PORTADA'.t(),
                   _coverPath,
                   Icons.photo_library_outlined,
                   mediaType: 'cover',
@@ -410,7 +411,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildMediaItem(
-                      'BANNER',
+                      'BANNER'.t(),
                       _bannerPath,
                       Icons.panorama_horizontal_outlined,
                       mediaType: 'banner',
@@ -424,7 +425,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                         SizedBox(
                           width: 100,
                           child: _buildMediaItem(
-                            'ICONO',
+                            'ICONO'.t(),
                             _iconPath,
                             Icons.apps_outlined,
                             mediaType: 'icon',
@@ -437,15 +438,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text('ESTADO EN DISCO', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                              Text('ESTADO EN DISCO'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
                               const SizedBox(height: 12),
                               Wrap(
                                 spacing: 8,
                                 runSpacing: 8,
                                 children: [
-                                  _buildStatusChip('COVER', File(_coverPath).existsSync()),
-                                  _buildStatusChip('BANNER', File(_bannerPath).existsSync()),
-                                  _buildStatusChip('ICONO', File(_iconPath).existsSync() || File(_lutrisPaths.systemIconPath(widget.game.slug)).existsSync()),
+                                  _buildStatusChip('PORTADA'.t(), File(_coverPath).existsSync()),
+                                  _buildStatusChip('BANNER'.t(), File(_bannerPath).existsSync()),
+                                  _buildStatusChip('ICONO'.t(), File(_iconPath).existsSync() || File(_lutrisPaths.systemIconPath(widget.game.slug)).existsSync()),
                                 ],
                               ),
                             ],
@@ -489,7 +490,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('INFORMACIÓN', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
+        Text('INFORMACIÓN'.t(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
         const SizedBox(height: 16),
         Expanded(
           child: SingleChildScrollView(
@@ -497,16 +498,16 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildInfoSection(
-                  title: 'GESTIÓN',
+                  title: 'GESTIÓN'.t(),
                   children: [_buildEditActions()],
                 ),
                 const SizedBox(height: 24),
                 _buildInfoSection(
-                  title: 'SISTEMA',
+                  title: 'SISTEMA'.t(),
                   children: [
-                    if (_romFileName != null) _buildMinimalInfoRow('ARCHIVO', _romFileName!),
-                    _buildMinimalInfoRow('SLUG', widget.game.slug),
-                    _buildMinimalInfoRow('ID', widget.game.id.toString()),
+                    if (_romFileName != null) _buildMinimalInfoRow('ARCHIVO'.t(), _romFileName!),
+                    _buildMinimalInfoRow('SLUG'.t(), widget.game.slug),
+                    _buildMinimalInfoRow('ID'.t(), widget.game.id.toString()),
                     if (_romPath != null) ...[
                       const SizedBox(height: 12),
                       _buildRomPathBlock(_romPath!),
@@ -515,16 +516,16 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
                 ),
                 const SizedBox(height: 24),
                 _buildInfoSection(
-                  title: 'DATOS',
+                  title: 'DATOS'.t(),
                   children: [
-                    if (_screenScraperInfo?.developer != null) _buildMinimalInfoRow('DEV', _screenScraperInfo!.developer!),
-                    if (_screenScraperInfo?.releaseDate != null) _buildMinimalInfoRow('FECHA', _screenScraperInfo!.releaseDate!),
+                    if (_screenScraperInfo?.developer != null) _buildMinimalInfoRow('DEV'.t(), _screenScraperInfo!.developer!),
+                    if (_screenScraperInfo?.releaseDate != null) _buildMinimalInfoRow('FECHA'.t(), _screenScraperInfo!.releaseDate!),
                   ],
                 ),
                 if (_screenScraperInfo?.synopsis != null && _screenScraperInfo!.synopsis!.isNotEmpty) ...[
                   const SizedBox(height: 24),
                   _buildInfoSection(
-                    title: 'SINOPSIS',
+                    title: 'SINOPSIS'.t(),
                     children: [
                       Text(
                         _screenScraperInfo!.synopsis!,
@@ -569,11 +570,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildActionHighlightButton(Icons.manage_search, 'CORREGIR METADATOS', _correctGame),
+        _buildActionHighlightButton(Icons.manage_search, 'CORREGIR METADATOS'.t(), _correctGame),
         const SizedBox(height: 12),
         _buildActionHighlightButton(
           Icons.sports_esports_outlined, 
-          'EXPORTAR A STEAM', 
+          'EXPORTAR A STEAM'.t(), 
           _isSteamAvailable ? _exportToSteam : () => SteamDependenciesDialog.show(context), 
           isDisabled: !_isSteamAvailable
         ),
@@ -619,15 +620,15 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
         children: [
           Row(
             children: [
-              const Text('RUTA ROM', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold)),
+              Text('RUTA ROM'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold)),
               const Spacer(),
               InkWell(
                 onTap: () async {
                   await Clipboard.setData(ClipboardData(text: fullPath));
                   if (!mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Copiado.')));
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Copiado.'.t())));
                 },
-                child: const Text('COPIAR', style: TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
+                child: Text('Copiar'.t().toUpperCase(), style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold, decoration: TextDecoration.underline)),
               ),
             ],
           ),
@@ -716,7 +717,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
             ],
           ),
           const SizedBox(height: 24),
-          const Text('ENLACES EXTERNOS', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold)),
+          Text('ENLACES EXTERNOS'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
           if (_screenScraperInfo!.coverUrl != null) _buildMediaUrlRow('Cover (2D)', _screenScraperInfo!.coverUrl!),
           if (_screenScraperInfo!.cover3dUrl != null) _buildMediaUrlRow('Cover (3D)', _screenScraperInfo!.cover3dUrl!),
@@ -803,11 +804,11 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       ),
       child: Row(
         children: [
-          const Expanded(child: Text('USAR ICONOS DE EDICIÓN PARA CAMBIAR CADA ELEMENTO.', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
+          Expanded(child: Text('USAR ICONOS DE EDICIÓN PARA CAMBIAR CADA ELEMENTO.'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
           const SizedBox(width: 20),
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('CERRAR', style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text('CERRAR'.t(), style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -821,7 +822,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   Future<void> _openVisualSelectorInternal({String? initialMediaType}) async {
     if (widget.apiKey.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Se requiere API Key de SteamGridDB para esta accion.')),
+        SnackBar(content: Text('Se requiere API Key de SteamGridDB para esta accion.'.t())),
       );
       if (widget.onShowConfig != null) {
         widget.onShowConfig!();
@@ -854,7 +855,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
   Future<void> _correctGame() async {
     if (widget.apiKey.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Se requiere API Key de SteamGridDB para esta accion.')),
+        SnackBar(content: Text('Se requiere API Key de SteamGridDB para esta accion.'.t())),
       );
       if (widget.onShowConfig != null) {
         widget.onShowConfig!();
@@ -868,25 +869,25 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Corregir juego en SteamGridDB'),
+          title: Text('Corregir juego en SteamGridDB'.t()),
           content: TextField(
             controller: controller,
             autofocus: true,
-            decoration: const InputDecoration(
-              labelText: 'Texto de busqueda',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: 'Texto de busqueda'.t(),
+              border: const OutlineInputBorder(),
             ),
             onSubmitted: (value) => Navigator.of(context).pop(value.trim()),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancelar'),
+              child: Text('Cancelar'.t()),
             ),
             FilledButton(
               onPressed: () =>
                   Navigator.of(context).pop(controller.text.trim()),
-              child: const Text('Buscar'),
+              child: Text('Buscar'.t()),
             ),
           ],
         );
@@ -924,7 +925,7 @@ class _GameDetailScreenState extends State<GameDetailScreen> {
       widget.onGameUpdated();
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('[  DONE ] Nombre corregido a "$pendingNameFromMatch".'),
+          content: Text('${'[  DONE ] Nombre corregido a '.t()}"$pendingNameFromMatch".'),
         ),
       );
     }

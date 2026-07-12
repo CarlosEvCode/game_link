@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import '../lutris/translation_manager.dart';
+
 class SteamCollectionsService {
   Future<void> addAppToSimpleCollection({
     required String namespace1Path,
@@ -21,7 +23,7 @@ class SteamCollectionsService {
     final decoded = jsonDecode(raw);
 
     if (decoded is! List) {
-      throw Exception('Formato inesperado en cloud-storage-namespace-1.json');
+      throw Exception('Formato inesperado en cloud-storage-namespace-1.json'.t());
     }
 
     final records = decoded;
@@ -50,7 +52,7 @@ class SteamCollectionsService {
       final valueRaw = metadata['value']?.toString() ?? '{}';
       final valueDecoded = jsonDecode(valueRaw);
       if (valueDecoded is! Map<String, dynamic>) {
-        throw Exception('Coleccion con formato invalido: $collectionName');
+        throw Exception('${'Coleccion con formato invalido: '.t()}$collectionName');
       }
 
       final added = (valueDecoded['added'] as List?)?.cast<dynamic>() ?? [];

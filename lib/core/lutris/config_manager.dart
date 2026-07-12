@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'translation_manager.dart';
 
 class ConfigManager {
   static final String _homeDir = Platform.environment['HOME'] ?? '';
@@ -23,7 +24,7 @@ class ConfigManager {
       final content = await file.readAsString();
       return jsonDecode(content) as Map<String, dynamic>;
     } catch (e) {
-      print("Error leyendo configuración: $e");
+      print('${'Error leyendo configuración: '.t()}$e');
       return {};
     }
   }
@@ -110,5 +111,15 @@ class ConfigManager {
     await _writeConfig(config);
   }
 
-  // Puedes añadir más configuraciones aquí en el futuro
+  // Language settings
+  static Future<String> getLanguage() async {
+    final config = await _readConfig();
+    return config['language'] as String? ?? 'en'; // Default is English
+  }
+
+  static Future<void> saveLanguage(String lang) async {
+    final config = await _readConfig();
+    config['language'] = lang;
+    await _writeConfig(config);
+  }
 }

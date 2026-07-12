@@ -1,6 +1,7 @@
 import 'package:sqlite3/sqlite3.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'translation_manager.dart';
 
 /// Modelo para información de ROM identificada y cacheada
 class RomCacheEntry {
@@ -231,7 +232,7 @@ class RomCacheRepository {
 
       return cached; // Cache válido
     } catch (e) {
-      print('[  WARN ] Error verificando cache ROM: $e');
+      print('${'[  WARN ] Error verificando cache ROM: '.t()}$e');
       return null;
     }
   }
@@ -306,7 +307,7 @@ class RomCacheRepository {
         ],
       );
     } catch (e) {
-      print('[  WARN ] Error guardando cache ROM: $e');
+      print('${'[  WARN ] Error guardando cache ROM: '.t()}$e');
     }
   }
 
@@ -362,7 +363,7 @@ class RomCacheRepository {
 
       return null;
     } catch (e) {
-      print('[  WARN ] Error buscando por nombre: $e');
+      print('${'[  WARN ] Error buscando por nombre: '.t()}$e');
       return null;
     }
   }
@@ -372,7 +373,7 @@ class RomCacheRepository {
     try {
       _db.execute('DELETE FROM rom_cache');
     } catch (e) {
-      print('[  WARN ] Error limpiando cache ROM: $e');
+      print('${'[  WARN ] Error limpiando cache ROM: '.t()}$e');
     }
   }
 

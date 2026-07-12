@@ -3,6 +3,8 @@ import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
+import '../lutris/translation_manager.dart';
+
 import 'steamgriddb_cache.dart';
 
 class SteamGridDBService {
@@ -58,7 +60,7 @@ class SteamGridDBService {
           final waitTime = pow(2, attempt).toInt();
           await Future.delayed(Duration(seconds: waitTime));
         } else if (response.statusCode == 401) {
-          throw Exception('SteamGridDB API Key inválida o sin permisos');
+          throw Exception('SteamGridDB API Key inválida o sin permisos'.t());
         } else if (response.statusCode >= 500) {
           // Server error
           await Future.delayed(const Duration(seconds: 1));

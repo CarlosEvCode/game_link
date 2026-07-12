@@ -15,6 +15,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import '../core/lutris/translation_manager.dart';
 
 class InjectionItem {
   final String filePath;
@@ -90,7 +91,7 @@ class _MainWindowState extends State<MainWindow> {
     final key = await ConfigManager.getApiKey();
     final ssUser = await ConfigManager.getSSUser();
     final ssPass = await ConfigManager.getSSPassword();
-
+    final lang = await ConfigManager.getLanguage();
 
     setState(() {
       _apiKey = key;
@@ -99,10 +100,11 @@ class _MainWindowState extends State<MainWindow> {
       _ssUserController.text = ssUser;
       _ssPassword = ssPass;
       _ssPasswordController.text = ssPass;
+      I18n.setLanguage(lang);
     });
 
-    if (key.isNotEmpty) _log("API Key cargada.");
-    if (ssUser.isNotEmpty) _log("ScreenScraper configurado.");
+    if (key.isNotEmpty) _log("API Key loaded.");
+    if (ssUser.isNotEmpty) _log("ScreenScraper configured.");
   }
 
   void _onPlatformChanged(PlatformInfo? val) async {
@@ -143,12 +145,12 @@ class _MainWindowState extends State<MainWindow> {
       _availableLutrisModes = _detector?.getAvailableModes() ?? [];
 
       if (_lutrisPaths?['mode'] == null || _lutrisPaths!['mode']!.isEmpty) {
-        _log("No se detectó Lutris instalado.");
+        _log('No se detectó Lutris instalado.'.t());
       } else {
-        _log("Lutris detectado: ${_lutrisPaths!['mode']}");
+        _log('${'Lutris detectado: '.t()}${_lutrisPaths!['mode']}');
       }
     } catch (e) {
-      _log("Error detectando Lutris: $e");
+      _log('${'Error detectando Lutris: '.t()}$e');
     }
   }
 
@@ -185,7 +187,7 @@ class _MainWindowState extends State<MainWindow> {
       _lutrisPaths = _detector!.getPaths();
     });
 
-    _log("Cambiado a: $newMode");
+    _log('${'Cambiado a: '.t()}$newMode');
   }
 
   void _editItemName(InjectionItem item) {
@@ -193,19 +195,19 @@ class _MainWindowState extends State<MainWindow> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Editar Nombre'),
+        title: Text('Editar Nombre'.t()),
         content: TextField(
           controller: controller,
           autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Nombre en Lutris',
+          decoration: InputDecoration(
+            labelText: 'Nombre en Lutris'.t(),
             border: OutlineInputBorder(),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'.t()),
           ),
           FilledButton(
             onPressed: () {
@@ -215,7 +217,7 @@ class _MainWindowState extends State<MainWindow> {
               });
               Navigator.pop(context);
             },
-            child: const Text('Guardar'),
+            child: Text('Guardar'.t()),
           ),
         ],
       ),
@@ -226,25 +228,24 @@ class _MainWindowState extends State<MainWindow> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
-            SizedBox(width: 8),
-            Text('Quota Limitada', style: TextStyle(fontSize: 16)),
+            const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 20),
+            const SizedBox(width: 8),
+            Text('Quota Limitada'.t(), style: const TextStyle(fontSize: 16)),
           ],
         ),
         content: Text(
-          'Solo tienes $available requests para $total ROMs.\n\n'
-          'Las primeras $available serán identificadas por ScreenScraper.',
+          '${'Solo tienes '.t()}$available${' requests para '.t()}$total${' ROMs.\n\nLas primeras '.t()}$available${' serán identificadas por ScreenScraper.'.t()}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'.t()),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Continuar'),
+            child: Text('Continuar'.t()),
           ),
         ],
       ),
@@ -285,7 +286,7 @@ class _MainWindowState extends State<MainWindow> {
         }
       }
     } catch (e) {
-      _log("[  WARN ] Error al leer app.xml: $e");
+        _log("[  WARN ] ${'Error al leer app.xml: '.t()}$e");
     }
     return true;
   }
@@ -336,7 +337,7 @@ class _MainWindowState extends State<MainWindow> {
         return folderName;
       }
     } catch (e) {
-      _log("[  WARN ] Error al obtener nombre desde meta.xml: $e");
+        _log("[  WARN ] ${'Error al obtener nombre desde meta.xml: '.t()}$e");
     }
 
     return p.basenameWithoutExtension(rpxPath);
@@ -512,7 +513,7 @@ class _MainWindowState extends State<MainWindow> {
 
       if (_useOfflineId && _selectedPlatform != null && DatResolver.isPlatformSupported(_selectedPlatform!.platformId) && detected.isNotEmpty) {
         final platformId = _selectedPlatform!.platformId;
-        _log("Resolviendo nombres de juegos usando base de datos local No-Intro/Redump/MAME...");
+        _log('Resolviendo nombres de juegos usando base de datos local No-Intro/Redump/MAME...'.t());
         final chunkSize = 50;
         int processedCount = 0;
         final List<String> unresolvedSlugs = [];
@@ -520,7 +521,7 @@ class _MainWindowState extends State<MainWindow> {
         // Asegurarnos de que el DAT esté listo (si es de GitHub se descarga y se guarda localmente)
         final datFile = await DatResolver.getDatFile(platformId);
         if (datFile == null) {
-          _log("[  WARN ] No se pudo cargar la base de datos local para $platformId");
+          _log("[  WARN ] ${'No se pudo cargar la base de datos local para '.t()}$platformId");
         } else {
           final scanRomCache = RomCacheRepository();
           try {
@@ -544,7 +545,7 @@ class _MainWindowState extends State<MainWindow> {
               }
 
               final isNoHashPlatform = (platformId == 'mame' || platformId == 'gamecube' || platformId == 'wii');
-              _log("Buscando en base de datos local $platformId: lote ${i ~/ chunkSize + 1} de ${(filteredFiles.length / chunkSize).ceil()}...");
+              _log("${'Buscando en base de datos local '.t()}$platformId: ${'lote'.t()} ${i ~/ chunkSize + 1} ${'de '.t()}${(filteredFiles.length / chunkSize).ceil()}...");
               
               final Map<String, String> resolvedChunk = {};
               for (final file in chunkToResolve) {
@@ -619,19 +620,19 @@ class _MainWindowState extends State<MainWindow> {
               }
               
               processedCount += chunkToResolve.length;
-              _log("Progreso offline: $processedCount / ${filteredFiles.length} juegos procesados.");
+              _log("${'Progreso offline: '.t()}$processedCount / ${filteredFiles.length} ${'juegos procesados.'.t()}");
             }
           } finally {
             scanRomCache.dispose();
           }
 
           if (unresolvedSlugs.isNotEmpty) {
-            _log("[  WARN ] Base de datos local no pudo identificar ${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
+            _log("[  WARN ] ${'Base de datos local no pudo identificar '.t()}${unresolvedSlugs.length} juego(s): ${unresolvedSlugs.join(', ')}");
           }
         }
       }
 
-      _log("${detected.length} juegos encontrados.");
+      _log("${detected.length} ${'juegos encontrados.'.t()}");
     } catch (e) {
       _log("Error: $e");
     } finally {
@@ -683,194 +684,242 @@ class _MainWindowState extends State<MainWindow> {
     _apiKeyController.text = _apiKey;
     _ssUserController.text = _ssUser;
     _ssPasswordController.text = _ssPassword;
+    String selectedLangTemp = I18n.currentLang;
 
     showDialog(
       context: context,
       builder: (context) {
-        return DefaultTabController(
-          length: 2,
-          initialIndex: initialTabIndex,
-          child: AlertDialog(
-            backgroundColor: const Color(0xFF0A0A0A),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: const BorderSide(color: Color(0xFF1A1A1A)),
-            ),
-            titlePadding: EdgeInsets.zero,
-            title: Container(
-              padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text('CONFIGURACIÓN', style: TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                  const SizedBox(height: 16),
-                  const TabBar(
-                    labelColor: Colors.white,
-                    unselectedLabelColor: Colors.white24,
-                    indicatorColor: Colors.white,
-                    indicatorWeight: 2,
-                    dividerColor: Colors.transparent,
-                    labelStyle: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
-                    tabs: [
-                      Tab(text: 'STEAMGRIDDB'),
-                      Tab(text: 'SCREEN SCRAPER'),
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return DefaultTabController(
+              length: 3,
+              initialIndex: initialTabIndex,
+              child: AlertDialog(
+                backgroundColor: const Color(0xFF0A0A0A),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  side: const BorderSide(color: Color(0xFF1A1A1A)),
+                ),
+                titlePadding: EdgeInsets.zero,
+                title: Container(
+                  padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('CONFIGURACIÓN'.t(), style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      const SizedBox(height: 16),
+                      TabBar(
+                        labelColor: Colors.white,
+                        unselectedLabelColor: Colors.white24,
+                        indicatorColor: Colors.white,
+                        indicatorWeight: 2,
+                        dividerColor: Colors.transparent,
+                        labelStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        tabs: [
+                          Tab(text: 'GENERAL'.t()),
+                          Tab(text: 'STEAMGRIDDB'.t()),
+                          Tab(text: 'SCREEN SCRAPER'.t()),
+                        ],
+                      ),
                     ],
                   ),
-                ],
-              ),
-            ),
-            content: SizedBox(
-              width: 400,
-              height: 250,
-              child: TabBarView(
-                children: [
-                  // Tab SteamGridDB
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('API KEY', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                        const SizedBox(height: 12),
-                        TextField(
-                          controller: _apiKeyController,
-                          obscureText: true,
-                          style: const TextStyle(fontSize: 13, color: Colors.white70),
-                          decoration: InputDecoration(
-                            hintText: 'Tu API Key...',
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.black,
-                            prefixIcon: const Icon(Icons.vpn_key_outlined, size: 16, color: Colors.white24),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        InkWell(
-                          onTap: () => _launchUrl('https://www.steamgriddb.com/profile/preferences/api'),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Obtén tu API Key en SteamGridDB',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Requerido para descargar carátulas, banners e iconos automáticamente.',
-                          style: TextStyle(color: Colors.white24, fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Tab ScreenScraper
-                  Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('USUARIO', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _ssUserController,
-                          style: const TextStyle(fontSize: 13, color: Colors.white70),
-                          decoration: InputDecoration(
-                            hintText: 'Usuario...',
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.black,
-                            prefixIcon: const Icon(Icons.person_outline, size: 16, color: Colors.white24),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text('CONTRASEÑA', style: TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-                        const SizedBox(height: 8),
-                        TextField(
-                          controller: _ssPasswordController,
-                          obscureText: true,
-                          style: const TextStyle(fontSize: 13, color: Colors.white70),
-                          decoration: InputDecoration(
-                            hintText: 'Contraseña...',
-                            isDense: true,
-                            filled: true,
-                            fillColor: Colors.black,
-                            prefixIcon: const Icon(Icons.lock_outline, size: 16, color: Colors.white24),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-                            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        InkWell(
-                          onTap: () => _launchUrl('https://www.screenscraper.fr/'),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
-                              const SizedBox(width: 6),
-                              Text(
-                                'Regístrate en ScreenScraper',
-                                style: TextStyle(
-                                  color: Colors.white.withOpacity(0.85),
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'Requerido para la identificación de alta precisión y metadatos.',
-                          style: TextStyle(color: Colors.white24, fontSize: 11),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('CANCELAR', style: TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(width: 8),
-              TextButton(
-                onPressed: () async {
-                  final newKey = _apiKeyController.text.trim();
-                  final newUser = _ssUserController.text.trim();
-                  final newPass = _ssPasswordController.text;
-                  setState(() {
-                    _apiKey = newKey;
-                    _ssUser = newUser;
-                    _ssPassword = newPass;
-                  });
-                  await ConfigManager.saveApiKey(newKey);
-                  await ConfigManager.saveSSCredentials(newUser, newPass);
-                  if (context.mounted) Navigator.of(context).pop();
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                 ),
-                child: const Text('GUARDAR', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                content: SizedBox(
+                  width: 400,
+                  height: 250,
+                  child: TabBarView(
+                    children: [
+                      // Tab General
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('IDIOMA'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                            const SizedBox(height: 12),
+                            DropdownButtonFormField<String>(
+                              value: selectedLangTemp,
+                              dropdownColor: const Color(0xFF0A0A0A),
+                              style: const TextStyle(fontSize: 13, color: Colors.white70),
+                              decoration: InputDecoration(
+                                isDense: true,
+                                filled: true,
+                                fillColor: Colors.black,
+                                prefixIcon: const Icon(Icons.language_outlined, size: 16, color: Colors.white24),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'en', child: Text('English (Default)')),
+                                DropdownMenuItem(value: 'es', child: Text('Español')),
+                              ],
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setDialogState(() {
+                                    selectedLangTemp = val;
+                                  });
+                                }
+                              },
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Selecciona el idioma de la aplicación.'.t(),
+                              style: const TextStyle(color: Colors.white24, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Tab SteamGridDB
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('API KEY'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                            const SizedBox(height: 12),
+                            TextField(
+                              controller: _apiKeyController,
+                              obscureText: true,
+                              style: const TextStyle(fontSize: 13, color: Colors.white70),
+                              decoration: InputDecoration(
+                                hintText: 'Tu API Key...'.t(),
+                                isDense: true,
+                                filled: true,
+                                fillColor: Colors.black,
+                                prefixIcon: const Icon(Icons.vpn_key_outlined, size: 16, color: Colors.white24),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: () => _launchUrl('https://www.steamgriddb.com/profile/preferences/api'),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Obtén tu API Key en SteamGridDB'.t(),
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.85),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Requerido para descargar carátulas, banners e iconos automáticamente.'.t(),
+                              style: const TextStyle(color: Colors.white24, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Tab ScreenScraper
+                      Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('USUARIO'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _ssUserController,
+                              style: const TextStyle(fontSize: 13, color: Colors.white70),
+                              decoration: InputDecoration(
+                                hintText: 'Usuario...'.t(),
+                                isDense: true,
+                                filled: true,
+                                fillColor: Colors.black,
+                                prefixIcon: const Icon(Icons.person_outline, size: 16, color: Colors.white24),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text('CONTRASEÑA'.t(), style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _ssPasswordController,
+                              obscureText: true,
+                              style: const TextStyle(fontSize: 13, color: Colors.white70),
+                              decoration: InputDecoration(
+                                hintText: 'Contraseña...'.t(),
+                                isDense: true,
+                                filled: true,
+                                fillColor: Colors.black,
+                                prefixIcon: const Icon(Icons.lock_outline, size: 16, color: Colors.white24),
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                                enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            InkWell(
+                              onTap: () => _launchUrl('https://www.screenscraper.fr/'),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'Regístrate en ScreenScraper'.t(),
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.85),
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Requerido para la identificación de alta precisión y metadatos.'.t(),
+                              style: const TextStyle(color: Colors.white24, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text('CANCELAR'.t(), style: const TextStyle(color: Colors.white38, fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () async {
+                      final newKey = _apiKeyController.text.trim();
+                      final newUser = _ssUserController.text.trim();
+                      final newPass = _ssPasswordController.text;
+                      setState(() {
+                        _apiKey = newKey;
+                        _ssUser = newUser;
+                        _ssPassword = newPass;
+                        I18n.setLanguage(selectedLangTemp);
+                      });
+                      await ConfigManager.saveApiKey(newKey);
+                      await ConfigManager.saveSSCredentials(newUser, newPass);
+                      await ConfigManager.saveLanguage(selectedLangTemp);
+                      if (context.mounted) Navigator.of(context).pop();
+                    },
+                    style: TextButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                    ),
+                    child: Text('GUARDAR'.t(), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         );
       },
     );
@@ -879,43 +928,43 @@ class _MainWindowState extends State<MainWindow> {
   Future<void> _launchUrl(String url) async {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri)) {
-      _log("No se pudo abrir la URL: $url");
+      _log("${'No se pudo abrir la URL: '.t()}$url");
     }
   }
 
   Future<void> _startProcess(String action) async {
     if (_isProcessing) return;
     if (_lutrisPaths == null) {
-      _log("Rutas de Lutris no detectadas.");
+      _log('Rutas de Lutris no detectadas.'.t());
       return;
     }
     if (_selectedPlatform == null || _selectedEmulator == null) {
-      _log("Selecciona plataforma y emulador.");
+      _log('Selecciona plataforma y emulador.'.t());
       return;
     }
     if ((action == 'inject' || action == 'full') && _romFolder.isEmpty) {
-      _log("Selecciona una carpeta de ROMs.");
+      _log('Selecciona una carpeta de ROMs.'.t());
       return;
     }
     if ((action == 'inject' || action == 'full') && _selectedExtensions.isEmpty) {
-      _log("Selecciona al menos una extensión.");
+      _log('Selecciona al menos una extensión.'.t());
       return;
     }
     if ((action == 'metadata' || action == 'full') && _apiKey.isEmpty) {
-      _log("Configura la API Key de SteamGridDB.");
-      _showConfigDialog(initialTabIndex: 0);
+      _log('Configura la API Key de SteamGridDB.'.t());
+      _showConfigDialog(initialTabIndex: 1);
       return;
     }
 
     if (_useHighPrecision && (action == 'inject' || action == 'full')) {
       final selectedCount = _previewItems.where((i) => i.isSelected).length;
       if (_ssUser.isEmpty || _ssPassword.isEmpty) {
-        _log("Alta Precisión requiere credenciales de ScreenScraper.");
-        _showConfigDialog(initialTabIndex: 1);
+        _log('Alta Precisión requiere credenciales de ScreenScraper.'.t());
+        _showConfigDialog(initialTabIndex: 2);
         return;
       }
 
-      _log("Verificando quota...");
+      _log('Verificando quota...'.t());
       final quotaCheck = await ScreenScraperService.canStartMassiveScan(selectedCount);
       if (!quotaCheck.canProceed) {
         _log("Error: ${quotaCheck.message}");
@@ -936,7 +985,7 @@ class _MainWindowState extends State<MainWindow> {
       if (action == 'inject' || action == 'full') {
         final selectedFiles = _previewItems.where((item) => item.isSelected).map((item) => File(item.filePath)).toList();
         if (selectedFiles.isEmpty) {
-          _log("[  WARN ] No hay ningún juego seleccionado para inyectar.");
+          _log("[  WARN ] ${'No hay ningún juego seleccionado para inyectar.'.t()}");
           setState(() {
             _isProcessing = false;
           });
@@ -1059,10 +1108,10 @@ class _MainWindowState extends State<MainWindow> {
               style: TextStyle(color: Colors.white70, fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'Software libre desarrollado como complemento para otros lanzadores y gestión de librerías.',
+            Text(
+              'Software libre desarrollado como complemento para otros lanzadores y gestión de librerías.'.t(),
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white24, fontSize: 10, height: 1.4),
+              style: const TextStyle(color: Colors.white24, fontSize: 10, height: 1.4),
             ),
             const SizedBox(height: 24),
             const Divider(color: Colors.white10),
@@ -1077,7 +1126,7 @@ class _MainWindowState extends State<MainWindow> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('CERRAR', style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+            child: Text('CERRAR'.t(), style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -1105,23 +1154,23 @@ class _MainWindowState extends State<MainWindow> {
               if (value == 'about') _showAboutDialog();
             },
             itemBuilder: (context) => [
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'settings',
                 child: Row(
                   children: [
-                    Icon(Icons.settings_outlined, size: 16, color: Colors.white70),
-                    SizedBox(width: 12),
-                    Text('Configuración', style: TextStyle(fontSize: 13, color: Colors.white70)),
+                    const Icon(Icons.settings_outlined, size: 16, color: Colors.white70),
+                    const SizedBox(width: 12),
+                    Text('Configuración'.t(), style: const TextStyle(fontSize: 13, color: Colors.white70)),
                   ],
                 ),
               ),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'about',
                 child: Row(
                   children: [
-                    Icon(Icons.info_outline, size: 16, color: Colors.white70),
-                    SizedBox(width: 12),
-                    Text('Acerca de', style: TextStyle(fontSize: 13, color: Colors.white70)),
+                    const Icon(Icons.info_outline, size: 16, color: Colors.white70),
+                    const SizedBox(width: 12),
+                    Text('Acerca de'.t(), style: const TextStyle(fontSize: 13, color: Colors.white70)),
                   ],
                 ),
               ),
@@ -1142,9 +1191,9 @@ class _MainWindowState extends State<MainWindow> {
             _scanFolder();
           }
         },
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.flash_on, size: 20), label: 'Inyector'),
-          NavigationDestination(icon: Icon(Icons.grid_view, size: 20), label: 'Gestor Visual'),
+        destinations: [
+          NavigationDestination(icon: const Icon(Icons.flash_on, size: 20), label: 'Inyector'.t()),
+          NavigationDestination(icon: const Icon(Icons.grid_view, size: 20), label: 'GESTOR VISUAL'.t()),
         ],
       ),
     );
@@ -1155,7 +1204,7 @@ class _MainWindowState extends State<MainWindow> {
   }
 
   Widget _buildLutrisSelector() {
-    final currentMode = _lutrisPaths != null ? _lutrisPaths!['mode']! : "No detectado";
+    final currentMode = _lutrisPaths != null ? _lutrisPaths!['mode']! : "No detectado".t();
     return PopupMenuButton<String>(
       onSelected: _switchLutrisMode,
       itemBuilder: (context) => _availableLutrisModes.map((mode) => PopupMenuItem(value: mode, child: Text(mode, style: const TextStyle(fontSize: 13)))).toList(),
@@ -1178,7 +1227,7 @@ class _MainWindowState extends State<MainWindow> {
   }
 
   Widget _buildVisualManagerView() {
-    return _lutrisPaths == null ? const Center(child: Text("Lutris no detectado.")) : VisualManagerScreen(
+    return _lutrisPaths == null ? Center(child: Text("Lutris no detectado.".t())) : VisualManagerScreen(
       lutrisPaths: _lutrisPaths!,
       apiKey: _apiKey,
       onShowConfig: () => _showConfigDialog(),
@@ -1224,9 +1273,9 @@ class _MainWindowState extends State<MainWindow> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // STEP 01
-        _buildStepHeader('01', 'SISTEMA'),
+        _buildStepHeader('01', 'SISTEMA'.t()),
         const SizedBox(height: 16),
-        Text('PLATAFORMA', style: labelStyle),
+        Text('PLATAFORMA'.t(), style: labelStyle),
         const SizedBox(height: 10),
         DropdownButtonFormField<PlatformInfo>(
           value: _selectedPlatform,
@@ -1236,7 +1285,7 @@ class _MainWindowState extends State<MainWindow> {
         ),
         if (_selectedPlatform != null && _selectedPlatform!.emulators.length > 1) ...[
           const SizedBox(height: 20),
-          Text('EMULADOR', style: labelStyle),
+          Text('EMULADOR'.t(), style: labelStyle),
           const SizedBox(height: 10),
           DropdownButtonFormField<EmulatorInfo>(
             value: _selectedEmulator,
@@ -1252,9 +1301,9 @@ class _MainWindowState extends State<MainWindow> {
         const SizedBox(height: 32),
 
         // STEP 02
-        _buildStepHeader('02', 'ORIGEN'),
+        _buildStepHeader('02', 'ORIGEN'.t()),
         const SizedBox(height: 16),
-        Text('CARPETA DE ROMS', style: labelStyle),
+        Text('CARPETA ROMS'.t(), style: labelStyle),
         const SizedBox(height: 10),
         Row(
           children: [
@@ -1270,7 +1319,7 @@ class _MainWindowState extends State<MainWindow> {
                   ),
                   child: Row(
                     children: [
-                      Expanded(child: Text(_romFolder.isEmpty ? 'Seleccionar...' : _romFolder, style: const TextStyle(fontSize: 12, color: Colors.white70), overflow: TextOverflow.ellipsis)),
+                      Expanded(child: Text(_romFolder.isEmpty ? 'Seleccionar...'.t() : _romFolder, style: const TextStyle(fontSize: 12, color: Colors.white70), overflow: TextOverflow.ellipsis)),
                       const Icon(Icons.folder_open, size: 16, color: Colors.white38),
                     ],
                   ),
@@ -1282,7 +1331,7 @@ class _MainWindowState extends State<MainWindow> {
               IconButton(
                 icon: const Icon(Icons.refresh, color: Colors.white70, size: 20),
                 onPressed: _isProcessing || _isScanning ? null : _scanFolder,
-                tooltip: 'Actualizar carpeta',
+                tooltip: 'Actualizar carpeta'.t(),
                 style: IconButton.styleFrom(
                   backgroundColor: const Color(0xFF0A0A0A),
                   shape: RoundedRectangleBorder(
@@ -1297,7 +1346,7 @@ class _MainWindowState extends State<MainWindow> {
         ),
         if (_selectedEmulator != null) ...[
           const SizedBox(height: 20),
-          Text('EXTENSIONES', style: labelStyle),
+          Text('EXTENSIONES'.t(), style: labelStyle),
           const SizedBox(height: 12),
           Wrap(
             spacing: 6,
@@ -1342,19 +1391,19 @@ class _MainWindowState extends State<MainWindow> {
         const SizedBox(height: 32),
 
         // STEP 03
-        _buildStepHeader('03', 'PREFERENCIAS'),
+        _buildStepHeader('03', 'PREFERENCIAS'.t()),
         const SizedBox(height: 16),
-        _buildCompactCheckbox('Limpiar juegos previos', _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
-        _buildCompactCheckbox('Autodetectar nombres (offline)', _useOfflineId, (val) {
+        _buildCompactCheckbox('Limpiar antiguos'.t(), _cleanOldGames, (val) => setState(() => _cleanOldGames = val ?? false)),
+        _buildCompactCheckbox('Autodetectar nombres (offline)'.t(), _useOfflineId, (val) {
           setState(() => _useOfflineId = val ?? false);
           _scanFolder();
         }),
         if (_useOfflineId)
-          _buildCompactCheckbox('Alta Precisión (Hash)', _useHighPrecision, (val) {
+          _buildCompactCheckbox('Alta Precisión (Hash)'.t(), _useHighPrecision, (val) {
             setState(() => _useHighPrecision = val ?? false);
             _scanFolder();
           }),
-        _buildCompactCheckbox('Escaneo recursivo', _isRecursive, (val) {
+        _buildCompactCheckbox('Escaneo recursivo'.t(), _isRecursive, (val) {
           setState(() => _isRecursive = val ?? false);
           _scanFolder();
         }),
@@ -1408,13 +1457,13 @@ class _MainWindowState extends State<MainWindow> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  canProcess ? '$selectedCount JUEGOS LISTOS' : 'ESPERANDO SELECCIÓN',
+                  canProcess ? (selectedCount == 1 ? 'JUEGO LISTO'.t() : '$selectedCount ${'JUEGOS LISTOS'.t()}') : 'ESPERANDO SELECCIÓN'.t(),
                   style: const TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 0.5),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Inyectar en Lutris + Descargar Metadatos',
-                  style: TextStyle(color: Colors.white24, fontSize: 10),
+                Text(
+                  'Inyectar en Lutris + Descargar Metadatos'.t(),
+                  style: const TextStyle(color: Colors.white24, fontSize: 10),
                 ),
               ],
             ),
@@ -1423,7 +1472,7 @@ class _MainWindowState extends State<MainWindow> {
           // Botón de opciones avanzadas
           if (canProcess)
             PopupMenuButton<String>(
-              tooltip: 'Opciones avanzadas',
+              tooltip: 'Opciones avanzadas'.t(),
               icon: const Icon(Icons.tune, color: Colors.white38, size: 20),
               offset: const Offset(0, -100),
               color: const Color(0xFF0A0A0A),
@@ -1433,23 +1482,23 @@ class _MainWindowState extends State<MainWindow> {
               ),
               onSelected: _startProcess,
               itemBuilder: (context) => [
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'inject',
                   child: Row(
                     children: [
-                      Icon(Icons.add, size: 16, color: Colors.white70),
-                      SizedBox(width: 12),
-                      Text('Solo Inyectar ROMs', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                      const Icon(Icons.add, size: 16, color: Colors.white70),
+                      const SizedBox(width: 12),
+                      Text('Solo Inyectar ROMs'.t(), style: const TextStyle(fontSize: 12, color: Colors.white70)),
                     ],
                   ),
                 ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'metadata',
                   child: Row(
                     children: [
-                      Icon(Icons.download_outlined, size: 16, color: Colors.white70),
-                      SizedBox(width: 12),
-                      Text('Solo Descargar Metadatos', style: TextStyle(fontSize: 12, color: Colors.white70)),
+                      const Icon(Icons.download_outlined, size: 16, color: Colors.white70),
+                      const SizedBox(width: 12),
+                      Text('Solo Descargar Metadatos'.t(), style: const TextStyle(fontSize: 12, color: Colors.white70)),
                     ],
                   ),
                 ),
@@ -1458,7 +1507,7 @@ class _MainWindowState extends State<MainWindow> {
           const SizedBox(width: 16),
           // Botón Principal
           _buildActionButton(
-            _isProcessing ? 'PROCESANDO...' : 'EJECUTAR PROCESO', 
+            _isProcessing ? 'PROCESANDO...'.t() : 'EJECUTAR PROCESO'.t(), 
             Icons.play_arrow_rounded, 
             () => _startProcess('full'), 
             isPrimary: canProcess,
@@ -1517,7 +1566,7 @@ class _MainWindowState extends State<MainWindow> {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Row(children: [
-            const Text('DETECTADOS', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
+            Text('DETECTADOS'.t(), style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: Colors.white38)),
             const Spacer(),
             Text('${_previewItems.where((i) => i.isSelected).length}/${_previewItems.length}', style: const TextStyle(fontSize: 11, color: Colors.white70)),
           ]),
@@ -1540,9 +1589,9 @@ class _MainWindowState extends State<MainWindow> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     if (item.alreadyExists)
-                      const Tooltip(
-                        message: 'Ya en la biblioteca de Lutris',
-                        child: Padding(
+                      Tooltip(
+                        message: 'Ya en la biblioteca de Lutris'.t(),
+                        child: const Padding(
                           padding: EdgeInsets.only(right: 8),
                           child: Icon(Icons.check_circle_outline_rounded, size: 14, color: Colors.white38),
                         ),
@@ -1568,7 +1617,7 @@ class _MainWindowState extends State<MainWindow> {
         children: [
           if (_progress > 0 && _progress < 1) LinearProgressIndicator(value: _progress, minHeight: 1, backgroundColor: Colors.transparent, color: Colors.white24),
           Expanded(child: ListView(controller: _logScrollController, padding: const EdgeInsets.all(16), children: [
-            Text(_logText.isEmpty ? '> Ready.' : _logText, style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Color(0xFF888888), height: 1.5)),
+            Text(_logText.isEmpty ? '> ' + 'Listo.'.t() : _logText, style: const TextStyle(fontFamily: 'monospace', fontSize: 11, color: Color(0xFF888888), height: 1.5)),
           ])),
         ],
       ),

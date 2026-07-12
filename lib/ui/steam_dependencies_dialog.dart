@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../core/lutris/translation_manager.dart';
 
 class SteamDependenciesDialog extends StatelessWidget {
   const SteamDependenciesDialog({super.key});
@@ -16,11 +17,11 @@ class SteamDependenciesDialog extends StatelessWidget {
     final theme = Theme.of(context);
     
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
-          SizedBox(width: 12),
-          Text('Requerimientos de Steam Export'),
+          const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+          const SizedBox(width: 12),
+          Text('Requerimientos de Steam Export'.t()),
         ],
       ),
       content: SizedBox(
@@ -30,32 +31,32 @@ class SteamDependenciesDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Para exportar tus juegos a Steam se necesitan dependencias adicionales en tu sistema:',
-                style: TextStyle(fontSize: 14),
+              Text(
+                'Para exportar tus juegos a Steam se necesitan dependencias adicionales en tu sistema:'.t(),
+                style: const TextStyle(fontSize: 14),
               ),
               const SizedBox(height: 16),
               _buildDependencyItem(
                 context,
                 'Python 3',
-                'Motor para ejecutar los scripts de sincronización.',
+                'Motor para ejecutar los scripts de sincronización.'.t(),
               ),
               _buildDependencyItem(
                 context,
-                'Librería vdf',
-                'Permite leer y escribir el formato de archivos de Steam.',
+                'Librería vdf'.t(),
+                'Permite leer y escribir el formato de archivos de Steam.'.t(),
               ),
               _buildDependencyItem(
                 context,
-                'Librería Pillow (PIL)',
-                'Necesaria para procesar y convertir las imágenes de carátulas.',
+                'Librería Pillow (PIL)'.t(),
+                'Necesaria para procesar y convertir las imágenes de carátulas.'.t(),
               ),
               const SizedBox(height: 20),
               const Divider(),
               const SizedBox(height: 12),
-              const Text(
-                'Comandos de instalación por distribución:',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              Text(
+                'Comandos de instalación por distribución:'.t(),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
               ),
               const SizedBox(height: 12),
               _buildInstallSection(
@@ -76,9 +77,9 @@ class SteamDependenciesDialog extends StatelessWidget {
                 'sudo dnf install python3-vdf python3-pillow',
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Nota: Actualmente solo se detecta la versión Nativa de Steam. Si usas Steam vía Flatpak, el soporte se añadirá próximamente.',
-                style: TextStyle(fontSize: 11, color: Colors.white54, fontStyle: FontStyle.italic),
+              Text(
+                'Nota: Actualmente solo se detecta la versión Nativa de Steam. Si usas Steam vía Flatpak, el soporte se añadirá próximamente.'.t(),
+                style: const TextStyle(fontSize: 11, color: Colors.white54, fontStyle: FontStyle.italic),
               ),
             ],
           ),
@@ -87,7 +88,7 @@ class SteamDependenciesDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Entendido'),
+            child: Text('Entendido'.t()),
         ),
       ],
     );
@@ -149,7 +150,7 @@ class SteamDependenciesDialog extends StatelessWidget {
                 onPressed: () {
                   Clipboard.setData(ClipboardData(text: command));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Comando copiado'), duration: Duration(seconds: 1)),
+                    SnackBar(content: Text('Comando copiado'.t()), duration: const Duration(seconds: 1)),
                   );
                 },
                 visualDensity: VisualDensity.compact,

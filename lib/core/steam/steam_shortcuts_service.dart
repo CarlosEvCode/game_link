@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import '../lutris/translation_manager.dart';
 import 'models/steam_shortcut_entry.dart';
 
 class SteamShortcutsService {
@@ -124,11 +125,11 @@ print(json.dumps({'ok': True, 'index': str(target_index)}))
     final code = await process.exitCode;
 
     if (code != 0) {
-      throw Exception('No se pudo actualizar shortcuts.vdf: $stderrText');
+      throw Exception('${'No se pudo actualizar shortcuts.vdf: '.t()}$stderrText');
     }
 
     if (stdoutText.trim().isEmpty) {
-      throw Exception('No hubo respuesta al actualizar shortcuts.vdf.');
+      throw Exception('No hubo respuesta al actualizar shortcuts.vdf.'.t());
     }
   }
 
@@ -189,7 +190,7 @@ print(json.dumps(result))
     final code = await process.exitCode;
 
     if (code != 0) {
-      throw Exception('No se pudo leer shortcuts.vdf: $stderrText');
+      throw Exception('${'No se pudo leer shortcuts.vdf: '.t()}$stderrText');
     }
 
     final decoded = jsonDecode(stdoutText);
@@ -268,7 +269,7 @@ print(json.dumps({'ok': True, 'removed': removed}))
     final stderrText = await utf8.decodeStream(process.stderr);
     final code = await process.exitCode;
     if (code != 0) {
-      throw Exception('No se pudo depurar shortcuts.vdf: $stderrText');
+      throw Exception('${'No se pudo depurar shortcuts.vdf: '.t()}$stderrText');
     }
   }
 

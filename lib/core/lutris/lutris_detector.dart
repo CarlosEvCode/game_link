@@ -24,7 +24,7 @@ class LutrisDetector {
   /// Returns a list of available Lutris installation modes detected on the system.
   List<String> getAvailableModes() {
     List<String> modes = [];
-    if (File(pathNativeDb).existsSync()) modes.add("NATIVO");
+    if (File(pathNativeDb).existsSync()) modes.add("NATIVE");
     if (File(pathFlatpakDb).existsSync()) modes.add("FLATPAK");
     return modes;
   }
@@ -42,7 +42,7 @@ class LutrisDetector {
       if (_forcedMode!.toUpperCase() == "FLATPAK" && flatpakExists) {
         _configureFlatpak();
         return;
-      } else if (_forcedMode!.toUpperCase() == "NATIVO" && nativeExists) {
+      } else if (_forcedMode!.toUpperCase() == "NATIVE" && nativeExists) {
         _configureNative();
         return;
       }
@@ -73,7 +73,7 @@ class LutrisDetector {
   }
 
   void _configureNative() {
-    mode = "NATIVO";
+    mode = "NATIVE";
     
     final baseData = File(pathNativeDb).parent.path;
     final baseConfig = '$_homeDir/.config/lutris';
@@ -87,7 +87,7 @@ class LutrisDetector {
   }
 
   void _configureNativeDefault() {
-    mode = "NATIVO_DEFAULT";
+    mode = "NATIVE_DEFAULT";
     
     final baseData = '$_homeDir/.local/share/lutris';
     final baseConfig = '$_homeDir/.config/lutris';

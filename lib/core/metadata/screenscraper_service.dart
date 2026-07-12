@@ -5,6 +5,7 @@ import 'dart:collection';
 import 'package:http/http.dart' as http;
 import 'hash_service.dart';
 import '../lutris/config_manager.dart';
+import '../lutris/translation_manager.dart';
 import 'package:path/path.dart' as p;
 import 'screenscraper_disk_cache.dart';
 
@@ -44,7 +45,7 @@ class AuthenticationException extends ScreenScraperException {
 class AppBlockedException extends ScreenScraperException {
   AppBlockedException()
     : super(
-        'Tu aplicación ha sido bloqueada por ScreenScraper. Contacta con soporte.',
+        'Tu aplicación ha sido bloqueada por ScreenScraper. Contacta con soporte.'.t(),
         statusCode: 426,
         isRetryable: false,
       );
@@ -54,7 +55,7 @@ class AppBlockedException extends ScreenScraperException {
 class TooManyRequestsException extends ScreenScraperException {
   TooManyRequestsException()
     : super(
-        'Demasiadas peticiones simultáneas. Reduciendo velocidad...',
+        'Demasiadas peticiones simultáneas. Reduciendo velocidad...'.t(),
         statusCode: 429,
         isRetryable: true,
       );
@@ -64,7 +65,7 @@ class TooManyRequestsException extends ScreenScraperException {
 class QuotaExceededException extends ScreenScraperException {
   QuotaExceededException()
     : super(
-        'Has excedido tu límite diario de peticiones. Intenta mañana.',
+        'Has excedido tu límite diario de peticiones. Intenta mañana.'.t(),
         statusCode: 430,
         isRetryable: false,
       );
@@ -74,7 +75,7 @@ class QuotaExceededException extends ScreenScraperException {
 class TooManyInvalidRomsException extends ScreenScraperException {
   TooManyInvalidRomsException()
     : super(
-        'Demasiadas ROMs no reconocidas. Verifica tus archivos.',
+        'Demasiadas ROMs no reconocidas. Verifica tus archivos.'.t(),
         statusCode: 431,
         isRetryable: false,
       );
@@ -551,7 +552,7 @@ class ScreenScraperService {
     await _ensureEnvCredentials();
     if (!hasDevCredentials) {
       print(
-        '[  WARN ] ScreenScraper: Credenciales de desarrollador no configuradas en .env',
+        '[  WARN ] ScreenScraper: Credenciales de desarrollador no configuradas en .env'.t(),
       );
       return null;
     }
@@ -588,7 +589,7 @@ class ScreenScraperService {
       return null;
     } catch (e) {
       if (e is ScreenScraperException) rethrow;
-      print('[  FAIL ] Error obteniendo quota: $e');
+      print('${'[  FAIL ] Error obteniendo quota: '.t()}$e');
       return null;
     }
   }
@@ -608,7 +609,7 @@ class ScreenScraperService {
     if (!hasDevCredentials) {
       return (
         canProceed: false,
-        message: 'Credenciales de desarrollador no configuradas',
+        message:           'Credenciales de desarrollador no configuradas'.t(),
         remainingRequests: null,
       );
     }
@@ -617,7 +618,7 @@ class ScreenScraperService {
     if (quota == null) {
       return (
         canProceed: false,
-        message: 'No se pudo verificar tu quota. Verifica tus credenciales.',
+        message: '${'No se pudo verificar tu quota. Verifica tus credenciales.'.t()}',
         remainingRequests: null,
       );
     }
@@ -626,7 +627,7 @@ class ScreenScraperService {
       return (
         canProceed: false,
         message:
-            'Has excedido tu límite diario (${quota.requestsToday}/${quota.maxRequestsPerDay})',
+            '${'Has excedido tu límite diario'.t()} (${quota.requestsToday}/${quota.maxRequestsPerDay})',
         remainingRequests: 0,
       );
     }
@@ -635,14 +636,14 @@ class ScreenScraperService {
       return (
         canProceed: true, // Permitir pero con advertencia
         message:
-            'Solo tienes ${quota.remainingToday} requests disponibles para $numberOfRoms ROMs. Algunas no serán identificadas.',
+            'Solo tienes ${quota.remainingToday} ${'requests disponibles para'.t()} $numberOfRoms ROMs. ${'Algunas no serán identificadas.'.t()}',
         remainingRequests: quota.remainingToday,
       );
     }
 
     return (
       canProceed: true,
-      message: 'OK - ${quota.remainingToday} requests disponibles',
+      message: 'OK - ${quota.remainingToday} ${'requests disponibles'.t()}',
       remainingRequests: quota.remainingToday,
     );
   }
@@ -652,24 +653,24 @@ class ScreenScraperService {
     switch (statusCode) {
       case 400:
         throw ScreenScraperException(
-          'Petición inválida. Verifica los parámetros.',
+          'Petición inválida. Verifica los parámetros.'.t(),
           statusCode: 400,
         );
       case 401:
         throw ApiUnavailableException(
-          'API temporalmente cerrada por saturación del servidor.',
+          'API temporalmente cerrada por saturación del servidor.'.t(),
           statusCode: 401,
         );
       case 403:
         throw AuthenticationException(
-          'Credenciales incorrectas. Verifica tu usuario y contraseña.',
+          'Credenciales incorrectas. Verifica tu usuario y contraseña.'.t(),
         );
       case 404:
         // No es un error, simplemente no se encontró
         return;
       case 423:
         throw ApiUnavailableException(
-          'API caída temporalmente. Intenta más tarde.',
+          'API caída temporalmente. Intenta más tarde.'.t(),
           statusCode: 423,
         );
       case 426:
@@ -683,12 +684,12 @@ class ScreenScraperService {
       default:
         if (statusCode >= 500) {
           throw ApiUnavailableException(
-            'Error del servidor ScreenScraper ($statusCode)',
+            '${'Error del servidor ScreenScraper'.t()} ($statusCode)',
             statusCode: statusCode,
           );
         }
         throw ScreenScraperException(
-          'Error desconocido: $statusCode',
+          '${'Error desconocido'.t()}: $statusCode',
           statusCode: statusCode,
         );
     }
@@ -726,7 +727,7 @@ class ScreenScraperService {
             response.statusCode == 423 ||
             response.statusCode >= 500) {
           print(
-            '[  WARN ] Error ${response.statusCode}, reintentando en ${delay.inSeconds}s (intento $attempt/$_maxRetries)',
+          '${'[  WARN ] Error '.t()}${response.statusCode}, ${'reintentando en'.t()} ${delay.inSeconds}s ${'(intento'.t()} $attempt/$_maxRetries)',
           );
           await Future.delayed(delay);
           delay *= 2; // Backoff exponencial
@@ -738,7 +739,7 @@ class ScreenScraperService {
         if (e is SocketException || e is TimeoutException) {
           if (attempt >= _maxRetries) rethrow;
           print(
-            '[  WARN ] Error de conexión, reintentando en ${delay.inSeconds}s (intento $attempt/$_maxRetries)',
+            '${'[  WARN ] Error de conexión, reintentando en'.t()} ${delay.inSeconds}s ${'(intento'.t()} $attempt/$_maxRetries)',
           );
           await Future.delayed(delay);
           delay *= 2;
@@ -762,7 +763,7 @@ class ScreenScraperService {
     // Verificar credenciales
     if (!hasDevCredentials) {
       throw AuthenticationException(
-        'Credenciales de desarrollador no configuradas. Verifica el archivo .env',
+        'Credenciales de desarrollador no configuradas. Verifica el archivo .env'.t(),
       );
     }
 
@@ -771,7 +772,7 @@ class ScreenScraperService {
     final cachedFailure = _failedGameCache[failureKey];
     if (cachedFailure != null) {
       if (DateTime.now().difference(cachedFailure) < _failedCacheTtl) {
-        print('[  SKIP ] Saltando request a ScreenScraper (falló recientemente)');
+        print('[  SKIP ] Saltando request a ScreenScraper (falló recientemente)'.t());
         return null;
       } else {
         _failedGameCache.remove(failureKey);
@@ -782,7 +783,7 @@ class ScreenScraperService {
     final cachedMemory = _memoryCache.get(crc, md5, sha1, systemId);
     if (cachedMemory != null) {
       _inMemoryCacheHits++;
-      print('[  INFO ] Cache en memoria para ${fileName ?? 'ROM'}');
+      print('${'[  INFO ] Cache en memoria para '.t()}${fileName ?? 'ROM'}');
       return cachedMemory;
     }
 
@@ -790,12 +791,12 @@ class ScreenScraperService {
     if (diskEntry != null) {
       _diskCacheHits++;
       if (diskEntry.isMiss) {
-        print('[  DISK ] Cache en disco (miss) para ${fileName ?? 'ROM'}');
+        print('${'[  DISK ] Cache en disco (miss) para '.t()}${fileName ?? 'ROM'}');
         return null;
       }
       final data = diskEntry.data;
       if (data != null) {
-        print('[  DISK ] Cache en disco para ${fileName ?? 'ROM'}');
+        print('${'[  DISK ] Cache en disco para '.t()}${fileName ?? 'ROM'}');
         final game = ScreenScraperGame.fromJson(data);
         _memoryCache.set(crc, md5, sha1, systemId, game);
         return game;
@@ -852,7 +853,7 @@ class ScreenScraperService {
     } on ScreenScraperException {
       rethrow;
     } catch (e) {
-      print('[  FAIL ] Error identificando juego: $e');
+      print('${'[  FAIL ] Error identificando juego: '.t()}$e');
       rethrow;
     }
   }
@@ -865,7 +866,7 @@ class ScreenScraperService {
     try {
       final file = File(filePath);
       if (!await file.exists()) {
-        throw ScreenScraperException('Archivo no encontrado: $filePath');
+        throw ScreenScraperException('${'Archivo no encontrado'.t()}: $filePath');
       }
 
       final size = await file.length();
@@ -881,7 +882,7 @@ class ScreenScraperService {
         systemId: systemId ?? '57',
       );
     } catch (e) {
-      print('[  FAIL ] Error identificando archivo $filePath: $e');
+      print('${'[  FAIL ] Error identificando archivo'.t()} $filePath: $e');
       rethrow;
     }
   }
@@ -892,7 +893,7 @@ class ScreenScraperService {
     _diskCache.clear();
     _inMemoryCacheHits = 0;
     _diskCacheHits = 0;
-    print('[ CLEAN ] Cache de ScreenScraper limpiado');
+    print('[ CLEAN ] Cache de ScreenScraper limpiado'.t());
   }
 
   /// Resetea el rate limiter (útil si cambia la quota)

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import '../lutris/games_repository.dart';
 import '../lutris/lutris_paths.dart';
+import '../lutris/translation_manager.dart';
 import 'models/steam_export_result.dart';
 import 'models/steam_shortcut_entry.dart';
 import 'steam_artwork_service.dart';
@@ -45,21 +46,21 @@ class SteamExportService {
 
     if (shortcutsPath == null || gridPath == null) {
       return SteamExportResult.error(
-        'No se detecto una instalacion valida de Steam.',
+        'No se detecto una instalacion valida de Steam.'.t(),
       );
     }
 
     final hasPythonVdf = await _shortcuts.isPythonVdfAvailable();
     if (!hasPythonVdf) {
       return SteamExportResult.error(
-        'Falta dependencia python-vdf. Instala con: pip install vdf',
+        'Falta dependencia python-vdf. Instala con: pip install vdf'.t(),
       );
     }
 
     final hasPillow = await _shortcuts.isPillowAvailable();
     if (!hasPillow) {
       return SteamExportResult.error(
-        'Falta dependencia Pillow. Instala con: pip install pillow',
+        'Falta dependencia Pillow. Instala con: pip install pillow'.t(),
       );
     }
 
@@ -113,11 +114,11 @@ class SteamExportService {
       }
 
       return SteamExportResult.ok(
-        'Exportado a Steam: ${game.name}',
+        '${'Exportado a Steam: '.t()}${game.name}',
         appId: appId,
       );
     } catch (e) {
-      return SteamExportResult.error('Error exportando ${game.name}: $e');
+      return SteamExportResult.error('${'Error exportando '.t()}${game.name}: $e');
     }
   }
 

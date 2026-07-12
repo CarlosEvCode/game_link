@@ -9,6 +9,7 @@ import '../core/steam/steam_export_service.dart';
 import '../platforms/platform_registry.dart';
 import 'game_detail_screen.dart';
 import 'steam_dependencies_dialog.dart';
+import '../core/lutris/translation_manager.dart';
 
 class VisualManagerScreen extends StatefulWidget {
   final Map<String, String?> lutrisPaths;
@@ -231,20 +232,20 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF0F0F0F),
-        title: const Text('¿Eliminar juegos seleccionados?', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        title: Text('¿Eliminar juegos seleccionados?'.t(), style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
         content: Text(
-          '¿Estás seguro de que deseas eliminar ${_selectedGameIds.length} juego(s) de la biblioteca de Lutris?\nEsto borrará permanentemente sus registros de base de datos, archivos de configuración (.yml) y archivos multimedia.',
+          '¿Estás seguro de eliminar los juegos seleccionados?'.t() + '\n\n' + 'Esta acción eliminará permanentemente los juegos de la base de datos de Lutris y sus configuraciones. Las ROMs físicas no serán eliminadas.'.t(),
           style: const TextStyle(color: Colors.white70, fontSize: 13),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar', style: TextStyle(color: Colors.white30, fontSize: 12)),
+            child: Text('Cancelar'.t(), style: const TextStyle(color: Colors.white30, fontSize: 12)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red[800], foregroundColor: Colors.white),
-            child: const Text('Eliminar', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            child: Text('Eliminar'.t(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -288,9 +289,8 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       _selectedGameIds.clear();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Juegos eliminados con éxito de la biblioteca'),
-            backgroundColor: Color(0xFF0F0F0F),
+          SnackBar(
+            content: Text('Juegos eliminados con éxito de la biblioteca'.t()),
           ),
         );
       }
@@ -298,7 +298,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al eliminar juegos: $e'),
+            content: Text('${'Error al eliminar juegos:'.t()} $e'),
             backgroundColor: Colors.red[900],
           ),
         );
@@ -328,7 +328,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     if (targetGames.isEmpty) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No hay juegos para exportar.')),
+        SnackBar(content: Text('No hay juegos para exportar.'.t())),
       );
       return;
     }
@@ -336,20 +336,20 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Exportar a Steam'),
+        title: Text('Exportar a Steam'.t()),
         content: Text(
           selectedOnly
-              ? 'Se exportaran ${targetGames.length} juegos seleccionados a Steam.\n\nSe crearan/actualizaran shortcuts, artwork y colecciones por plataforma.'
-              : 'Se sincronizaran ${targetGames.length} juegos de ${_selectedPlatform!.platformName} con Steam.\n\nSe crearan/actualizaran shortcuts, artwork y colecciones por plataforma, y se eliminaran en Steam los shortcuts/media huérfanos de esta plataforma.',
+              ? '${'Se exportaran'.t()} ${targetGames.length} ${'juegos seleccionados a Steam.'.t()}\n\n${'Se crearan/actualizaran shortcuts, artwork y colecciones por plataforma.'.t()}'
+              : '${'Se sincronizaran'.t()} ${targetGames.length} ${'juegos de'.t()} ${_selectedPlatform!.platformName} ${'con Steam.'.t()}\n\n${'Se crearan/actualizaran shortcuts, artwork y colecciones por plataforma, y se eliminaran en Steam los shortcuts/media huérfanos de esta plataforma.'.t()}',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancelar'),
+            child: Text('Cancelar'.t()),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Exportar'),
+            child: Text('Exportar'.t()),
           ),
         ],
       ),
@@ -383,8 +383,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               Future.microtask(() async {
                 if (!selectedOnly && _selectedPlatform != null) {
                   setLocalState(() {
-                    current =
-                        'Sincronizando plataforma ${_selectedPlatform!.platformName}';
+                    current = '${'Sincronizando plataforma '.t()}${_selectedPlatform!.platformName}';
                   });
                   final result = await _steamExportService.syncPlatformToSteam(
                     platformGames: games,
@@ -435,8 +434,8 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                         Expanded(
                           child: Text(
                             selectedOnly
-                                ? 'Exportacion completada. OK: $ok | Fallidos: $failed'
-                                : 'Sincronizacion completada. OK: $ok | Fallidos: $failed',
+                                ? '${'Exportación completada. OK: '.t()}$ok${' | Fallidos: '.t()}$failed'
+                                : '${'Sincronización completada. OK: '.t()}$ok${' | Fallidos: '.t()}$failed',
                           ),
                         ),
                       ],
@@ -448,7 +447,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
 
             final progress = games.isEmpty ? 0.0 : done / games.length;
             return AlertDialog(
-              title: const Text('Exportando a Steam...'),
+              title: Text('Exportando a Steam...'.t()),
               content: SizedBox(
                 width: 480,
                 child: Column(
@@ -457,17 +456,17 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                   children: [
                     LinearProgressIndicator(value: progress),
                     const SizedBox(height: 12),
-                    Text('Procesando: $done/${games.length}'),
+                    Text('${'Procesando:'.t()} $done/${games.length}'),
                     const SizedBox(height: 6),
-                    Text('Correctos: $ok | Fallidos: $failed'),
+                    Text('${'Correctos:'.t()} $ok${' | Fallidos: '.t()}$failed'),
                     if (!selectedOnly)
                       Text(
-                        'Depurados: $removedShortcuts shortcuts | $removedArtwork medias',
+                        '${'Depurados:'.t()} $removedShortcuts shortcuts | $removedArtwork medias',
                       ),
                     if (current.isNotEmpty) ...[
                       const SizedBox(height: 10),
                       Text(
-                        'Actual: $current',
+                        '${'Actual:'.t()} $current',
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
@@ -575,7 +574,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                     },
                     style: const TextStyle(fontSize: 13),
                     decoration: InputDecoration(
-                      hintText: 'Buscar juego...',
+                      hintText: 'Buscar juego...'.t(),
                       prefixIcon: const Icon(Icons.search, size: 16, color: Colors.white24),
                       suffixIcon: _searchQuery.isNotEmpty
                           ? IconButton(
@@ -626,8 +625,8 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               _buildMinimalHeaderButton(
                 icon: Icons.cloud_upload_outlined,
                 label: _selectedGameIds.isNotEmpty
-                    ? 'Exportar Seleccionados (${_selectedGameIds.length})'
-                    : 'Exportar a Steam',
+                    ? '${'Exportar Seleccionados'.t()} (${_selectedGameIds.length})'
+                    : 'Exportar a Steam'.t(),
                 onPressed: _isSteamAvailable
                     ? () => _confirmAndExportToSteam(selectedOnly: _selectedGameIds.isNotEmpty)
                     : () => SteamDependenciesDialog.show(context),
@@ -646,19 +645,19 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               Wrap(
                 spacing: 8,
                 children: [
-                  _buildMinimalChoiceChip('Todos', _filterMode == 'all', () {
+                  _buildMinimalChoiceChip('Todos'.t(), _filterMode == 'all', () {
                     setState(() => _filterMode = 'all');
                     _refreshList();
                   }),
-                  _buildMinimalChoiceChip('Sin portada (${_stats.missingCover})', _filterMode == 'missingCover', () {
+                  _buildMinimalChoiceChip('${'Sin portada'.t()} (${_stats.missingCover})', _filterMode == 'missingCover', () {
                     setState(() => _filterMode = 'missingCover');
                     _refreshList();
                   }),
-                  _buildMinimalChoiceChip('Sin banner (${_stats.missingBanner})', _filterMode == 'missingBanner', () {
+                  _buildMinimalChoiceChip('${'Sin banner'.t()} (${_stats.missingBanner})', _filterMode == 'missingBanner', () {
                     setState(() => _filterMode = 'missingBanner');
                     _refreshList();
                   }),
-                  _buildMinimalChoiceChip('Sin icono (${_stats.missingIcon})', _filterMode == 'missingIcon', () {
+                  _buildMinimalChoiceChip('${'Sin icono'.t()} (${_stats.missingIcon})', _filterMode == 'missingIcon', () {
                     setState(() => _filterMode = 'missingIcon');
                     _refreshList();
                   }),
@@ -666,7 +665,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               ),
               const Spacer(),
               Text(
-                '${_stats.total} JUEGOS',
+                '${_stats.total} ${(_stats.total == 1 ? 'JUEGO' : 'JUEGOS').t()}',
                 style: const TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -677,7 +676,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
               const SizedBox(width: 16),
               _buildToolbarActionButton(
                 icon: _selectionMode ? Icons.close : Icons.checklist,
-                label: _selectionMode ? 'Cancelar' : 'Selección Múltiple',
+                label: _selectionMode ? 'Cancelar'.t() : 'Selección Múltiple'.t(),
                 onPressed: _toggleSelectionMode,
                 isActive: _selectionMode,
               ),
@@ -687,7 +686,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                 const SizedBox(width: 8),
                 _buildToolbarIconButton(
                   icon: Icons.done_all,
-                  tooltip: 'Seleccionar Todo',
+                  tooltip: 'Seleccionar Todo'.t(),
                   onPressed: () {
                     final allIds = _repo.getGameIdsByRunners(
                       _selectedRunners,
@@ -705,7 +704,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                 const SizedBox(width: 8),
                 _buildToolbarIconButton(
                   icon: Icons.delete_outline,
-                  tooltip: 'Eliminar Seleccionados',
+                  tooltip: 'Eliminar seleccionados'.t(),
                   backgroundColor: _selectedGameIds.isEmpty ? null : Colors.red[900],
                   foregroundColor: _selectedGameIds.isEmpty ? null : Colors.white,
                   isDisabled: _selectedGameIds.isEmpty,
@@ -1015,7 +1014,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: _buildBadge('INCOMPLETO'),
+                        child: _buildBadge('INCOMPLETO'.t()),
                       ),
                   ],
                 ),
@@ -1141,8 +1140,8 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
         children: [
           const Icon(Icons.search_off_outlined, size: 48, color: Colors.white10),
           const SizedBox(height: 16),
-          const Text(
-            'Sin resultados',
+          Text(
+            'Sin resultados'.t(),
             style: TextStyle(color: Colors.white38, fontWeight: FontWeight.w600, fontSize: 14),
           ),
         ],
@@ -1194,14 +1193,14 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                   }
                 : null,
             icon: const Icon(Icons.arrow_back_ios_new, size: 12),
-            label: const Text('Anterior', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            label: Text('Anterior'.t(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             style: TextButton.styleFrom(
               foregroundColor: Colors.white70,
               disabledForegroundColor: Colors.white24,
             ),
           ),
           Text(
-            'PÁGINA ${_page + 1} DE $_totalPages  •  $_totalGames JUEGOS',
+            '${'PÁGINA '.t()}${_page + 1} ${'DE '.t()}$_totalPages  •  $_totalGames ${'JUEGOS'.t()}',
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
@@ -1219,7 +1218,7 @@ class _VisualManagerScreenState extends State<VisualManagerScreen> {
                     }
                   }
                 : null,
-            icon: const Text('Siguiente', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+            icon: Text('Siguiente'.t(), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
             label: const Icon(Icons.arrow_forward_ios, size: 12),
             style: TextButton.styleFrom(
               foregroundColor: Colors.white70,

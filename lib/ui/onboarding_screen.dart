@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../core/lutris/config_manager.dart';
+import '../core/lutris/translation_manager.dart';
 import 'main_window.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     if (!await launchUrl(uri)) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('No se pudo abrir el enlace: $url')),
+          SnackBar(content: Text('${'No se pudo abrir el enlace: '.t()}$url')),
         );
       }
     }
@@ -102,7 +103,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           Image.asset('assets/icon.png', width: 180, height: 180),
           const SizedBox(height: 60),
           Text(
-            'Bienvenido a Game Link',
+            'Bienvenido a Game Link'.t(),
             style: GoogleFonts.inter(
               color: Colors.white,
               fontSize: 36,
@@ -112,9 +113,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Tu puente universal para gestionar ROMs, arte visual e integración con launchers.',
-            style: TextStyle(color: Colors.white38, fontSize: 16, height: 1.5),
+          Text(
+            'Tu puente universal para gestionar ROMs, arte visual e integración con launchers.'.t(),
+            style: const TextStyle(color: Colors.white38, fontSize: 16, height: 1.5),
             textAlign: TextAlign.center,
           ),
         ],
@@ -129,24 +130,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Configuración de Media',
-            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            'Configuración de Media'.t(),
+            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'Para descargar carátulas y banners automáticamente, necesitas una API Key de SteamGridDB.',
-            style: TextStyle(color: Colors.white38, fontSize: 14, height: 1.5),
+          Text(
+            'Para descargar carátulas y banners automáticamente, necesitas una API Key de SteamGridDB.'.t(),
+            style: const TextStyle(color: Colors.white38, fontSize: 14, height: 1.5),
           ),
           const SizedBox(height: 32),
-          const Text('STEAMGRIDDB API KEY (NECESARIO)', style: TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text('STEAMGRIDDB API KEY (NECESARIO)'.t(), style: const TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           TextField(
             controller: _apiKeyController,
             obscureText: true,
             style: const TextStyle(color: Colors.white, fontSize: 14),
             decoration: InputDecoration(
-              hintText: 'Pega tu llave aquí...',
+              hintText: 'Pega tu llave aquí...'.t(),
               filled: true,
               fillColor: const Color(0xFF0A0A0A),
               prefixIcon: const Icon(Icons.vpn_key_outlined, color: Colors.white24, size: 20),
@@ -165,8 +166,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 children: [
                   const Icon(Icons.open_in_new, color: Colors.white70, size: 14),
                   const SizedBox(width: 8),
-                  const Text(
-                    'OBTENER LLAVE EN STEAMGRIDDB.COM',
+                  Text(
+                    'OBTENER LLAVE EN STEAMGRIDDB.COM'.t(),
                     style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
                   ),
                 ],
@@ -185,23 +186,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Alta Precisión (Opcional)',
-            style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
+          Text(
+            'Alta Precisión (Opcional)'.t(),
+            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'ScreenScraper permite identificar ROMs por su firma (Hash). Esto aumenta drásticamente la precisión si tus archivos no tienen nombres perfectos.',
-            style: TextStyle(color: Colors.white38, fontSize: 14, height: 1.5),
+          Text(
+            'ScreenScraper permite identificar ROMs por su firma (Hash). Esto aumenta drásticamente la precisión si tus archivos no tienen nombres perfectos.'.t(),
+            style: const TextStyle(color: Colors.white38, fontSize: 14, height: 1.5),
           ),
           const SizedBox(height: 32),
-          const Text('USUARIO', style: TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text('USUARIO'.t(), style: const TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           TextField(
             controller: _ssUserController,
             style: const TextStyle(color: Colors.white, fontSize: 14),
             decoration: InputDecoration(
-              hintText: 'Usuario...',
+              hintText: 'Usuario...'.t(),
               filled: true,
               fillColor: const Color(0xFF0A0A0A),
               prefixIcon: const Icon(Icons.person_outline, color: Colors.white24, size: 20),
@@ -210,14 +211,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text('CONTRASEÑA', style: TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text('CONTRASEÑA'.t(), style: const TextStyle(color: Colors.white24, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
           const SizedBox(height: 12),
           TextField(
             controller: _ssPasswordController,
             obscureText: true,
             style: const TextStyle(color: Colors.white, fontSize: 14),
             decoration: InputDecoration(
-              hintText: 'Contraseña...',
+              hintText: 'Contraseña...'.t(),
               filled: true,
               fillColor: const Color(0xFF0A0A0A),
               prefixIcon: const Icon(Icons.lock_outline, color: Colors.white24, size: 20),
@@ -238,14 +239,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           const Icon(Icons.check_circle_outline, color: Colors.white10, size: 100),
           const SizedBox(height: 40),
-          const Text(
-            '¡Todo listo!',
-            style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+          Text(
+            '¡Todo listo!'.t(),
+            style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 20),
-          const Text(
-            'Ya puedes empezar a organizar tu biblioteca de juegos y emuladores.',
-            style: TextStyle(color: Colors.white38, fontSize: 16, height: 1.5),
+          Text(
+            'Ya puedes empezar a organizar tu biblioteca de juegos y emuladores.'.t(),
+            style: const TextStyle(color: Colors.white38, fontSize: 16, height: 1.5),
             textAlign: TextAlign.center,
           ),
         ],
@@ -280,7 +281,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
             ),
             child: Text(
-              _currentPage == 3 ? 'EMPEZAR' : 'CONTINUAR',
+              _currentPage == 3 ? 'EMPEZAR'.t() : 'CONTINUAR'.t(),
               style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
             ),
           ),

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../core/lutris/games_repository.dart';
 import '../core/lutris/lutris_paths.dart';
+import '../core/lutris/translation_manager.dart';
 import '../core/metadata/steamgriddb_service.dart';
 
 class SteamGridDBVisualSelector extends StatefulWidget {
@@ -40,7 +41,7 @@ class SteamGridDBVisualSelector extends StatefulWidget {
   }) {
     if (apiKey.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Configura tu API Key primero.')),
+        SnackBar(content: Text('Configura tu API Key primero.')),
       );
       return Future.value(false);
     }
@@ -208,7 +209,7 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
     }
 
     setState(() => _isApplying = true);
-    _setStatus('Descargando y aplicando $type...', Colors.blue, Icons.download);
+    _setStatus('${'Descargando y aplicando'.t()} $type...', Colors.blue, Icons.download);
 
     try {
       final res = await http.get(Uri.parse(url));
@@ -225,27 +226,27 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
 
         _hasAppliedChanges = true;
         _setStatus(
-          '${type[0].toUpperCase()}${type.substring(1)} aplicado correctamente en Lutris.',
+          '${type[0].toUpperCase()}${type.substring(1)} ${'aplicado correctamente en Lutris'.t()}.',
           Colors.green,
           Icons.check_circle,
         );
 
         ScaffoldMessenger.of(
           context,
-        ).showSnackBar(SnackBar(content: Text('[  DONE ] $type actualizado.')));
+        ).showSnackBar(SnackBar(content: Text('${'[  DONE ] '.t()}$type ${'actualizado'.t()}.')));
         widget.onUpdated();
       } else {
         _setStatus(
-          'No se pudo descargar $type (HTTP ${res.statusCode}).',
+          '${'No se pudo descargar'.t()} $type (HTTP ${res.statusCode}).',
           Colors.red,
           Icons.error_outline,
         );
       }
     } catch (e) {
-      _setStatus('Error aplicando $type: $e', Colors.red, Icons.error_outline);
+      _setStatus('${'Error aplicando'.t()} $type: $e', Colors.red, Icons.error_outline);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('[  FAIL ] Error: $e')));
+      ).showSnackBar(SnackBar(content: Text('${'[  FAIL ] Error'.t()}: $e')));
     } finally {
       if (mounted) setState(() => _isApplying = false);
     }
@@ -265,7 +266,7 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
                   const Icon(Icons.grid_view),
                   const SizedBox(width: 12),
                   Text(
-                    'Gestor Visual para: ${widget.game.name}',
+                    '${'Gestor Visual para'.t()}: ${widget.game.name}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -281,11 +282,11 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
               const SizedBox(height: 12),
               TabBar(
                 controller: _tabController,
-                tabs: const [
-                  Tab(text: '1. Buscar Juego', icon: Icon(Icons.search)),
-                  Tab(text: '2. Covers', icon: Icon(Icons.image)),
-                  Tab(text: '3. Banners', icon: Icon(Icons.view_carousel)),
-                  Tab(text: '4. Iconos', icon: Icon(Icons.blur_on)),
+                tabs: [
+                  Tab(text: '${'1. Buscar Juego'.t()}', icon: const Icon(Icons.search)),
+                  Tab(text: '2. Covers', icon: const Icon(Icons.image)),
+                  Tab(text: '3. Banners', icon: const Icon(Icons.view_carousel)),
+                  Tab(text: '4. ${'Iconos'.t()}', icon: const Icon(Icons.blur_on)),
                 ],
               ),
               if (_statusMessage != null) ...[
@@ -347,8 +348,8 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
               Expanded(
                 child: TextField(
                   controller: _searchCtrl,
-                  decoration: const InputDecoration(
-                    labelText: 'Nombre del juego en SteamGridDB',
+                  decoration: InputDecoration(
+                    labelText: 'Nombre del juego en SteamGridDB'.t(),
                     border: OutlineInputBorder(),
                   ),
                   onSubmitted: (_) => _search(),
@@ -358,7 +359,7 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
               ElevatedButton.icon(
                 onPressed: _isSearching ? null : _search,
                 icon: const Icon(Icons.search),
-                label: const Text('Buscar'),
+                label: Text('Buscar'.t()),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.all(20),
                 ),
@@ -371,7 +372,7 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
           if (!_isSearching)
             Expanded(
               child: _searchResults.isEmpty
-                  ? const Center(child: Text('No hay resultados.'))
+                  ? Center(child: Text('No hay resultados'.t()))
                   : ListView.builder(
                       itemCount: _searchResults.length,
                       itemBuilder: (context, index) {
@@ -407,16 +408,16 @@ class _SteamGridDBVisualSelectorState extends State<SteamGridDBVisualSelector>
 
   Widget _buildImageGrid(List<Map<String, dynamic>> images, String type) {
     if (_selectedSgdbGame == null) {
-      return const Center(
-        child: Text('Primero selecciona un juego en la pestaña de búsqueda.'),
+      return Center(
+        child: Text('Primero selecciona un juego en la pestaña de búsqueda'.t()),
       );
     }
     if (_isLoadingImages) {
       return const Center(child: CircularProgressIndicator());
     }
     if (images.isEmpty) {
-      return const Center(
-        child: Text('No se encontraron imágenes para este tipo.'),
+      return Center(
+        child: Text('No se encontraron imágenes para este tipo'.t()),
       );
     }
 
