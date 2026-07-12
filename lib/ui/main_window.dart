@@ -13,6 +13,7 @@ import '../core/lutris/rom_cache_repository.dart';
 import 'visual_manager_screen.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
+import 'package:url_launcher/url_launcher.dart';
 
 class InjectionItem {
   final String filePath;
@@ -675,7 +676,7 @@ class _MainWindowState extends State<MainWindow> {
 
   DateTime? _lastQuotaFetch;
 
-  void _showConfigDialog() {
+  void _showConfigDialog({int initialTabIndex = 0}) {
     _apiKeyController.text = _apiKey;
     _ssUserController.text = _ssUser;
     _ssPasswordController.text = _ssPassword;
@@ -685,6 +686,7 @@ class _MainWindowState extends State<MainWindow> {
       builder: (context) {
         return DefaultTabController(
           length: 2,
+          initialIndex: initialTabIndex,
           child: AlertDialog(
             backgroundColor: const Color(0xFF0A0A0A),
             shape: RoundedRectangleBorder(
@@ -716,7 +718,7 @@ class _MainWindowState extends State<MainWindow> {
             ),
             content: SizedBox(
               width: 400,
-              height: 220,
+              height: 250,
               child: TabBarView(
                 children: [
                   // Tab SteamGridDB
@@ -739,6 +741,25 @@ class _MainWindowState extends State<MainWindow> {
                             prefixIcon: const Icon(Icons.vpn_key_outlined, size: 16, color: Colors.white24),
                             border: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: () => _launchUrl('https://www.steamgriddb.com/profile/api'),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.open_in_new_rounded, size: 10, color: Colors.blueAccent),
+                              SizedBox(width: 4),
+                              Text(
+                                'Obtén tu API Key en SteamGridDB',
+                                style: TextStyle(
+                                  color: Colors.blueAccent,
+                                  fontSize: 11,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -787,6 +808,30 @@ class _MainWindowState extends State<MainWindow> {
                             enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(4), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
                           ),
                         ),
+                        const SizedBox(height: 12),
+                        InkWell(
+                          onTap: () => _launchUrl('https://www.screenscraper.fr/'),
+                          child: const Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.open_in_new_rounded, size: 10, color: Colors.blueAccent),
+                              SizedBox(width: 4),
+                              Text(
+                                'Regístrate en ScreenScraper',
+                                style: TextStyle(
+                                  color: Colors.blueAccent,
+                                  fontSize: 11,
+                                  decoration: TextDecoration.underline,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'Requerido para la identificación de alta precisión y metadatos.',
+                          style: TextStyle(color: Colors.white24, fontSize: 11),
+                        ),
                       ],
                     ),
                   ),
@@ -828,6 +873,13 @@ class _MainWindowState extends State<MainWindow> {
     );
   }
 
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri)) {
+      _log("No se pudo abrir la URL: $url");
+    }
+  }
+
   Future<void> _startProcess(String action) async {
     if (_isProcessing) return;
     if (_lutrisPaths == null) {
@@ -848,7 +900,7 @@ class _MainWindowState extends State<MainWindow> {
     }
     if ((action == 'metadata' || action == 'full') && _apiKey.isEmpty) {
       _log("Configura la API Key de SteamGridDB.");
-      _showConfigDialog();
+      _showConfigDialog(initialTabIndex: 0);
       return;
     }
 
@@ -856,7 +908,7 @@ class _MainWindowState extends State<MainWindow> {
       final selectedCount = _previewItems.where((i) => i.isSelected).length;
       if (_ssUser.isEmpty || _ssPassword.isEmpty) {
         _log("Alta Precisión requiere credenciales de ScreenScraper.");
-        _showConfigDialog();
+        _showConfigDialog(initialTabIndex: 1);
         return;
       }
 
@@ -1103,7 +1155,7 @@ class _MainWindowState extends State<MainWindow> {
     return _lutrisPaths == null ? const Center(child: Text("Lutris no detectado.")) : VisualManagerScreen(
       lutrisPaths: _lutrisPaths!,
       apiKey: _apiKey,
-      onShowConfig: _showConfigDialog,
+      onShowConfig: () => _showConfigDialog(),
       initialPlatformId: _selectedPlatform?.platformId,
     );
   }
