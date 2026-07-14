@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.20.0](https://github.com/CarlosEvCode/game_link/compare/v2.19.0...v2.20.0) (2026-07-14)
+
+
+### Features
+
+* **onboarding:** add copyable ScreenScraper and SteamGridDB links on AppImage onboarding pages ([36aa5e6](https://github.com/CarlosEvCode/game_link/commit/36aa5e6abf629e9857b623603f6fdf6d815b8cba))
+
 ## [2.19.0](https://github.com/CarlosEvCode/game_link/compare/v2.18.3...v2.19.0) (2026-07-14)
 
 
