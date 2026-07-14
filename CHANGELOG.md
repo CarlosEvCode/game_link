@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.19.0](https://github.com/CarlosEvCode/game_link/compare/v2.18.3...v2.19.0) (2026-07-14)
+
+
+### Features
+
+* **ui:** fallback to copyable URLs with clipboard support on AppImage environments ([6ae3a72](https://github.com/CarlosEvCode/game_link/commit/6ae3a728552347696867c167847d9865a9ab8959))
+
 ## [2.18.3](https://github.com/CarlosEvCode/game_link/compare/v2.18.2...v2.18.3) (2026-07-14)
 
 
