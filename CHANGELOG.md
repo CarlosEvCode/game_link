@@ -1,5 +1,13 @@
 # Changelog
 
+## [2.18.1](https://github.com/CarlosEvCode/game_link/compare/v2.18.0...v2.18.1) (2026-07-14)
+
+
+### Bug Fixes
+
+* **appimage:** resolve url_launcher failing to open browser due to LD_LIBRARY_PATH ([986532c](https://github.com/CarlosEvCode/game_link/commit/986532ca9c770680e3bbeed34ddcc647523ea9f5))
+* **packaging:** fix executable permissions in Fedora RPM spec and correct PPA repository in README ([530af36](https://github.com/CarlosEvCode/game_link/commit/530af36db35157f8c8fd79be7ee9602f607105b4))
+
 ## [2.18.0](https://github.com/CarlosEvCode/game_link/compare/v2.17.0...v2.18.0) (2026-07-12)
 
 
