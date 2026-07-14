@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.3](https://github.com/CarlosEvCode/game_link/compare/v2.18.2...v2.18.3) (2026-07-14)
+
+
+### Bug Fixes
+
+* **appimage:** disable GIO and GTK desktop portals inside AppRun ([e9fe454](https://github.com/CarlosEvCode/game_link/commit/e9fe454b29d1aa9a5868e8ee4d8d7c39522d1bc0))
+
 ## [2.18.2](https://github.com/CarlosEvCode/game_link/compare/v2.18.1...v2.18.2) (2026-07-14)
 
 
