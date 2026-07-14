@@ -120,6 +120,8 @@ cat > AppDir/AppRun <<'APP_RUN'
 HERE="$(dirname "$(readlink -f "$0")")"
 export PATH="$HERE/usr/bin/compat:$PATH"
 export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$HERE/usr/lib:$LD_LIBRARY_PATH"
+export GTK_USE_PORTAL=0
+export GIO_USE_PORTAL=0
 
 # Detección de Tema de Cursor e Iconos
 HOST_CURSOR_THEME=$(gsettings get org.gnome.desktop.interface cursor-theme 2>/dev/null | tr -d "'")
