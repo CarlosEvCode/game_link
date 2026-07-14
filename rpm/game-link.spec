@@ -31,6 +31,10 @@ mkdir -p %{buildroot}%{_datadir}/pixmaps
 # Copiar todo el contenido del tarball a /usr/lib64/game-link (o _libdir)
 cp -r * %{buildroot}%{_libdir}/%{name}/
 
+# Asegurar permisos de ejecución en el binario y el launch.sh
+chmod +x %{buildroot}%{_libdir}/%{name}/game_link
+chmod +x %{buildroot}%{_libdir}/%{name}/launch.sh
+
 # Symlink para el ejecutable principal (usando el wrapper launch.sh)
 ln -s %{_libdir}/%{name}/launch.sh %{buildroot}%{_bindir}/%{name}
 

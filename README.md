@@ -99,7 +99,7 @@ yay -S game-link-bin
 ### Ubuntu / Debian
 Add the official **PPA** repository and install:
 ```bash
-sudo add-apt-repository ppa:evcode/ubuntu/game-link
+sudo add-apt-repository ppa:evcode/game-link
 sudo apt update
 sudo apt install game-link
 ```
