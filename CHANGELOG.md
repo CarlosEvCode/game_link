@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.18.2](https://github.com/CarlosEvCode/game_link/compare/v2.18.1...v2.18.2) (2026-07-14)
+
+
+### Bug Fixes
+
+* **appimage:** clean GTK/GDK environment variables in xdg-open wrapper to support Wayland hosts ([64ac83f](https://github.com/CarlosEvCode/game_link/commit/64ac83fd191a53f7b1174d9a92ca5a38229b9497))
+
 ## [2.18.1](https://github.com/CarlosEvCode/game_link/compare/v2.18.0...v2.18.1) (2026-07-14)
 
 
