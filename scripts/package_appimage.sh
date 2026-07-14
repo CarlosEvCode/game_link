@@ -97,10 +97,25 @@ export DEPLOY_GTK_VERSION=3
 # find AppDir/usr/lib -name "libselinux*" -delete || true
 # find AppDir/usr/lib -name "libdbus*" -delete || true
 
-# 10. AppRun Personalizado
+# 10. Crear directorio de compatibilidad y wrapper xdg-open para restaurar variables del host
+mkdir -p AppDir/usr/bin/compat
+cat > AppDir/usr/bin/compat/xdg-open <<'EOF'
+#!/bin/sh
+if [ -n "$LD_LIBRARY_PATH_ORIG" ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH_ORIG"
+else
+    unset LD_LIBRARY_PATH
+fi
+CLEAN_PATH=$(echo "$PATH" | sed "s|$(dirname "$0"):||g")
+PATH="$CLEAN_PATH" exec xdg-open "$@"
+EOF
+chmod +x AppDir/usr/bin/compat/xdg-open
+
+# 11. AppRun Personalizado
 cat > AppDir/AppRun <<'APP_RUN'
 #!/bin/sh
 HERE="$(dirname "$(readlink -f "$0")")"
+export PATH="$HERE/usr/bin/compat:$PATH"
 export LD_LIBRARY_PATH="$HERE/usr/bin/lib:$HERE/usr/lib:$LD_LIBRARY_PATH"
 
 # Detección de Tema de Cursor e Iconos
