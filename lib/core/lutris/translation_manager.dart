@@ -65,6 +65,14 @@ class I18n {
       'en': 'Register on ScreenScraper',
       'es': 'Regístrate en ScreenScraper',
     },
+    'Copy Link': {
+      'en': 'Copy Link',
+      'es': 'Copiar enlace',
+    },
+    'Link copied to clipboard': {
+      'en': 'Link copied to clipboard',
+      'es': 'Enlace copiado al portapapeles',
+    },
     'Requerido para descargar carátulas, banners e iconos automáticamente.': {
       'en': 'Required to download covers, banners, and icons automatically.',
       'es': 'Requerido para descargar carátulas, banners e iconos automáticamente.',

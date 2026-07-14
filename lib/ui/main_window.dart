@@ -14,7 +14,7 @@ import 'visual_manager_screen.dart';
 import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show rootBundle, Clipboard, ClipboardData;
 import '../core/lutris/translation_manager.dart';
 
 class InjectionItem {
@@ -792,23 +792,9 @@ class _MainWindowState extends State<MainWindow> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () => _launchUrl('https://www.steamgriddb.com/profile/preferences/api'),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Obtén tu API Key en SteamGridDB'.t(),
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _buildLinkButton(
+                              text: 'Obtén tu API Key en SteamGridDB'.t(),
+                              url: 'https://www.steamgriddb.com/profile/preferences/api',
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -857,23 +843,9 @@ class _MainWindowState extends State<MainWindow> {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            InkWell(
-                              onTap: () => _launchUrl('https://www.screenscraper.fr/'),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'Regístrate en ScreenScraper'.t(),
-                                    style: TextStyle(
-                                      color: Colors.white.withOpacity(0.85),
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                            _buildLinkButton(
+                              text: 'Regístrate en ScreenScraper'.t(),
+                              url: 'https://www.screenscraper.fr/',
                             ),
                             const SizedBox(height: 12),
                             Text(
@@ -929,6 +901,62 @@ class _MainWindowState extends State<MainWindow> {
     final uri = Uri.parse(url);
     if (!await launchUrl(uri)) {
       _log("${'No se pudo abrir la URL: '.t()}$url");
+    }
+  }
+
+  Widget _buildLinkButton({required String text, required String url}) {
+    final bool isAppImage = Platform.environment.containsKey('APPIMAGE');
+
+    if (isAppImage) {
+      return InkWell(
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: url));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${'Link copied to clipboard'.t()}: $url'),
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.grey[900],
+              ),
+            );
+          }
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.copy_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
+            const SizedBox(width: 6),
+            Text(
+              '$text (${'Copy Link'.t()})',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return InkWell(
+        onTap: () => _launchUrl(url),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.open_in_new_rounded, size: 11, color: Colors.white.withOpacity(0.5)),
+            const SizedBox(width: 6),
+            Text(
+              text,
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.85),
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
     }
   }
 
