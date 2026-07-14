@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+import 'package:flutter/services.dart' show Clipboard, ClipboardData;
 import '../core/lutris/config_manager.dart';
 import '../core/lutris/translation_manager.dart';
 import 'main_window.dart';
@@ -36,6 +38,72 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           SnackBar(content: Text('${'No se pudo abrir el enlace: '.t()}$url')),
         );
       }
+    }
+  }
+
+  Widget _buildLinkButton({required String text, required String url}) {
+    final bool isAppImage = Platform.environment.containsKey('APPIMAGE');
+
+    if (isAppImage) {
+      return InkWell(
+        onTap: () async {
+          await Clipboard.setData(ClipboardData(text: url));
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('${'Link copied to clipboard'.t()}: $url'),
+                duration: const Duration(seconds: 3),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.grey[900],
+              ),
+            );
+          }
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.copy_rounded, color: Colors.white70, size: 14),
+              const SizedBox(width: 8),
+              Text(
+                '$text (${'Copy Link'.t()})',
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else {
+      return InkWell(
+        onTap: () => _launchUrl(url),
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.open_in_new, color: Colors.white70, size: 14),
+              const SizedBox(width: 8),
+              Text(
+                text,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
     }
   }
 
@@ -156,23 +224,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          InkWell(
-            onTap: () => _launchUrl('https://www.steamgriddb.com/profile/preferences/api'),
-            borderRadius: BorderRadius.circular(4),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.open_in_new, color: Colors.white70, size: 14),
-                  const SizedBox(width: 8),
-                  Text(
-                    'OBTENER LLAVE EN STEAMGRIDDB.COM'.t(),
-                    style: TextStyle(color: Colors.white70, fontSize: 10, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
-                  ),
-                ],
-              ),
-            ),
+          _buildLinkButton(
+            text: 'OBTENER LLAVE EN STEAMGRIDDB.COM'.t(),
+            url: 'https://www.steamgriddb.com/profile/preferences/api',
           ),
         ],
       ),
@@ -225,6 +279,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: Color(0xFF1A1A1A))),
             ),
+          ),
+          const SizedBox(height: 24),
+          _buildLinkButton(
+            text: 'REGÍSTRATE EN SCREENSCRAPER.FR'.t(),
+            url: 'https://www.screenscraper.fr/',
           ),
         ],
       ),

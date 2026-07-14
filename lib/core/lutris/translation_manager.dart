@@ -65,6 +65,10 @@ class I18n {
       'en': 'Register on ScreenScraper',
       'es': 'Regístrate en ScreenScraper',
     },
+    'REGÍSTRATE EN SCREENSCRAPER.FR': {
+      'en': 'REGISTER ON SCREENSCRAPER.FR',
+      'es': 'REGÍSTRATE EN SCREENSCRAPER.FR',
+    },
     'Copy Link': {
       'en': 'Copy Link',
       'es': 'Copiar enlace',
