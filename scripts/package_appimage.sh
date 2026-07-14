@@ -106,6 +106,9 @@ if [ -n "$LD_LIBRARY_PATH_ORIG" ]; then
 else
     unset LD_LIBRARY_PATH
 fi
+unset GDK_BACKEND
+unset GTK_CSD
+unset GTK_OVERLAY_SCROLLING
 CLEAN_PATH=$(echo "$PATH" | sed "s|$(dirname "$0"):||g")
 PATH="$CLEAN_PATH" exec xdg-open "$@"
 EOF
